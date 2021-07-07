@@ -1,2 +1,1 @@
-# equality-api
-The Equality app API.
+# Equality app API repository
