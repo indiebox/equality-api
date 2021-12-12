@@ -4,6 +4,7 @@ namespace Tests\Feature\Api\V1;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class UserControllerTest extends TestCase
@@ -21,7 +22,8 @@ class UserControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/api/v1/user');
+        Sanctum::actingAs($user);
+        $response = $this->getJson('/api/v1/user');
 
         $response->assertOk()
             ->assertJsonPath('data.email', $user->email);
