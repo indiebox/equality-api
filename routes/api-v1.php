@@ -1,19 +1,24 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\UserController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+Route::prefix('auth')->group(function() {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+});
+
+Route::middleware('auth:sanctum')->group(function() {
+    Route::get('/user', [UserController::class, 'index']);
+    // Route::get('/verify-email', [EmailVerificationPromptController::class, '__invoke']);
+    // Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])->middleware(['signed', 'throttle:6,1']);
+    // Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])->middleware('throttle:6,1');
+    // Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store']);
+});
+
+// Route::get('/reset-password/{token}', [NewPasswordController::class, 'create']);
+// Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']);
+// Route::post('/reset-password', [NewPasswordController::class, 'store']);
