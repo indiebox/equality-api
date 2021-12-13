@@ -26,7 +26,7 @@ class VerifyEmailControllerTest extends TestCase
         $response = $this->postJson('/api/v1/verify-email/send');
 
         $response->assertOk()
-            ->assertJson(['sended' => true]);
+            ->assertJson(['status' => true]);
         Notification::assertSentTo($user, VerifyEmail::class);
     }
 
@@ -39,7 +39,7 @@ class VerifyEmailControllerTest extends TestCase
         $response = $this->postJson('/api/v1/verify-email/send');
 
         $response->assertOk()
-            ->assertJson(['sended' => false]);
+            ->assertJson(['status' => false]);
         Notification::assertNothingSent();
     }
 

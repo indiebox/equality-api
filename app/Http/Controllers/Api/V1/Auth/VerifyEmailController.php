@@ -20,12 +20,12 @@ class VerifyEmailController extends Controller
     public function send(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return response(['sended' => false]);
+            return response(['status' => false]);
         }
 
         $request->user()->sendEmailVerificationNotification();
 
-        return response(['sended' => true]);
+        return response(['status' => true]);
     }
 
     /**
