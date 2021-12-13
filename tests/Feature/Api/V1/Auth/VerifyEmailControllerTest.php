@@ -23,7 +23,7 @@ class VerifyEmailControllerTest extends TestCase
         $user = User::factory()->unverified()->create();
 
         Sanctum::actingAs($user);
-        $response = $this->postJson('/api/v1/auth/verify-email/send');
+        $response = $this->postJson('/api/v1/verify-email/send');
 
         $response->assertOk()
             ->assertJson(['sended' => true]);
@@ -36,7 +36,7 @@ class VerifyEmailControllerTest extends TestCase
         $user = User::factory()->create();
 
         Sanctum::actingAs($user);
-        $response = $this->postJson('/api/v1/auth/verify-email/send');
+        $response = $this->postJson('/api/v1/verify-email/send');
 
         $response->assertOk()
             ->assertJson(['sended' => false]);

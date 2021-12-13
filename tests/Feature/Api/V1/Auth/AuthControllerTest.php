@@ -23,7 +23,7 @@ class AuthControllerTest extends TestCase
             'password_confirmation' => '123456',
         ];
 
-        $response = $this->postJson('api/v1/auth/register', $data);
+        $response = $this->postJson('api/v1/register', $data);
 
         $response->assertCreated()
             ->assertJsonPath('data.email', 'test@mail.ru');
@@ -41,7 +41,7 @@ class AuthControllerTest extends TestCase
             'device_name' => 'Desktop',
         ];
 
-        $response = $this->postJson('api/v1/auth/login', $data);
+        $response = $this->postJson('api/v1/login', $data);
 
         $response->assertOk()
             ->assertJsonPath('data.email', 'test@mail.ru');
@@ -57,7 +57,7 @@ class AuthControllerTest extends TestCase
             'device_name' => 'Desktop',
         ];
 
-        $response = $this->postJson('api/v1/auth/login', $data);
+        $response = $this->postJson('api/v1/login', $data);
 
         $response->assertUnprocessable()
             ->assertJsonValidationErrorFor('email');
