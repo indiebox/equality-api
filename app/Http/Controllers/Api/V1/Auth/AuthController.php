@@ -23,15 +23,20 @@ class AuthController extends Controller
     }
 
     public function login(LoginUserRequest $request) {
-        $data = $request->validated();
+        $request->ensureIsNotRateLimited();
 
+        $data = $request->validated();
         $user = User::where('email', $data['email'])->first();
 
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
+        if (!$user || !Hash::check($data['password'], $user->password)) {
+            $request->hitAttempt();
+
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => __('auth.failed'),
             ]);
         }
+
+        $request->clearAttempts();
 
         return response([
             'data' => new UserResource($user),
