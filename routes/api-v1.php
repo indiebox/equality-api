@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth;
-use App\Http\Controllers\Api\V1\Auth\VerifyEmailController;
 use App\Http\Controllers\Api\V1\UserController;
 
 /*
@@ -13,12 +12,14 @@ use App\Http\Controllers\Api\V1\UserController;
 
 Route::post('/register', [Auth\AuthController::class, 'register']);
 Route::post('/login', [Auth\AuthController::class, 'login']);
+Route::post('/forgot-password', [Auth\ResetPasswordController::class, 'send']);
+Route::post('/reset-password', [Auth\ResetPasswordController::class, 'reset']);
 Route::middleware('auth')->group(function() {
     Route::post('/logout', [Auth\AuthController::class, 'logout']);
-    Route::post('/verify-email/send', [VerifyEmailController::class, 'send'])
+    Route::post('/verify-email/send', [Auth\VerifyEmailController::class, 'send'])
         ->middleware(['throttle:3,1']);
 });
-Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+Route::get('/verify-email/{id}/{hash}', [Auth\VerifyEmailController::class, 'verify'])
     ->middleware('signed')
     ->name('verification.verify');
 
@@ -31,7 +32,3 @@ Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, 'verify']
 Route::middleware(['auth', 'verified'])->group(function() {
     Route::get('/user', [UserController::class, 'index']);
 });
-
-// Route::get('/reset-password/{token}', [NewPasswordController::class, 'create']);
-// Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']);
-// Route::post('/reset-password', [NewPasswordController::class, 'store']);
