@@ -16,6 +16,18 @@ class LoginUserRequest extends FormRequest
     protected const MAX_ATTEMPTS = 5;
 
     /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'device_name' => $this->device_name ?? 'Unknown device',
+        ]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array
@@ -25,7 +37,7 @@ class LoginUserRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'device_name' => ['required', 'string'],
+            'device_name' => ['required', 'string', 'max:191'],
         ];
     }
 
