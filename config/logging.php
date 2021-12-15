@@ -120,6 +120,12 @@ return [
         |-------------------------------------------------------------
         */
 
+        'mail' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/mail.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
         'deprecations' => [
             'driver' => 'single',
             'path' => storage_path('logs/deprecations.log'),
