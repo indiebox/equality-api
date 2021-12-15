@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Auth;
 
+use App\Listeners\InvalidateUserTokens;
 use App\Models\User;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Auth\Events\PasswordReset;
@@ -47,6 +48,7 @@ class ResetPasswordControllerTest extends TestCase
                 ->assertOk()
                 ->assertJsonStructure(['message']);
             Event::assertDispatched(PasswordReset::class);
+            Event::assertListening(PasswordReset::class, InvalidateUserTokens::class);
 
             return true;
         });
