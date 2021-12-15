@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,5 +26,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+
+        // Setup default password rule.
+        Password::defaults(function() {
+            $rule = Password::min(6);
+
+            return $this->app->isProduction()
+                        ? $rule->mixedCase()->numbers()
+                        : $rule;
+        });
     }
 }
