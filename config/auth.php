@@ -84,13 +84,16 @@ return [
     | considered valid. This security feature keeps tokens short-lived so
     | they have less time to be guessed. You may change this as needed.
     |
+    | The throttle time is the number of seconds after which the password
+    | reset link can be sent again.
+    |
     */
 
     'passwords' => [
         'users' => [
             'provider' => 'users',
             'table' => 'password_resets',
-            'expire' => 60,
+            'expire' => 10,
             'throttle' => 60,
         ],
     ],
