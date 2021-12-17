@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\RegisteredUserController;
+use App\Http\Controllers\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,10 +16,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
 
+/*
+|-------------------------------------------------------------
+| Register and Email verification
+|-------------------------------------------------------------
+*/
+
 Route::group([
     'prefix' => '/register',
     'as' => 'register.',
 ], function() {
-    Route::get('/', [RegisteredUserController::class, 'create'])->name('create');
-    Route::post('/', [RegisteredUserController::class, 'store'])->name('store');
+    Route::get('/', [Auth\RegisteredUserController::class, 'create'])->name('create');
+    Route::post('/', [Auth\RegisteredUserController::class, 'store'])->name('store');
 });
+Route::get('/verify-email/{id}/{hash}', Auth\VerifyEmailController::class)
+    ->middleware('signed')
+    ->name('verification.verify');
