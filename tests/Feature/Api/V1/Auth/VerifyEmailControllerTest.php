@@ -25,7 +25,8 @@ class VerifyEmailControllerTest extends TestCase
         Sanctum::actingAs($user);
         $response = $this->postJson('/api/v1/verify-email/send');
 
-        $response->assertOk()
+        $response
+            ->assertOk()
             ->assertJson(['status' => true]);
         Notification::assertSentTo($user, VerifyEmail::class);
     }
@@ -38,7 +39,8 @@ class VerifyEmailControllerTest extends TestCase
         Sanctum::actingAs($user);
         $response = $this->postJson('/api/v1/verify-email/send');
 
-        $response->assertOk()
+        $response
+            ->assertOk()
             ->assertJson(['status' => false]);
         Notification::assertNothingSent();
     }

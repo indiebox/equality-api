@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::view('/', 'welcome');
+
+Route::group([
+    'prefix' => '/register',
+    'as' => 'register.',
+], function() {
+    Route::get('/', [RegisteredUserController::class, 'create'])->name('create');
+    Route::post('/', [RegisteredUserController::class, 'store'])->name('store');
 });

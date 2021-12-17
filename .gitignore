@@ -1,5 +1,11 @@
-public/hot
+# Ignore builded content
+public/css
+public/js
+public/fonts
+public/images
 public/storage
+public/mix-manifest.json
+
 storage/*.key
 
 node_modules
