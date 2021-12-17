@@ -13,6 +13,8 @@ class RegisteredUserController extends Controller
     }
 
     public function store(RegisterUserRequest $request) {
+        $request->ensureIsNotRateLimited();
+
         $user = User::create($request->validated());
 
         event(new Registered($user));
