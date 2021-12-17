@@ -8,10 +8,10 @@
             <h1 class="text-3xl text-center mb-4">Регистрация</h1>
             <div class="flex flex-col justify-center">
                 <div class="space-y-5">
-                    <x-input text="Имя:" type="text" name="name"  minlength="2" maxlength="50" />
-                    <x-input text="Email:" type="email" name="email"  maxlength="128" />
-                    <x-input text="Пароль:" type="password" name="password"  minlength="6" />
-                    <x-input text="Подтвердите пароль:" type="password" name="password_confirmation"  minlength="6"/>
+                    <x-input text="Имя:" type="text" name="name" :value="old('name')" required minlength="2" maxlength="50" />
+                    <x-input text="Email:" type="email" name="email" :value="old('email')" required maxlength="128" />
+                    <x-input text="Пароль:" type="password" name="password" required minlength="6" />
+                    <x-input text="Подтвердите пароль:" type="password" name="password_confirmation" required minlength="6"/>
                 </div>
 
                 <button class="button button-primary mt-10">Зарегистрироваться</button>
