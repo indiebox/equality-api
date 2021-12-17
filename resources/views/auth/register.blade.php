@@ -1,5 +1,9 @@
 @extends('layouts.html')
 
+@push('scripts')
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+@endpush
+
 @section('content')
     <div class="flex items-center justify-center h-[100vh]">
         <form class="shadow-lg px-14 py-7" method="POST" actions="{{ route('register.store') }}">
@@ -12,9 +16,13 @@
                     <x-input text="Email:" type="email" name="email" :value="old('email')" required maxlength="128" />
                     <x-input text="Пароль:" type="password" name="password" required minlength="6" />
                     <x-input text="Подтвердите пароль:" type="password" name="password_confirmation" required minlength="6"/>
+                    <div class="g-recaptcha" data-sitekey="{{ config('recaptcha.public_key') }}"></div>
+                    @error(config('recaptcha.field_name'))
+                        <div class="text-red-500">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                <button class="button button-primary mt-10">Зарегистрироваться</button>
+                <button class="button button-primary mt-5">Зарегистрироваться</button>
             </div>
         </form>
     </div>

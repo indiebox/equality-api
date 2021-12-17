@@ -6,6 +6,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class RegisteredUserControllerTest extends TestCase
@@ -28,7 +29,16 @@ class RegisteredUserControllerTest extends TestCase
             'email' => 'test@mail.ru',
             'password' => '123456',
             'password_confirmation' => '123456',
+            config('recaptcha.field_name') => 'fake',
         ];
+
+        Http::fake(function() {
+            $fakeData = [
+                'success' => true,
+            ];
+
+            return Http::response($fakeData, 200);
+        });
 
         $response = $this->post('/register', $data);
 

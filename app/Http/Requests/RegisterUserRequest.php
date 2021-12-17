@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidRecaptcha;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
@@ -10,6 +11,9 @@ use Illuminate\Validation\Rules\Password;
 
 class RegisterUserRequest extends FormRequest
 {
+    /**
+     * Max attempts count per minute for the request.
+     */
     protected const MAX_ATTEMPTS = 1;
 
     /**
@@ -23,6 +27,7 @@ class RegisterUserRequest extends FormRequest
             'name' => ['required', 'string', 'between:2,50'],
             'email' => ['required', 'email', 'max:128', 'unique:users'],
             'password' => ['required', 'confirmed', Password::default()],
+            config('recaptcha.field_name') => [new ValidRecaptcha],
         ];
     }
 
