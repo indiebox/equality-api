@@ -127,9 +127,6 @@ return [
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
 
-    // Custom.
-    'recaptcha' => 'You must confirm that you are not a robot.',
-
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines
@@ -140,6 +137,8 @@ return [
     | specify a specific custom language line for a given attribute rule.
     |
     */
+
+    'recaptcha' => 'You must confirm that you are not a robot.',
 
     'custom' => [
         'attribute-name' => [
