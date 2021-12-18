@@ -1,7 +1,7 @@
 @extends('layouts.html')
 
 @push('scripts')
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script>
 @endpush
 
 @section('content')
@@ -16,10 +16,12 @@
                     <x-input text="Email:" type="email" name="email" :value="old('email')" required maxlength="128" />
                     <x-input text="Пароль:" type="password" name="password" required minlength="6" />
                     <x-input text="Подтвердите пароль:" type="password" name="password_confirmation" required minlength="6"/>
-                    <div class="g-recaptcha" data-sitekey="{{ config('recaptcha.public_key') }}"></div>
-                    @error(config('recaptcha.field_name'))
-                        <div class="text-red-500">{{ $message }}</div>
-                    @enderror
+                    <div>
+                        <div class="g-recaptcha" data-sitekey="{{ config('recaptcha.public_key') }}"></div>
+                        @error(config('recaptcha.field_name'))
+                            <div class="text-red-500">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 <button class="button button-primary mt-5">Зарегистрироваться</button>
