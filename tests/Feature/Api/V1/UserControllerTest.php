@@ -25,7 +25,8 @@ class UserControllerTest extends TestCase
         Sanctum::actingAs($user);
         $response = $this->getJson('/api/v1/user');
 
-        $response->assertOk()
+        $response
+            ->assertOk()
             ->assertJsonPath('data.email', $user->email);
     }
 }

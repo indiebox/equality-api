@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Auth;
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
@@ -12,29 +11,12 @@ use Illuminate\Http\Request;
 class VerifyEmailController extends Controller
 {
     /**
-     * Send a new email verification notification.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function send(Request $request)
-    {
-        if ($request->user()->hasVerifiedEmail()) {
-            return response(['status' => false]);
-        }
-
-        $request->user()->sendEmailVerificationNotification();
-
-        return response(['status' => true]);
-    }
-
-    /**
      * Mark the authenticated user's email address as verified.
      *
      * @param  \Illuminate\Foundation\Auth\EmailVerificationRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function verify(Request $request)
+    public function __invoke(Request $request)
     {
         $user = User::find($request->route('id'));
 
@@ -43,13 +25,13 @@ class VerifyEmailController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
+            return view('auth.verified', ['verified' => false]);
         }
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
 
-        return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
+        return view('auth.verified', ['verified' => true]);
     }
 }

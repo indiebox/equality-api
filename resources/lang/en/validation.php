@@ -138,6 +138,8 @@ return [
     |
     */
 
+    'recaptcha' => 'You must confirm that you are not a robot.',
+
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',

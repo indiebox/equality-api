@@ -1,0 +1,16 @@
+/* stylelint-disable */
+
+@tailwind base;
+
+// Base styles.
+@import "base";
+
+@tailwind components;
+
+// Custom components.
+@import "components";
+
+@tailwind utilities;
+
+// Custom utilities.
+@import "utilities";

@@ -111,4 +111,18 @@ return [
 
     'password_timeout' => 10800,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Verifying Email
+    |--------------------------------------------------------------------------
+    |
+    | The expire time is the number of minutes that the email verification url
+    | should be considered valid. This security feature keeps tokens short-lived so
+    | they have less time to be guessed. You may change this as needed.
+    |
+    */
+
+    'verification' => [
+        'expire' => 30,
+    ],
 ];

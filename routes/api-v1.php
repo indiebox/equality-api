@@ -16,12 +16,9 @@ Route::post('/forgot-password', [Auth\ResetPasswordController::class, 'send']);
 Route::post('/reset-password', [Auth\ResetPasswordController::class, 'reset']);
 Route::middleware('auth')->group(function() {
     Route::post('/logout', [Auth\AuthController::class, 'logout']);
-    Route::post('/verify-email/send', [Auth\VerifyEmailController::class, 'send'])
+    Route::post('/verify-email/send', Auth\SendEmailVerificationLinkController::class)
         ->middleware(['throttle:3,1']);
 });
-Route::get('/verify-email/{id}/{hash}', [Auth\VerifyEmailController::class, 'verify'])
-    ->middleware('signed')
-    ->name('verification.verify');
 
 /*
 |-------------------------------------------------------------

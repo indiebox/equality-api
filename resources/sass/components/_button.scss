@@ -1,0 +1,26 @@
+/*
+|-------------------------------------------------------------
+| Buttons
+|-------------------------------------------------------------
+*/
+
+.button {
+    cursor: pointer;
+
+    display: inline-block;
+    width: auto;
+    height: auto;
+    padding: 10px;
+
+    background: 0 0;
+    border: 0;
+    outline: none;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.button-primary {
+    @apply bg-cyan-500 hover:bg-cyan-600 text-white;
+}

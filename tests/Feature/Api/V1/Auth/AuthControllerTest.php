@@ -3,33 +3,12 @@
 namespace Tests\Feature\Api\V1\Auth;
 
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
 {
     use DatabaseTransactions;
-
-    public function test_can_register()
-    {
-        Event::fake();
-        $data = [
-            'name' => 'test',
-            'email' => 'test@mail.ru',
-            'password' => '123456',
-            'password_confirmation' => '123456',
-        ];
-
-        $response = $this->postJson('api/v1/register', $data);
-
-        $response->assertCreated()
-            ->assertJsonPath('data.email', 'test@mail.ru');
-        $this->assertDatabaseHas('users', Arr::only($data, ['email']));
-        Event::assertDispatched(Registered::class);
-    }
 
     public function test_can_login_with_correct_credentials()
     {
@@ -43,7 +22,8 @@ class AuthControllerTest extends TestCase
 
         $response = $this->postJson('api/v1/login', $data);
 
-        $response->assertOk()
+        $response
+            ->assertOk()
             ->assertJsonPath('data.email', 'test@mail.ru');
     }
 
@@ -59,7 +39,25 @@ class AuthControllerTest extends TestCase
 
         $response = $this->postJson('api/v1/login', $data);
 
-        $response->assertUnprocessable()
+        $response
+            ->assertUnprocessable()
             ->assertJsonValidationErrorFor('email');
+    }
+
+    public function test_can_logout() {
+        User::factory()->create(['email' => 'test@mail.ru', 'password' => '123456']);
+        $data = [
+            'email' => 'test@mail.ru',
+            'password' => '123456',
+            'device_name' => 'Desktop',
+        ];
+        $token = $this->postJson('api/v1/login', $data)->json('token');
+
+        $this->assertDatabaseCount('personal_access_tokens', 1);
+
+        $response = $this->postJson('api/v1/logout', [], ["Authorization" => "Bearer {$token}"]);
+
+        $response->assertNoContent();
+        $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 }
