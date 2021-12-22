@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Team\StoreTeamRequest;
 use App\Http\Requests\Api\V1\Team\UpdateTeamRequest;
+use App\Http\Resources\V1\Team\TeamResource;
 use App\Models\Team;
 
 class TeamController extends Controller
@@ -16,18 +17,7 @@ class TeamController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\Api\V1\Team\StoreTeamRequest  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(StoreTeamRequest $request)
-    {
-        //
+        return TeamResource::collection(auth()->user()->teams);
     }
 
     /**
@@ -37,6 +27,19 @@ class TeamController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Team $team)
+    {
+        $team->load('members');
+
+        return new TeamResource($team);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \App\Http\Requests\Api\V1\Team\StoreTeamRequest  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreTeamRequest $request)
     {
         //
     }

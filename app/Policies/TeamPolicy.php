@@ -19,18 +19,7 @@ class TeamPolicy
      */
     public function view(User $user, Team $team)
     {
-        return $team->creator->is($user);
-    }
-
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function create(User $user)
-    {
-        return true;
+        return $team->isMember($user);
     }
 
     /**

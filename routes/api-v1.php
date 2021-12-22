@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\UserController;
 
 /*
@@ -28,4 +29,11 @@ Route::middleware('auth')->group(function() {
 
 Route::middleware(['auth', 'verified'])->group(function() {
     Route::get('/user', [UserController::class, 'index']);
+
+    Route::group([
+        'prefix' => 'teams',
+    ], function() {
+        Route::get('/', [Team\TeamController::class, 'index']);
+        Route::get('/{team}', [Team\TeamController::class, 'show'])->can('view', "team");
+    });
 });
