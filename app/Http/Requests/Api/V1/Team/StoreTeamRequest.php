@@ -14,7 +14,9 @@ class StoreTeamRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'url' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

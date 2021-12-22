@@ -19,7 +19,7 @@ class TeamResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'url' => $this->url,
-            'logo' => $this->when($this->logo != null, url($this->logo), null),
+            'logo' => image($this->logo),
             'members' => $this->whenLoaded('members', function() {
                 return TeamMemberResource::collection($this->members);
             }),

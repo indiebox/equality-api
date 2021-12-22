@@ -41,7 +41,10 @@ class TeamController extends Controller
      */
     public function store(StoreTeamRequest $request)
     {
-        //
+        $team = Team::create($request->validated());
+        $team->members()->attach(auth()->user(), ['is_creator' => true]);
+
+        return (new TeamResource($team))->response()->setStatusCode(201);
     }
 
     /**
@@ -53,7 +56,9 @@ class TeamController extends Controller
      */
     public function update(UpdateTeamRequest $request, Team $team)
     {
-        //
+        $team->update($request->validated());
+
+        return (new TeamResource($team));
     }
 
     /**

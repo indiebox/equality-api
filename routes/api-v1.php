@@ -34,6 +34,19 @@ Route::middleware(['auth', 'verified'])->group(function() {
         'prefix' => 'teams',
     ], function() {
         Route::get('/', [Team\TeamController::class, 'index']);
-        Route::get('/{team}', [Team\TeamController::class, 'show'])->can('view', "team");
+        Route::post('/', [Team\TeamController::class, 'store']);
+
+        // Update team settings.
+        Route::group([
+            'prefix' => '{team}',
+            'middleware' => 'can:update,team',
+        ], function() {
+            Route::patch('/', [Team\TeamController::class, 'update']);
+
+            Route::post('/logo', [Team\LogoController::class, 'store']);
+            Route::delete('/logo', [Team\LogoController::class, 'destroy']);
+        });
+
+        Route::get('/{team}', [Team\TeamController::class, 'show'])->can('view', 'team');
     });
 });
