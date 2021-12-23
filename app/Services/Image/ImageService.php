@@ -23,13 +23,7 @@ class ImageService implements ImageServiceContract {
     }
 
     public function delete($path) {
-        if ($path != null) {
-            Storage::delete($path);
-
-            return true;
-        }
-
-        return false;
+        return Storage::delete($path);
     }
 
     protected function stripImage(ImageInstance $img) {
