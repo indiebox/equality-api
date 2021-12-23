@@ -35,6 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
     ], function() {
         Route::get('/', [Team\TeamController::class, 'index']);
         Route::post('/', [Team\TeamController::class, 'store']);
+        Route::post('{team}/leave', [Team\TeamController::class, 'leave'])->can('leave', 'team');
 
         // Update team settings.
         Route::group([

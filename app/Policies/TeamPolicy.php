@@ -35,14 +35,14 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determine whether the user can leave team.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Team  $team
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Team $team)
+    public function leave(User $user, Team $team)
     {
-        //
+        return $team->isMember($user);
     }
 }

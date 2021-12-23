@@ -62,13 +62,19 @@ class TeamController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the user from team.
      *
      * @param  \App\Models\Team  $team
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Team $team)
+    public function leave(Team $team)
     {
-        //
+        $team->members()->detach(auth()->user());
+
+        if (!$team->members()->exists()) {
+            $team->delete();
+        }
+
+        return response('', 204);
     }
 }
