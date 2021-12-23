@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Team;
 
+use App\Events\Api\UserLeaveTeam;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Team\StoreTeamRequest;
 use App\Http\Requests\Api\V1\Team\UpdateTeamRequest;
@@ -71,9 +72,7 @@ class TeamController extends Controller
     {
         $team->members()->detach(auth()->user());
 
-        if (!$team->members()->exists()) {
-            $team->delete();
-        }
+        event(new UserLeaveTeam(auth()->user(), $team));
 
         return response('', 204);
     }

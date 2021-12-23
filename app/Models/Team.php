@@ -35,6 +35,12 @@ class Team extends Model
         'url',
     ];
 
+    /*
+    |-------------------------------------------------------------
+    | Methods
+    |-------------------------------------------------------------
+    */
+
     public function isMember($user) {
         if ($this->relationLoaded('members')) {
             return $this->members->contains($user);
