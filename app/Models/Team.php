@@ -76,4 +76,8 @@ class Team extends Model
             ->withTimestamps('joined_at')
             ->withPivot('is_creator');
     }
+
+    public function invites() {
+        return $this->hasMany(Invite::class);
+    }
 }
