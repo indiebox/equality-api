@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\Api\TeamEventSubscriber;
 use App\Listeners\InvalidateUserTokens;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
@@ -23,6 +24,15 @@ class EventServiceProvider extends ServiceProvider
         PasswordReset::class => [
             InvalidateUserTokens::class,
         ],
+    ];
+
+    /**
+     * The subscriber classes to register.
+     *
+     * @var array
+     */
+    protected $subscribe = [
+        TeamEventSubscriber::class,
     ];
 
     /**

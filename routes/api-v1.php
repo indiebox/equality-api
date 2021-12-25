@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\UserController;
 
 /*
@@ -28,4 +29,25 @@ Route::middleware('auth')->group(function() {
 
 Route::middleware(['auth', 'verified'])->group(function() {
     Route::get('/user', [UserController::class, 'index']);
+
+    Route::group([
+        'prefix' => 'teams',
+    ], function() {
+        Route::get('/', [Team\TeamController::class, 'index']);
+        Route::post('/', [Team\TeamController::class, 'store']);
+        Route::post('{team}/leave', [Team\TeamController::class, 'leave'])->can('leave', 'team');
+
+        // Update team settings.
+        Route::group([
+            'prefix' => '{team}',
+            'middleware' => 'can:update,team',
+        ], function() {
+            Route::patch('/', [Team\TeamController::class, 'update']);
+
+            Route::post('/logo', [Team\LogoController::class, 'store']);
+            Route::delete('/logo', [Team\LogoController::class, 'destroy']);
+        });
+
+        Route::get('/{team}', [Team\TeamController::class, 'show'])->can('view', 'team');
+    });
 });
