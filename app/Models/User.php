@@ -31,6 +31,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User query()
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Invite[] $invites
+ * @property-read int|null $invites_count
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -96,6 +98,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     public function invites() {
-        return $this->hasMany(Invite::class, 'invited_id');
+        return $this->hasMany(Invite::class, 'invited_id')->onlyPending();
     }
 }

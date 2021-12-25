@@ -22,8 +22,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\User[] $members
  * @property-read int|null $members_count
  * @property-read \App\Models\User $creator
- *
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Invite[] $invites
+ * @property-read int|null $invites_count
  */
 class Team extends Model
 {
