@@ -20,9 +20,7 @@ class TeamResource extends JsonResource
             'description' => $this->description,
             'url' => $this->url,
             'logo' => image($this->logo),
-            'members' => $this->whenLoaded('members', function() {
-                return TeamMemberResource::collection($this->members);
-            }),
+            'members' => TeamMemberResource::collection($this->whenLoaded('members')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
