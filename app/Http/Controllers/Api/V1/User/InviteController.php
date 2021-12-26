@@ -16,9 +16,7 @@ class InviteController extends Controller
      */
     public function index(Request $request)
     {
-        $invites = auth()->user()->invites()->sortByStatus($request->query('filter', 'all'))->get();
-
-        return UserInviteResource::collection($invites);
+        return UserInviteResource::collection(auth()->user()->invites);
     }
 
     /**
