@@ -139,7 +139,7 @@ return [
     */
 
     'recaptcha' => 'You must confirm that you are not a robot.',
-    'is_member_of_the_team' => 'This user is already a member of this team.',
+    'is_member_of_team' => 'This user is already a member of this team.',
     'already_invited' => 'This user is already invited in this team.',
 
     'custom' => [
