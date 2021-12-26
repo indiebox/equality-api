@@ -15,6 +15,8 @@ class InviteController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param  \Illuminate\Http\Request  $request
+     * @param \App\Models\Team  $team
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, Team $team)
@@ -45,11 +47,10 @@ class InviteController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     *
+     * @param \App\Models\Invite  $invite
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, Team $team, Invite $invite)
+    public function destroy(Invite $invite)
     {
         $invite->delete();
 

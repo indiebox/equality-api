@@ -12,7 +12,6 @@ use App\Models\Invite;
 |-------------------------------------------------------------
 */
 
-Route::post('/register', [Auth\AuthController::class, 'register']);
 Route::post('/login', [Auth\AuthController::class, 'login']);
 Route::post('/forgot-password', [Auth\ResetPasswordController::class, 'send']);
 Route::post('/reset-password', [Auth\ResetPasswordController::class, 'reset']);
@@ -24,24 +23,27 @@ Route::middleware('auth')->group(function() {
 
 /*
 |-------------------------------------------------------------
-| User actions.
+| Base api.
 |-------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'verified'])->group(function() {
-    // Authenticated user.
+    /*
+    |-------------------------------------------------------------
+    | User actions.
+    |-------------------------------------------------------------
+    */
+
     Route::prefix('user')->group(function() {
         Route::get('/', [User\UserController::class, 'index']);
-
-        // Invites.
-        Route::prefix('/invites')->group(function() {
-            Route::get('/', [User\InviteController::class, 'index']);
-            Route::post('/{pendingInvite}/accept', [User\InviteController::class, 'accept'])->can('accept', 'pendingInvite');
-            Route::post('/{pendingInvite}/decline', [User\InviteController::class, 'decline'])->can('decline', 'pendingInvite');
-        });
     });
 
-    // Teams.
+    /*
+    |-------------------------------------------------------------
+    | Teams actions.
+    |-------------------------------------------------------------
+    */
+
     Route::prefix('teams')->group(function() {
         Route::get('/', [Team\TeamController::class, 'index']);
         Route::post('/', [Team\TeamController::class, 'store']);
@@ -53,7 +55,6 @@ Route::middleware(['auth', 'verified'])->group(function() {
         ], function() {
             Route::get('/', [Team\InviteController::class, 'index'])->can('viewAny', [Invite::class, 'team']);
             Route::post('/', [Team\InviteController::class, 'store'])->can('create', [Invite::class, 'team']);
-            Route::delete('/{pendingInvite}', [Team\InviteController::class, 'destroy'])->can('delete', ['pendingInvite', 'team']);
         });
 
         // Update team settings.
@@ -68,5 +69,21 @@ Route::middleware(['auth', 'verified'])->group(function() {
         });
 
         Route::get('/{team}', [Team\TeamController::class, 'show'])->can('view', 'team');
+    });
+
+    /*
+    |-------------------------------------------------------------
+    | Invites actions.
+    |-------------------------------------------------------------
+    */
+
+    Route::prefix('invites')->group(function() {
+        Route::get('/', [User\InviteController::class, 'index']);
+
+        Route::prefix('/{pendingInvite}')->group(function() {
+            Route::post('/accept', [User\InviteController::class, 'accept'])->can('accept', 'pendingInvite');
+            Route::post('/decline', [User\InviteController::class, 'decline'])->can('decline', 'pendingInvite');
+            Route::delete('/', [Team\InviteController::class, 'destroy'])->can('delete', 'pendingInvite');
+        });
     });
 });

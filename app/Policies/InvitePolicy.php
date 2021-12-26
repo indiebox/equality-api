@@ -36,16 +36,15 @@ class InvitePolicy
     }
 
     /**
-     * Determine whether the user can revoke invite for team.
+     * Determine whether the user can revoke invite.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Invite  $invite
-     * @param  \App\Models\Team  $team
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Invite $invite, Team $team)
+    public function delete(User $user, Invite $invite)
     {
-        return $team->isMember($user);
+        return $invite->team->isMember($user);
     }
 
     /**
