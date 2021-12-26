@@ -45,11 +45,11 @@ class Invite extends Model
 
     /*
     |-------------------------------------------------------------
-    | Mutators and Accessors
+    | Methods
     |-------------------------------------------------------------
     */
 
-    public function getStatusAttribute() {
+    public function getStatus() {
         if ($this->accepted_at == null && $this->declined_at == null) {
             return self::STATUS_PENDING;
         }
