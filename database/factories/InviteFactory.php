@@ -16,9 +16,7 @@ class InviteFactory extends Factory
         return [];
     }
 
-    /**
-     * Indicate that the invite should be accepted.
-     *
+    /** Indicate that the invite should be accepted.
      * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
     public function accepted() {
@@ -29,9 +27,7 @@ class InviteFactory extends Factory
         });
     }
 
-    /**
-     * Indicate that the invite should be declined.
-     *
+    /** Indicate that the invite should be declined.
      * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
     public function declined() {
@@ -40,5 +36,29 @@ class InviteFactory extends Factory
                 'declined_at' => now(),
             ];
         });
+    }
+
+    /** Setup inviter user to the invite.
+     * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
+     * @return static
+     */
+    public function inviter($user) {
+        return $this->for($user, 'inviter');
+    }
+
+    /** Setup invited user to the invite.
+     * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
+     * @return static
+     */
+    public function invited($user) {
+        return $this->for($user, 'invited');
+    }
+
+    /** Setup team to the invite.
+     * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
+     * @return static
+     */
+    public function team($team) {
+        return $this->for($team);
     }
 }
