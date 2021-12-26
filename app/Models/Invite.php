@@ -39,6 +39,30 @@ class Invite extends Model
         'declined_at' => 'datetime',
     ];
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_ACCEPTED = 'accepted';
+    public const STATUS_DECLINED = 'declined';
+
+    /*
+    |-------------------------------------------------------------
+    | Mutators and Accessors
+    |-------------------------------------------------------------
+    */
+
+    public function getStatusAttribute() {
+        if ($this->accepted_at == null && $this->declined_at == null) {
+            return self::STATUS_PENDING;
+        }
+
+        if ($this->accepted_at != null) {
+            return self::STATUS_ACCEPTED;
+        }
+
+        if ($this->declined_at != null) {
+            return self::STATUS_DECLINED;
+        }
+    }
+
     /*
     |-------------------------------------------------------------
     | Scopes
@@ -47,11 +71,11 @@ class Invite extends Model
 
     public function scopeSortByStatus(Builder $query, $status) {
         return $query
-            ->when($status == 'pending', function($query) {
+            ->when($status == self::STATUS_PENDING, function($query) {
                 return $query->onlyPending();
-            })->when($status == 'accepted', function($query) {
+            })->when($status == self::STATUS_ACCEPTED, function($query) {
                 return $query->onlyAccepted();
-            })->when($status == 'declined', function($query) {
+            })->when($status == self::STATUS_DECLINED, function($query) {
                 return $query->onlyDeclined();
             });
     }
