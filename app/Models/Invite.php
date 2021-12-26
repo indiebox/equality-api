@@ -27,7 +27,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static Builder|Invite onlyDeclined()
  * @method static Builder|Invite onlyPending()
  * @method static Builder|Invite query()
- * @method static Builder|Invite sortByStatus($status)
+ * @method static Builder|Invite filterByStatus($status)
  * @mixin \Eloquent
  */
 class Invite extends Model
@@ -69,7 +69,7 @@ class Invite extends Model
     |-------------------------------------------------------------
     */
 
-    public function scopeSortByStatus(Builder $query, $status) {
+    public function scopeFilterByStatus(Builder $query, $status) {
         return $query
             ->when($status == self::STATUS_PENDING, function($query) {
                 return $query->onlyPending();

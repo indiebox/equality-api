@@ -19,7 +19,7 @@ class InviteController extends Controller
      */
     public function index(Request $request, Team $team)
     {
-        $invites = $team->invites()->sortByStatus($request->query('filter', 'all'))->get();
+        $invites = $team->invites()->filterByStatus($request->query('filter', 'all'))->get();
 
         return TeamInviteResource::collection($invites);
     }
