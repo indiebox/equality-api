@@ -31,7 +31,8 @@ class UserSeeder extends Seeder
         ]);
 
         // Create tokens for easy testing.
+        // User token = {tokenId}|12345 and {tokenId}|123456.
         $user1->tokens()->create(['name' => 'Default', 'token' => hash('sha256', 12345), 'abilities' => ['*']]);
-        $user2->tokens()->create(['name' => 'Default', 'token' => hash('sha256', 12345), 'abilities' => ['*']]);
+        $user2->tokens()->create(['name' => 'Default', 'token' => hash('sha256', 123456), 'abilities' => ['*']]);
     }
 }
