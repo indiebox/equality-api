@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -85,6 +86,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function setPasswordAttribute($password) {
         $this->attributes['password'] = Hash::make($password);
+    }
+
+    /*
+    |-------------------------------------------------------------
+    | Scopes
+    |-------------------------------------------------------------
+    */
+
+    public function scopeUnverified(Builder $query) {
+        return $query->whereNull('email_verified_at');
     }
 
     /*
