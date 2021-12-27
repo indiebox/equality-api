@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Api\V1\Team;
-use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\User;
+use App\Models\Invite;
 
 /*
 |-------------------------------------------------------------
@@ -11,7 +12,6 @@ use App\Http\Controllers\Api\V1\UserController;
 |-------------------------------------------------------------
 */
 
-Route::post('/register', [Auth\AuthController::class, 'register']);
 Route::post('/login', [Auth\AuthController::class, 'login']);
 Route::post('/forgot-password', [Auth\ResetPasswordController::class, 'send']);
 Route::post('/reset-password', [Auth\ResetPasswordController::class, 'reset']);
@@ -23,19 +23,39 @@ Route::middleware('auth')->group(function() {
 
 /*
 |-------------------------------------------------------------
-| User actions.
+| Base api.
 |-------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'verified'])->group(function() {
-    Route::get('/user', [UserController::class, 'index']);
+    /*
+    |-------------------------------------------------------------
+    | User actions.
+    |-------------------------------------------------------------
+    */
 
-    Route::group([
-        'prefix' => 'teams',
-    ], function() {
+    Route::prefix('user')->group(function() {
+        Route::get('/', [User\UserController::class, 'index']);
+    });
+
+    /*
+    |-------------------------------------------------------------
+    | Teams actions.
+    |-------------------------------------------------------------
+    */
+
+    Route::prefix('teams')->group(function() {
         Route::get('/', [Team\TeamController::class, 'index']);
         Route::post('/', [Team\TeamController::class, 'store']);
         Route::post('{team}/leave', [Team\TeamController::class, 'leave'])->can('leave', 'team');
+
+        // Invites.
+        Route::group([
+            'prefix' => '{team}/invites',
+        ], function() {
+            Route::get('/', [Team\InviteController::class, 'index'])->can('viewAny', [Invite::class, 'team']);
+            Route::post('/', [Team\InviteController::class, 'store'])->can('create', [Invite::class, 'team']);
+        });
 
         // Update team settings.
         Route::group([
@@ -49,5 +69,21 @@ Route::middleware(['auth', 'verified'])->group(function() {
         });
 
         Route::get('/{team}', [Team\TeamController::class, 'show'])->can('view', 'team');
+    });
+
+    /*
+    |-------------------------------------------------------------
+    | Invites actions.
+    |-------------------------------------------------------------
+    */
+
+    Route::prefix('invites')->group(function() {
+        Route::get('/', [User\InviteController::class, 'index']);
+
+        Route::prefix('/{pendingInvite}')->group(function() {
+            Route::post('/accept', [User\InviteController::class, 'accept'])->can('accept', 'pendingInvite');
+            Route::post('/decline', [User\InviteController::class, 'decline'])->can('decline', 'pendingInvite');
+            Route::delete('/', [Team\InviteController::class, 'destroy'])->can('delete', 'pendingInvite');
+        });
     });
 });

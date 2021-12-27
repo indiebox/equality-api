@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\V1;
+namespace Tests\Feature\Api\V1\User;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -11,14 +11,14 @@ class UserControllerTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_cant_get_user()
+    public function test_cant_get_user_unauthorized()
     {
         $response = $this->getJson('/api/v1/user');
 
         $response->assertUnauthorized();
     }
 
-    public function test_can_get_user_with_token()
+    public function test_can_get_user()
     {
         $user = User::factory()->create();
 
