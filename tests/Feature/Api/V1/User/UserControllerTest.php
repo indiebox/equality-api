@@ -20,7 +20,7 @@ class UserControllerTest extends TestCase
 
     public function test_can_get_user()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->unverified()->create();
 
         Sanctum::actingAs($user);
         $response = $this->getJson('/api/v1/user');

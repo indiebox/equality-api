@@ -35,7 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
     */
 
     Route::prefix('user')->group(function() {
-        Route::get('/', [User\UserController::class, 'index']);
+        Route::get('/', [User\UserController::class, 'index'])->withoutMiddleware('verified');
     });
 
     /*
