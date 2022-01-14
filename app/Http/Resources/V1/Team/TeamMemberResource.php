@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\V1\Team;
 
-use App\Http\Resources\V1\UserResource;
+use App\Http\Resources\V1\User\UserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 
