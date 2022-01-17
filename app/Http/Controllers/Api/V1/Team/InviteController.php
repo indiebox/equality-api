@@ -7,7 +7,6 @@ use App\Http\Requests\Api\V1\Team\StoreInviteRequest;
 use App\Http\Resources\V1\Team\TeamInviteResource;
 use App\Models\Invite;
 use App\Models\Team;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class InviteController extends Controller
@@ -38,7 +37,7 @@ class InviteController extends Controller
         $invite = new Invite();
         $invite->team()->associate($team);
         $invite->inviter()->associate(auth()->user());
-        $invite->invited()->associate(User::where('email', $request->email)->firstOrFail());
+        $invite->invited()->associate($request->invited);
         $invite->save();
 
         return (new TeamInviteResource($invite))->response()->setStatusCode(201);

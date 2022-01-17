@@ -49,6 +49,8 @@ class StoreInviteRequest extends FormRequest
 
                 return;
             }
+
+            $this->merge(['invited' => $user]);
         });
     }
 
