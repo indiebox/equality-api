@@ -33,7 +33,7 @@ class StoreInviteRequest extends FormRequest
             $user = User::where('email', $this->email)->first();
 
             if ($user == null) {
-                $validator->errors()->add('email', trans('validation.exists'));
+                $validator->errors()->add('email', trans('validation.invalid_user'));
 
                 return;
             }

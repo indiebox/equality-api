@@ -86,7 +86,7 @@ class InviteControllerTest extends TestCase
 
         $response
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['email' => trans('validation.exists')]);
+            ->assertJsonValidationErrors(['email' => trans('validation.invalid_user')]);
     }
     public function test_cant_invite_member_of_team()
     {
