@@ -18,7 +18,7 @@ Route::post('/reset-password', [Auth\ResetPasswordController::class, 'reset']);
 Route::middleware('auth')->group(function() {
     Route::post('/logout', [Auth\AuthController::class, 'logout']);
     Route::post('/verify-email/send', Auth\SendEmailVerificationLinkController::class)
-        ->middleware(['throttle:3,1']);
+        ->middleware(['throttle:mail_verification']);
 });
 
 /*
