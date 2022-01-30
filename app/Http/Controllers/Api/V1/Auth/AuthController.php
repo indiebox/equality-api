@@ -22,7 +22,7 @@ class AuthController extends Controller
             $request->hitAttempt();
 
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'credentials' => __('auth.failed'),
             ]);
         }
 
