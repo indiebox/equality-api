@@ -28,6 +28,8 @@ class AuthController extends Controller
 
         $request->clearAttempts();
 
+        $user->tokens()->where('name', $data['device_name'])->delete();
+
         return response([
             'data' => new UserResource($user),
             'token' => $user->createToken($data['device_name'])->plainTextToken,
