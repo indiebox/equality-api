@@ -14,7 +14,7 @@ class StoreLogoRequest extends FormRequest
     public function rules()
     {
         return [
-            'logo' => ['nullable', 'image', 'dimensions:ratio=1', 'mimes:jpeg,jpg,png', 'max:4096'],
+            'logo' => ['required', 'image', 'dimensions:ratio=1', 'mimes:jpeg,jpg,png', 'max:4096'],
         ];
     }
 }
