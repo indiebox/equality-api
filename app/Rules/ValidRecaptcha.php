@@ -16,7 +16,7 @@ class ValidRecaptcha implements ImplicitRule
      */
     public function passes($attribute, $value)
     {
-        if ($value == null) {
+        if ($value == null || !is_string($value)) {
             return false;
         }
 
