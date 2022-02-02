@@ -1,0 +1,12 @@
+/**
+ * Window at center of the screen.
+ */
+.modal-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    overflow: auto;
+    max-height: 100%;
+
+    transform: translate(-50%, -50%);
+}

@@ -6,8 +6,15 @@
 
 <label class="flex flex-col gap-y-1">
     {{ $text }}
-    <input class="p-2 border border-cyan-500 transition-shadow focus:outline-none focus:ring-4 ring-cyan-500" {{ $attributes }}>
+    <label class="mdc-text-field mdc-text-field--filled mdc-text-field--no-label @error($attributes->get('name')) mdc-text-field--invalid @enderror">
+        <span class="mdc-text-field__ripple"></span>
+        <input class="mdc-text-field__input" aria-label="Label" {{ $attributes }}>
+        <span class="mdc-line-ripple"></span>
+    </label>
     @error($attributes->get('name'))
-        <div class="text-red-500">{{ $message }}</div>
+        <div class="mdc-text-field-helper-text
+         mdc-text-field-helper-text--persistent
+         mdc-text-field-helper-text--validation-msg
+         text-red-500">{{ $message }}</div>
     @enderror
 </label>
