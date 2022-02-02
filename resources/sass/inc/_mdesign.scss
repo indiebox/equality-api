@@ -1,0 +1,37 @@
+@use "@material/theme" with (
+    $primary: #FD5A2E,
+    $secondary: #EDEDED,
+    $on-primary: white,
+);
+@use "@material/textfield/mdc-text-field";
+@use "@material/button/mdc-button";
+
+/*
+|-------------------------------------------------------------
+| Redefine styles.
+|-------------------------------------------------------------
+*/
+
+:root {
+    /*
+    |-------------------------------------------------------------
+    | Button styles.
+    |-------------------------------------------------------------
+    */
+
+    --mdc-typography-button-text-transform: none;
+    --mdc-typography-button-font-size: 1rem;
+    --mdc-typography-button-letter-spacing: normal;
+
+    /*
+    |-------------------------------------------------------------
+    | Typography.
+    |-------------------------------------------------------------
+    */
+
+    --mdc-typography-font-family: Segoe UI, Roboto, sans-serif;
+}
+
+.mdc-text-field--filled {
+    height: 40px;
+}
