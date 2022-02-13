@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
             Route::delete('/logo', [Team\LogoController::class, 'destroy']);
         });
 
+        Route::get('/{team}/members', [Team\TeamController::class, 'members'])->can('view', 'team');
         Route::get('/{team}', [Team\TeamController::class, 'show'])->can('view', 'team');
     });
 

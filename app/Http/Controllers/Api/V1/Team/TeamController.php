@@ -6,6 +6,7 @@ use App\Events\Api\UserLeaveTeam;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Team\StoreTeamRequest;
 use App\Http\Requests\Api\V1\Team\UpdateTeamRequest;
+use App\Http\Resources\V1\Team\TeamMemberResource;
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Models\Team;
 
@@ -29,9 +30,17 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
-        $team->load('members');
-
         return new TeamResource($team);
+    }
+
+    /**
+     * Get all team members.
+     *
+     * @param \App\Models\Team $team
+     */
+    public function members(Team $team)
+    {
+        return TeamMemberResource::collection($team->members);
     }
 
     /**

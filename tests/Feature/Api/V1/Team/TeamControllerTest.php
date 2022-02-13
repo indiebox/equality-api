@@ -53,6 +53,26 @@ class TeamControllerTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_cant_view_members_without_permissions()
+    {
+        $user = User::factory()->create();
+        $teamId = Team::factory()->create()->id;
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/teams/' . $teamId . '/members');
+
+        $response->assertForbidden();
+    }
+    public function test_can_view_members() {
+        $teamId = Team::factory()->has(User::factory(), 'members')->create()->id;
+        $user = User::first();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/teams/' . $teamId . '/members');
+
+        $response->assertOk();
+    }
+
     public function test_can_store()
     {
         $user = User::factory()->create();
