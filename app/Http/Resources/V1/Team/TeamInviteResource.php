@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\V1\Team;
 
+use App\Http\Resources\V1\User\UserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TeamInviteResource extends JsonResource
@@ -16,8 +17,8 @@ class TeamInviteResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'inviter' => $this->inviter,
-            'invited' => $this->invited,
+            'inviter' => new UserResource($this->inviter),
+            'invited' => new UserResource($this->invited),
             'status' => $this->getStatus(),
             'accepted_at' => $this->accepted_at,
             'declined_at' => $this->declined_at,
