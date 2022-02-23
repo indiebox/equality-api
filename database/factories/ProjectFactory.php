@@ -18,4 +18,20 @@ class ProjectFactory extends Factory
             'description' => $this->faker->sentence(),
         ];
     }
+
+    /** Setup leader user to the project.
+     * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
+     * @return static
+     */
+    public function leader($user) {
+        return $this->for($user, 'leader');
+    }
+
+    /** Setup team to the project.
+     * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $team
+     * @return static
+     */
+    public function team($team) {
+        return $this->for($team);
+    }
 }
