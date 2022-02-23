@@ -19,7 +19,7 @@ class ProjectControllerTest extends TestCase
         $team = Team::factory()->create();
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-        Project::factory()->team(Team::factory())->leader(User::factory())->create();
+        Project::factory()->team(Team::factory())->create();
 
         $response = $this->getJson('/api/v1/teams/' . $team->id . '/projects');
 
@@ -30,7 +30,7 @@ class ProjectControllerTest extends TestCase
         $team = Team::factory()->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
-        Project::factory()->team($team)->leader(User::factory())->create();
+        Project::factory()->team($team)->create();
         $projects = Project::all();
 
         $response = $this->getJson('/api/v1/teams/' . $team->id . '/projects');
