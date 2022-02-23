@@ -19,7 +19,7 @@ class TeamProjectResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'image' => $this->image,
+            'image' => image($this->image),
             'leader' => new UserResource($this->leader),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
