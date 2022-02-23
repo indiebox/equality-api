@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|null $members_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Invite[] $invites
  * @property-read int|null $invites_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Project[] $projects
+ * @property-read int|null $projects_count
  * @method static \Database\Factories\TeamFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|Team newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Team newQuery()
@@ -71,6 +73,10 @@ class Team extends Model
     | Relationships
     |-------------------------------------------------------------
     */
+
+    public function projects() {
+        return $this->hasMany(Project::class);
+    }
 
     public function members() {
         return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id')
