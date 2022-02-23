@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Team;
 
-use App\Http\Resources\V1\Project\ProjectResource;
+use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
@@ -13,6 +13,32 @@ use Tests\TestCase;
 class ProjectControllerTest extends TestCase
 {
     use DatabaseTransactions;
+
+    public function test_cant_view_any_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        Project::factory()->team(Team::factory())->leader(User::factory())->create();
+
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/projects');
+
+        $response->assertForbidden();
+    }
+    public function test_can_view_any()
+    {
+        $team = Team::factory()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        Project::factory()->team($team)->leader(User::factory())->create();
+        $projects = Project::all();
+
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/projects');
+
+        $response
+            ->assertOk()
+            ->assertJson(TeamProjectResource::collection($projects)->response()->getData(true));
+    }
 
     public function test_cant_store_in_not_your_team()
     {
@@ -38,7 +64,7 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new ProjectResource(Project::first()))->response()->getData(true));
+            ->assertJson((new TeamProjectResource(Project::first()))->response()->getData(true));
         $this->assertDatabaseHas('projects', ['team_id' => $team->id, 'leader_id' => $user->id]);
     }
 }

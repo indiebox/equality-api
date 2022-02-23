@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Team;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Team\StoreProjectRequest;
-use App\Http\Resources\V1\Project\ProjectResource;
+use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Models\Project;
 use App\Models\Team;
 
@@ -17,7 +17,7 @@ class ProjectController extends Controller
      */
     public function index(Team $team)
     {
-        //
+        return TeamProjectResource::collection($team->projects);
     }
 
     /**
@@ -33,6 +33,6 @@ class ProjectController extends Controller
         $project->leader()->associate($request->user());
         $project->save();
 
-        return (new ProjectResource($project))->response()->setStatusCode(201);
+        return (new TeamProjectResource($project))->response()->setStatusCode(201);
     }
 }
