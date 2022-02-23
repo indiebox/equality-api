@@ -35,5 +35,7 @@ class TeamSeeder extends Seeder
         Invite::factory()->team($teams[1])->inviter($user2)->invited($user1)->create();
         Invite::factory()->team($teams[2])->inviter($user3)->invited($user1)->create();
         Invite::factory()->team($teams[2])->inviter($user3)->invited($user2)->create();
+
+        // TODO: Creating projects for teams.
     }
 }
