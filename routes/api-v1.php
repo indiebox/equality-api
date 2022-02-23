@@ -54,7 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
         Route::group([
             'prefix' => '{team}/projects',
         ], function() {
-            Route::post('/', [Project\ProjectController::class, 'store'])->can('create', [Project::class, 'team']);
+            Route::post('/', [Team\ProjectController::class, 'store'])->can('create', [Project::class, 'team']);
         });
 
         // Invites.
