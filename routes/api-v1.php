@@ -104,6 +104,14 @@ Route::middleware(['auth', 'verified'])->group(function() {
     */
 
     Route::prefix('projects')->group(function() {
+        // Update project settings.
+        Route::group([
+            'prefix' => '{project}',
+            'middleware' => 'can:update,project',
+        ], function() {
+            Route::patch('/', [Project\ProjectController::class, 'update']);
+        });
+
         Route::get('/{project}', [Project\ProjectController::class, 'show'])->can('view', 'project');
     });
 });

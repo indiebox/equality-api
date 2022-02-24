@@ -68,7 +68,7 @@ class TeamController extends Controller
     {
         $team->update($request->validated());
 
-        return (new TeamResource($team));
+        return new TeamResource($team);
     }
 
     /**

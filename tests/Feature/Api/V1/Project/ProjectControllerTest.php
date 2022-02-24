@@ -37,4 +37,38 @@ class ProjectControllerTest extends TestCase
             ->assertOk()
             ->assertJson((new ProjectResource($project))->response()->getData(true));
     }
+
+    public function test_cant_update_without_permissions()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $data = [
+            'name' => 'New name',
+            'description' => 'New description',
+        ];
+
+        $response = $this->patchJson('/api/v1/projects/' . $project->id, $data);
+
+        $response->assertForbidden();
+    }
+    public function test_can_update()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        $data = [
+            'name' => 'New name',
+            'description' => 'New description',
+        ];
+
+        $response = $this->patchJson('/api/v1/projects/' . $project->id, $data);
+
+        $response
+            ->assertOk()
+            ->assertJson((new ProjectResource(Project::first()))->response()->getData(true));;
+        $this->assertDatabaseHas('projects', $data);
+    }
 }
