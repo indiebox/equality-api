@@ -96,4 +96,14 @@ Route::middleware(['auth', 'verified'])->group(function() {
             Route::delete('/', [Team\InviteController::class, 'destroy'])->can('delete', 'pendingInvite');
         });
     });
+
+    /*
+    |-------------------------------------------------------------
+    | Projects actions.
+    |-------------------------------------------------------------
+    */
+
+    Route::prefix('projects')->group(function() {
+        Route::get('/{project}', [Project\ProjectController::class, 'show'])->can('view', 'project');
+    });
 });
