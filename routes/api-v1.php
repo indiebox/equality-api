@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Api\V1\Team;
+use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\User;
 use App\Models\Invite;
 
@@ -48,6 +49,14 @@ Route::middleware(['auth', 'verified'])->group(function() {
         Route::get('/', [Team\TeamController::class, 'index']);
         Route::post('/', [Team\TeamController::class, 'store']);
         Route::post('{team}/leave', [Team\TeamController::class, 'leave'])->can('leave', 'team');
+
+        // Projects.
+        Route::group([
+            'prefix' => '{team}/projects',
+        ], function() {
+            Route::get('/', [Team\ProjectController::class, 'index'])->can('viewAny', [Project::class, 'team']);
+            Route::post('/', [Team\ProjectController::class, 'store'])->can('create', [Project::class, 'team']);
+        });
 
         // Invites.
         Route::group([

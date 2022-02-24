@@ -12,7 +12,7 @@ class TeamEventSubscriber
      * Handle user leave events.
      */
     public function handleUserLeave(UserLeaveTeam $event) {
-        // Delete a team if there are no members left.
+        // Delete the team if there are no members left.
         if (!$event->team->members()->exists()) {
             $event->team->delete();
         }
