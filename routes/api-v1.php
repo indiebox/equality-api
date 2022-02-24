@@ -110,6 +110,9 @@ Route::middleware(['auth', 'verified'])->group(function() {
             'middleware' => 'can:update,project',
         ], function() {
             Route::patch('/', [Project\ProjectController::class, 'update']);
+
+            Route::post('/image', [Project\ImageController::class, 'store']);
+            Route::delete('/image', [Project\ImageController::class, 'destroy']);
         });
 
         Route::get('/{project}', [Project\ProjectController::class, 'show'])->can('view', 'project');
