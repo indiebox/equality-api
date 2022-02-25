@@ -10,8 +10,10 @@ class LeaderNominationController extends Controller
 {
     public function index(Project $project)
     {
-        $nominations = $project->leaderNominations()->with('nominated')->get();
-        $nominations = $nominations->groupBy('nominated_id');
+        $nominations = $project->leaderNominations()
+            ->with('nominated')
+            ->get()
+            ->groupBy('nominated_id');
 
         return new LeaderNominationCollection($nominations);
     }

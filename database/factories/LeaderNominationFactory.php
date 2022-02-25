@@ -13,6 +13,32 @@ class LeaderNominationFactory extends Factory
      */
     public function definition()
     {
-        return [];
+        return [
+            'created_at' => now(),
+        ];
+    }
+
+    /** Setup nominated user.
+     * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
+     * @return static
+     */
+    public function nominated($user) {
+        return $this->for($user, 'nominated');
+    }
+
+    /** Setup voter.
+     * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
+     * @return static
+     */
+    public function voter($user) {
+        return $this->for($user, 'voter');
+    }
+
+    /** Setup project for the nomination.
+     * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $project
+     * @return static
+     */
+    public function project($project) {
+        return $this->for($project);
     }
 }

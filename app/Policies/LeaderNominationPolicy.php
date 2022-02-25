@@ -11,6 +11,18 @@ class LeaderNominationPolicy
     use HandlesAuthorization;
 
     /**
+     * Determine whether the user can view any models.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Project  $project
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function viewAny(User $user, Project $project)
+    {
+        return $project->team->isMember($user);
+    }
+
+    /**
      * Determine whether the user can nominate user to the project leader.
      *
      * @param  \App\Models\User  $user

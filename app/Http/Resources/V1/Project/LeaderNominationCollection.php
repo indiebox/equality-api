@@ -28,7 +28,7 @@ class LeaderNominationCollection extends ResourceCollection
             $result->add([
                 'nominated' => new UserResource($nomination->first()->nominated),
                 'count' => $nomination->count(),
-                'voters' => [$nomination->pluck('voter_id')],
+                'voters' => $nomination->pluck('voter_id'),
             ]);
         }
 

@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $voter_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @method static \Database\Factories\ProjectFactory factory(...$parameters)
+ * @method static \Database\Factories\LeaderNominationFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|Team newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Team newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Team query()
