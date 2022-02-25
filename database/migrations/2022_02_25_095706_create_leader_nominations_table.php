@@ -20,6 +20,10 @@ class CreateLeaderNominationsTable extends Migration
             $table->foreignId('nominated_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
+
+        Schema::table('leader_nominations', function (Blueprint $table) {
+            $table->unique(['project_id', 'voter_id']);
+        });
     }
 
     /**
