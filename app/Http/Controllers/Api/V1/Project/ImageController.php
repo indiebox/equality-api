@@ -18,7 +18,7 @@ class ImageController extends Controller
     }
 
     public function store(StoreImageRequest $request, Project $project) {
-        $directory = "projects/image/" . date('m.Y');
+        $directory = "projects/images/" . date('m.Y');
 
         $path = $this->image->save($request->file('image'), $directory);
         $this->image->delete($project->image);
