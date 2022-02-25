@@ -18,7 +18,7 @@ class LogoController extends Controller
     }
 
     public function store(StoreLogoRequest $request, Team $team) {
-        $directory = "teams/logo/" . date('m.Y');
+        $directory = "teams/logos/" . date('m.Y');
 
         $path = $this->image->save($request->file('logo'), $directory);
         $this->image->delete($team->logo);

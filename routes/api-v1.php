@@ -96,4 +96,25 @@ Route::middleware(['auth', 'verified'])->group(function() {
             Route::delete('/', [Team\InviteController::class, 'destroy'])->can('delete', 'pendingInvite');
         });
     });
+
+    /*
+    |-------------------------------------------------------------
+    | Projects actions.
+    |-------------------------------------------------------------
+    */
+
+    Route::prefix('projects')->group(function() {
+        // Update project settings.
+        Route::group([
+            'prefix' => '{project}',
+            'middleware' => 'can:update,project',
+        ], function() {
+            Route::patch('/', [Project\ProjectController::class, 'update']);
+
+            Route::post('/image', [Project\ImageController::class, 'store']);
+            Route::delete('/image', [Project\ImageController::class, 'destroy']);
+        });
+
+        Route::get('/{project}', [Project\ProjectController::class, 'show'])->can('view', 'project');
+    });
 });

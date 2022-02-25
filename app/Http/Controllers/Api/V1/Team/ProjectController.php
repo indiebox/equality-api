@@ -30,7 +30,7 @@ class ProjectController extends Controller
     {
         $project = new Project($request->validated());
         $project->team()->associate($team);
-        $project->leader()->associate($request->user());
+        $project->leader()->associate(auth()->user());
         $project->save();
 
         return (new TeamProjectResource($project))->response()->setStatusCode(201);

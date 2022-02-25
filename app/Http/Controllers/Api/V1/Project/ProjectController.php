@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Project;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Project\UpdateProjectRequest;
+use App\Http\Resources\V1\Project\ProjectResource;
 use App\Models\Project;
 
 class ProjectController extends Controller
@@ -16,7 +17,7 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        //
+        return new ProjectResource($project);
     }
 
     /**
@@ -28,7 +29,9 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        //
+        $project->update($request->validated());
+
+        return new ProjectResource($project);
     }
 
     /**
@@ -39,6 +42,6 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        //
+        // TODO: implement this later
     }
 }
