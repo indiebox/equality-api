@@ -66,4 +66,55 @@ class LeaderNominationControllerTest extends TestCase
                 ])->interacted();
             });
     }
+
+    public function test_cant_nominate_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/1');
+
+        $response->assertForbidden();
+    }
+    public function test_cant_nominate_not_member_of_team()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        $nominated = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $nominated->id);
+
+        $response->assertForbidden();
+    }
+    public function test_can_nominate()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        $nominated = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $nominated->id);
+
+        $response->assertNoContent();
+        $this->assertDatabaseCount('leader_nominations', 1);
+
+        $nominated = User::factory()->hasAttached($team)->create();
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $nominated->id);
+
+        $response->assertNoContent();
+        $this->assertDatabaseCount('leader_nominations', 1);
+
+        Sanctum::actingAs($nominated);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $nominated->id);
+
+        $response->assertNoContent();
+        $this->assertDatabaseCount('leader_nominations', 2);
+    }
 }

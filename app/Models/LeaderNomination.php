@@ -27,6 +27,12 @@ class LeaderNomination extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'voter_id',
+        'project_id',
+        'nominated_id',
+    ];
+
     /*
     |-------------------------------------------------------------
     | Relationships

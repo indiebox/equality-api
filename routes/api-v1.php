@@ -109,7 +109,10 @@ Route::middleware(['auth', 'verified'])->group(function() {
         Route::group([
             'prefix' => '{project}/leader-nominations'
         ], function() {
-            Route::get('/', [Project\LeaderNominationController::class, 'index'])->can('viewAny', [LeaderNomination::class, 'project']);
+            Route::get('/', [Project\LeaderNominationController::class, 'index'])
+                ->can('viewAny', [LeaderNomination::class, 'project']);
+            Route::post('/{user}', [Project\LeaderNominationController::class, 'nominate'])
+                ->can('nominate', [LeaderNomination::class, 'project', 'user']);
         });
 
         // Update project settings.
