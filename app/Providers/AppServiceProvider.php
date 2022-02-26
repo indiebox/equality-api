@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Services\Contracts\Image\ImageService as ImageServiceContract;
+use App\Services\Contracts\Projects\LeaderService as LeaderServiceContract;
 use App\Services\Image\ImageService;
+use App\Services\Projects\LeaderService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -11,6 +13,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public $singletons = [
         ImageServiceContract::class => ImageService::class,
+        LeaderServiceContract::class => LeaderService::class
     ];
 
     /**

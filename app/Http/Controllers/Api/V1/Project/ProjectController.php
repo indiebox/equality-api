@@ -42,6 +42,6 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        // TODO: implement this later
+        //
     }
 }
