@@ -23,9 +23,7 @@ class TeamEventSubscriber
          * @var LeaderService
          */
         $leaderService = app(LeaderService::class);
-
-        $leaderService->deleteAssociatedNominations($event->user, $event->team);
-        $leaderService->recalculateProjectsLeaderInTeam($event->team);
+        $leaderService->deleteUserNominations($event->user, $event->team);
     }
 
     /**

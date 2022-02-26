@@ -8,22 +8,16 @@ use App\Models\User;
 
 interface LeaderService {
     /**
-     * Delete leader nominations for all projects of the team where voter or nominated user is user that leaves team.
+     * Delete leader nominations for all projects of the team where voter or nominated user
+     * is user that leaves team and determine new leaders for affected projects.
      * @param User $user
      * @param Team $team
      */
-    public function deleteAssociatedNominations(User $user, Team $team);
+    public function deleteUserNominations(User $user, Team $team);
 
     /**
-     * Recalculate the leader of the project.
+     * Determine the leader of the project.
      * @param Project $project
      */
-    public function recalculateProjectLeader(Project $project);
-
-    /**
-     * Recalculate the leader of the team projects.
-     * @param Team $team
-     * @return int The number of affected rows.
-     */
-    public function recalculateProjectsLeaderInTeam(Team $team);
+    public function determineLeader(Project $project);
 }

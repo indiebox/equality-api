@@ -42,7 +42,7 @@ class LeaderNominationController extends Controller
             ['nominated_id' => $user->id]
         );
 
-        $leaderService->recalculateProjectLeader($project);
+        $leaderService->determineLeader($project);
 
         return response('', 204);
     }

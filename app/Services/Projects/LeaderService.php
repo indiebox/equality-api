@@ -11,17 +11,36 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class LeaderService implements LeaderServiceContract {
-    public function deleteAssociatedNominations(User $user, Team $team)
+    public function deleteUserNominations(User $user, Team $team)
     {
-        $team->projectsLeaderNominations()
+        $nominations = $team->projectsLeaderNominations()
             ->where(function (Builder $query) use ($user) {
                 $query->where('voter_id', $user->id)
                     ->orWhere('nominated_id', $user->id);
-            })
-            ->delete();
+            });
+
+        $projects = $nominations->get(['project_id'])->pluck('project_id')->unique();
+
+        $nominations->delete();
+
+        // Calculate leader by leader nominations for affected projects.
+        $result = $team->projects()
+            ->whereIn('id', $projects)
+            ->orWhere('leader_id', $user->id)
+            ->update([
+                'leader_id' => $this->getSqlForGetNominationQuery(),
+            ]);
+
+        // Setup most older member of the team as leader of the projects
+        // if leader from nomination is null.
+        $team->projects()
+            ->whereNull('leader_id')
+            ->update(['leader_id' => $this->getSqlForGetMostOlderMember()]);
+
+        return $result;
     }
 
-    public function recalculateProjectLeader(Project $project)
+    public function determineLeader(Project $project)
     {
         $nomination = $this->constructGetNominationQuery($project->leaderNominations())->first();
 
@@ -31,22 +50,6 @@ class LeaderService implements LeaderServiceContract {
         } else {
             Project::where('id', $project->id)->update(['leader_id' => $this->getSqlForGetMostOlderMember()]);
         }
-    }
-
-    public function recalculateProjectsLeaderInTeam(Team $team)
-    {
-        // Calculate leader by leader nominations.
-        $result = $team->projects()->update([
-            'leader_id' => $this->getSqlForGetNominationQuery(),
-        ]);
-
-        // Setup most older member of the team as leader of the project
-        // if leader from nomination is null.
-        $team->projects()
-            ->whereNull('leader_id')
-            ->update(['leader_id' => $this->getSqlForGetMostOlderMember()]);
-
-        return $result;
     }
 
     protected function getSqlForGetNominationQuery()

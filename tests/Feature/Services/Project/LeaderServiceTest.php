@@ -37,28 +37,28 @@ class LeaderServiceTest extends TestCase
 
         // 1 - 0
         LeaderNomination::factory()->project($project)->voter($users[0])->nominated($projectCreator)->create();
-        $this->service->recalculateProjectLeader($project);
+        $this->service->determineLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $projectCreator->id);
 
         // 1 - 1, Project creator stays the leader.
         LeaderNomination::factory()->project($project)->voter($users[1])->nominated($users[1])->create();
-        $this->service->recalculateProjectLeader($project);
+        $this->service->determineLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $projectCreator->id);
 
         // 1 - 2, Other user becomes the leader.
         LeaderNomination::factory()->project($project)->voter($users[2])->nominated($users[1])->create();
-        $this->service->recalculateProjectLeader($project);
+        $this->service->determineLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $users[1]->id);
 
         // 2 - 2, Other user stays the leader.
         LeaderNomination::factory()->project($project)->voter($projectCreator)->nominated($projectCreator)->create();
-        $this->service->recalculateProjectLeader($project);
+        $this->service->determineLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $users[1]->id);
@@ -70,47 +70,25 @@ class LeaderServiceTest extends TestCase
         $users = User::factory(3)->hasAttached($team)->create();
         $project = Project::factory()->team($team)->leader($users[0])->create();
 
-        $this->service->recalculateProjectLeader($project);
+        $this->service->determineLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $oldMember->id);
     }
-    public function test_recalculate_projects_leader_in_team()
-    {
-        $users = User::factory(3)->create();
-        $team = Team::factory()->hasAttached($users, [], 'members')->create();
-        $project1 = Project::factory()->team($team)->leader($users[0])->create();
-        $project2 = Project::factory()->team($team)->leader($users[0])->create();
-
-        // Because this project does not have any leader nominations here,
-        // leader should be reset to first member of the team.
-        $project3 = Project::factory()->team($team)->leader($users[1])->create();
-
-        LeaderNomination::factory()->project($project1)->voter($users[1])->nominated($users[1])->create();
-        LeaderNomination::factory()->project($project1)->voter($users[2])->nominated($users[1])->create();
-        LeaderNomination::factory()->project($project2)->voter($users[1])->nominated($users[2])->create();
-        LeaderNomination::factory()->project($project2)->voter($users[2])->nominated($users[2])->create();
-        $this->service->recalculateProjectsLeaderInTeam($team);
-        $project1->refresh();
-        $project2->refresh();
-        $project3->refresh();
-
-        $this->assertEquals($project1->leader_id, $users[1]->id);
-        $this->assertEquals($project2->leader_id, $users[2]->id);
-        $this->assertEquals($project3->leader_id, $users[0]->id);
-    }
-    public function test_delete_associated_nominations()
+    public function test_delete_associated_nominations_and_detemine_new_leader()
     {
         $team = Team::factory()->create();
         $users = User::factory(3)->hasAttached($team)->create();
-        $project = Project::factory()->team($team)->create();
+        $project = Project::factory()->team($team)->leader($users[0])->create();
         LeaderNomination::factory()->project($project)->voter($users[0])->nominated($users[0])->create();
         LeaderNomination::factory()->project($project)->voter($users[1])->nominated($users[0])->create();
         LeaderNomination::factory()->project($project)->voter($users[2])->nominated($users[1])->create();
 
-        $this->service->deleteAssociatedNominations($users[0], $team);
+        $this->service->deleteUserNominations($users[0], $team);
 
         $this->assertDatabaseCount('leader_nominations', 1);
         $this->assertDatabaseHas('leader_nominations', ['voter_id' => $users[2]->id, 'nominated_id' => $users[1]->id]);
+        $project->refresh();
+        $this->assertEquals($project->leader_id, $users[1]->id);
     }
 }

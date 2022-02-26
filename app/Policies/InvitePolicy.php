@@ -32,6 +32,8 @@ class InvitePolicy
      */
     public function create(User $user, Team $team)
     {
+        // We load members here because we also use ->isMember() method
+        // in StoreInviteRequest.
         $team->load('members');
 
         return $team->isMember($user);
