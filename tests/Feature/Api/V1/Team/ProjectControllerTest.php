@@ -62,9 +62,12 @@ class ProjectControllerTest extends TestCase
 
         $response = $this->postJson('/api/v1/teams/' . $team->id . '/projects', $data);
 
+        $project = Project::find($response->json('data.id'));
+
         $response
             ->assertCreated()
-            ->assertJson((new TeamProjectResource(Project::first()))->response()->getData(true));
+            ->assertJson((new TeamProjectResource($project))->response()->getData(true));
         $this->assertDatabaseHas('projects', ['team_id' => $team->id, 'leader_id' => $user->id]);
+        $this->assertDatabaseHas('leader_nominations', ['project_id' => $project->id, 'voter_id' => $user->id, 'nominated_id' => $user->id]);
     }
 }
