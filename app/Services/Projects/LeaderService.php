@@ -23,7 +23,7 @@ class LeaderService implements LeaderServiceContract {
 
         $nominations->delete();
 
-        // Calculate leader by leader nominations for affected projects.
+        // Determine the new leader by nominations for affected projects.
         $result = $team->projects()
             ->whereIn('id', $projects)
             ->orWhere('leader_id', $user->id)
@@ -40,7 +40,7 @@ class LeaderService implements LeaderServiceContract {
         return $result;
     }
 
-    public function determineLeader(Project $project)
+    public function determineNewLeader(Project $project)
     {
         $nomination = $this->constructGetNominationQuery($project->leaderNominations())->first();
 

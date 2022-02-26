@@ -37,28 +37,28 @@ class LeaderServiceTest extends TestCase
 
         // 1 - 0
         LeaderNomination::factory()->project($project)->voter($users[0])->nominated($projectCreator)->create();
-        $this->service->determineLeader($project);
+        $this->service->determineNewLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $projectCreator->id);
 
         // 1 - 1, Project creator stays the leader.
         LeaderNomination::factory()->project($project)->voter($users[1])->nominated($users[1])->create();
-        $this->service->determineLeader($project);
+        $this->service->determineNewLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $projectCreator->id);
 
         // 1 - 2, Other user becomes the leader.
         LeaderNomination::factory()->project($project)->voter($users[2])->nominated($users[1])->create();
-        $this->service->determineLeader($project);
+        $this->service->determineNewLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $users[1]->id);
 
         // 2 - 2, Other user stays the leader.
         LeaderNomination::factory()->project($project)->voter($projectCreator)->nominated($projectCreator)->create();
-        $this->service->determineLeader($project);
+        $this->service->determineNewLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $users[1]->id);
@@ -70,7 +70,7 @@ class LeaderServiceTest extends TestCase
         $users = User::factory(3)->hasAttached($team)->create();
         $project = Project::factory()->team($team)->leader($users[0])->create();
 
-        $this->service->determineLeader($project);
+        $this->service->determineNewLeader($project);
         $project->refresh();
 
         $this->assertEquals($project->leader_id, $oldMember->id);

@@ -16,8 +16,8 @@ interface LeaderService {
     public function deleteUserNominations(User $user, Team $team);
 
     /**
-     * Determine the leader of the project.
+     * Determine the new leader of the project.
      * @param Project $project
      */
-    public function determineLeader(Project $project);
+    public function determineNewLeader(Project $project);
 }
