@@ -5,7 +5,7 @@ namespace App\Listeners\Api;
 use App\Events\Api\UserLeaveTeam;
 use App\Models\Team;
 use App\Services\Contracts\Image\ImageService;
-use Illuminate\Database\Eloquent\Builder;
+use App\Services\Contracts\Projects\LeaderService;
 
 class TeamEventSubscriber
 {
@@ -19,20 +19,13 @@ class TeamEventSubscriber
             return;
         }
 
-        // Delete leader nominations for all projects of the team where
-        // voter or nominated user is user that leaves team.
-        $event->team->projectsLeaderNominations()
-            ->where(function (Builder $query) use ($event) {
-                $query->where('voter_id', $event->user->id)
-                    ->orWhere('nominated_id', $event->user->id);
-            })
-            ->delete();
+        /**
+         * @var LeaderService
+         */
+        $leaderService = app(LeaderService::class);
 
-        // Clear leader for all projects of the team where
-        // leader is user that leaves team.
-        $event->team->projects()
-            ->where('leader_id', $event->user->id)
-            ->update(['leader_id' => null]);
+        $leaderService->deleteAssociatedNominations($event->user, $event->team);
+        $leaderService->recalculateProjectsLeaderInTeam($event->team);
     }
 
     /**

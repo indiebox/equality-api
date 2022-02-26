@@ -168,6 +168,37 @@ class TeamControllerTest extends TestCase
         $response->assertNoContent();
         $this->assertDatabaseCount('teams', 0);
     }
+    public function test_logo_deleted_after_team_deleting()
+    {
+        Storage::fake();
+
+        $team = Team::factory()->has(User::factory()->count(2), 'members')->create();
+        $user = User::all()->first();
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/v1/teams/' . $team->id . '/logo', ['logo' => UploadedFile::fake()->image('test.jpg')]);
+        $team->refresh();
+        Storage::assertExists($team->logo);
+
+        $this->assertDatabaseCount('teams', 1);
+
+        $response = $this->postJson('/api/v1/teams/' . $team->id . '/leave');
+
+        $response->assertNoContent();
+        Storage::assertExists($team->logo);
+
+        $user = User::all()->last();
+        Sanctum::actingAs($user);
+
+        $this->assertDatabaseCount('teams', 1);
+
+        $response = $this->postJson('/api/v1/teams/' . $team->id . '/leave');
+
+        $response->assertNoContent();
+        $this->assertDatabaseCount('teams', 0);
+        Storage::assertMissing($team->logo);
+    }
+
     public function test_associated_leader_nominations_deleted_after_user_leave_team()
     {
         $leavedTeam = Team::factory()->create();
@@ -199,51 +230,36 @@ class TeamControllerTest extends TestCase
             'nominated_id' => $user1->id,
         ]);
     }
-    public function test_project_leader_cleared_after_leader_leave_team()
+    public function test_leader_recalculates_after_leader_leave_team_by_nomination()
     {
-        $leavedTeam = Team::factory()->hasAttached(User::factory(2), [], 'members')->create();
-        $team = Team::factory()->hasAttached(User::factory(2), [], 'members')->create();
-        $user1 = User::factory()->hasAttached($leavedTeam)->hasAttached($team)->create();
-        $project1 = Project::factory()->team($leavedTeam)->leader($user1)->create();
-        $project2 = Project::factory()->team($team)->leader($user1)->create();
-        Sanctum::actingAs($user1);
+        $team = Team::factory()->create();
+        User::factory()->hasAttached($team)->create();
+        $users = User::factory(3)->hasAttached($team)->create();
+        $project = Project::factory()->team($team)->leader($users[0])->create();
+        LeaderNomination::factory()->project($project)->voter($users[0])->nominated($users[0])->create();
+        LeaderNomination::factory()->project($project)->voter($users[1])->nominated($users[1])->create();
+        Sanctum::actingAs($users[0]);
 
-        $response = $this->postJson('/api/v1/teams/' . $leavedTeam->id . '/leave');
+        $response = $this->postJson('/api/v1/teams/' . $team->id . '/leave');
 
         $response->assertNoContent();
-        $project1->refresh();
-        $project2->refresh();
-        $this->assertNull($project1->leader_id);
-        $this->assertEquals($project2->leader_id, $user1->id);
+        $project->refresh();
+
+        $this->assertEquals($project->leader_id, $users[1]->id);
     }
-    public function test_logo_deleted_after_team_deleting()
+    public function test_leader_recalculates_after_leader_leave_team_by_olders_member()
     {
-        Storage::fake();
-
-        $team = Team::factory()->has(User::factory()->count(2), 'members')->create();
-        $user = User::all()->first();
-        Sanctum::actingAs($user);
-
-        $this->postJson('/api/v1/teams/' . $team->id . '/logo', ['logo' => UploadedFile::fake()->image('test.jpg')]);
-        $team->refresh();
-        Storage::assertExists($team->logo);
-
-        $this->assertDatabaseCount('teams', 1);
+        $team = Team::factory()->create();
+        $oldMember = User::factory()->hasAttached($team)->create();
+        $users = User::factory(3)->hasAttached($team)->create();
+        $project = Project::factory()->team($team)->leader($users[0])->create();
+        Sanctum::actingAs($users[0]);
 
         $response = $this->postJson('/api/v1/teams/' . $team->id . '/leave');
 
         $response->assertNoContent();
-        Storage::assertExists($team->logo);
+        $project->refresh();
 
-        $user = User::all()->last();
-        Sanctum::actingAs($user);
-
-        $this->assertDatabaseCount('teams', 1);
-
-        $response = $this->postJson('/api/v1/teams/' . $team->id . '/leave');
-
-        $response->assertNoContent();
-        $this->assertDatabaseCount('teams', 0);
-        Storage::assertMissing($team->logo);
+        $this->assertEquals($project->leader_id, $oldMember->id);
     }
 }
