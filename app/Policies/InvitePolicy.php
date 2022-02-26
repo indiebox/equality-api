@@ -32,6 +32,8 @@ class InvitePolicy
      */
     public function create(User $user, Team $team)
     {
+        $team->load('members');
+
         return $team->isMember($user);
     }
 

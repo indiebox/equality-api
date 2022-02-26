@@ -37,6 +37,22 @@ class Project extends Model
 
     /*
     |-------------------------------------------------------------
+    | Methods
+    |-------------------------------------------------------------
+    */
+
+    public function isLeader($user) {
+        if ($user instanceof User) {
+            return $this->leader_id == $user->id;
+        } else if (is_numeric($user)) {
+            return $this->leader_id == $user;
+        } else {
+            return false;
+        }
+    }
+
+    /*
+    |-------------------------------------------------------------
     | Relationships
     |-------------------------------------------------------------
     */
