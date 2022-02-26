@@ -168,15 +168,16 @@ class TeamControllerTest extends TestCase
         $response->assertNoContent();
         $this->assertDatabaseCount('teams', 0);
     }
-    public function test_associated_leader_nominations_deleted_after_user_leave_team() {
+    public function test_associated_leader_nominations_deleted_after_user_leave_team()
+    {
         $leavedTeam = Team::factory()->create();
-        $project1 = Project::factory()->team($leavedTeam)->create();
-        $project2 = Project::factory()->team($leavedTeam)->create();
         $team = Team::factory()->create();
-        $project3 = Project::factory()->team($team)->create();
         $user1 = User::factory()->hasAttached($leavedTeam)->hasAttached($team)->create();
         $user2 = User::factory()->hasAttached($leavedTeam)->create();
         $user3 = User::factory()->hasAttached($leavedTeam)->create();
+        $project1 = Project::factory()->team($leavedTeam)->create();
+        $project2 = Project::factory()->team($leavedTeam)->create();
+        $project3 = Project::factory()->team($team)->create();
         LeaderNomination::factory()->project($project1)->voter($user1)->nominated($user2)->create();
         LeaderNomination::factory()->project($project1)->voter($user2)->nominated($user1)->create();
         LeaderNomination::factory()->project($project2)->voter($user3)->nominated($user3)->create();
@@ -197,6 +198,23 @@ class TeamControllerTest extends TestCase
             'voter_id' => $user1->id,
             'nominated_id' => $user1->id,
         ]);
+    }
+    public function test_project_leader_cleared_after_leader_leave_team()
+    {
+        $leavedTeam = Team::factory()->hasAttached(User::factory(2), [], 'members')->create();
+        $team = Team::factory()->hasAttached(User::factory(2), [], 'members')->create();
+        $user1 = User::factory()->hasAttached($leavedTeam)->hasAttached($team)->create();
+        $project1 = Project::factory()->team($leavedTeam)->leader($user1)->create();
+        $project2 = Project::factory()->team($team)->leader($user1)->create();
+        Sanctum::actingAs($user1);
+
+        $response = $this->postJson('/api/v1/teams/' . $leavedTeam->id . '/leave');
+
+        $response->assertNoContent();
+        $project1->refresh();
+        $project2->refresh();
+        $this->assertNull($project1->leader_id);
+        $this->assertEquals($project2->leader_id, $user1->id);
     }
     public function test_logo_deleted_after_team_deleting()
     {

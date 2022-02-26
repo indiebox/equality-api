@@ -27,6 +27,12 @@ class TeamEventSubscriber
                     ->orWhere('nominated_id', $event->user->id);
             })
             ->delete();
+
+        // Clear leader for all projects of the team where
+        // leader is user that leaves team.
+        $event->team->projects()
+            ->where('leader_id', $event->user->id)
+            ->update(['leader_id' => null]);
     }
 
     /**
