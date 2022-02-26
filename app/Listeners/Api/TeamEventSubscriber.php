@@ -5,6 +5,7 @@ namespace App\Listeners\Api;
 use App\Events\Api\UserLeaveTeam;
 use App\Models\Team;
 use App\Services\Image\Contracts\ImageServiceContract;
+use Illuminate\Database\Eloquent\Builder;
 
 class TeamEventSubscriber
 {
@@ -15,7 +16,17 @@ class TeamEventSubscriber
         // Delete the team if there are no members left.
         if (!$event->team->members()->exists()) {
             $event->team->delete();
+            return;
         }
+
+        // Delete leader nominations for all projects of the team where
+        // voter or nominated user is user that leaves team.
+        $event->team->projectsLeaderNominations()
+            ->where(function (Builder $query) use ($event) {
+                $query->where('voter_id', $event->user->id)
+                    ->orWhere('nominated_id', $event->user->id);
+            })
+            ->delete();
     }
 
     /**

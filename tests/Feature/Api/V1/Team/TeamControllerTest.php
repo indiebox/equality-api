@@ -3,6 +3,8 @@
 namespace Tests\Feature\Api\V1\Team;
 
 use App\Events\Api\UserLeaveTeam;
+use App\Models\LeaderNomination;
+use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -165,6 +167,36 @@ class TeamControllerTest extends TestCase
 
         $response->assertNoContent();
         $this->assertDatabaseCount('teams', 0);
+    }
+    public function test_associated_leader_nominations_deleted_after_user_leave_team() {
+        $leavedTeam = Team::factory()->create();
+        $project1 = Project::factory()->team($leavedTeam)->create();
+        $project2 = Project::factory()->team($leavedTeam)->create();
+        $team = Team::factory()->create();
+        $project3 = Project::factory()->team($team)->create();
+        $user1 = User::factory()->hasAttached($leavedTeam)->hasAttached($team)->create();
+        $user2 = User::factory()->hasAttached($leavedTeam)->create();
+        $user3 = User::factory()->hasAttached($leavedTeam)->create();
+        LeaderNomination::factory()->project($project1)->voter($user1)->nominated($user2)->create();
+        LeaderNomination::factory()->project($project1)->voter($user2)->nominated($user1)->create();
+        LeaderNomination::factory()->project($project2)->voter($user3)->nominated($user3)->create();
+        LeaderNomination::factory()->project($project3)->voter($user1)->nominated($user1)->create();
+        Sanctum::actingAs($user1);
+
+        $response = $this->postJson('/api/v1/teams/' . $leavedTeam->id . '/leave');
+
+        $response->assertNoContent();
+        $this->assertDatabaseCount('leader_nominations', 2);
+        $this->assertDatabaseHas('leader_nominations', [
+            'project_id' => $project2->id,
+            'voter_id' => $user3->id,
+            'nominated_id' => $user3->id,
+        ]);
+        $this->assertDatabaseHas('leader_nominations', [
+            'project_id' => $project3->id,
+            'voter_id' => $user1->id,
+            'nominated_id' => $user1->id,
+        ]);
     }
     public function test_logo_deleted_after_team_deleting()
     {
