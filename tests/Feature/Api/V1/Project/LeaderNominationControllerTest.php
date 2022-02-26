@@ -74,7 +74,7 @@ class LeaderNominationControllerTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/1');
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $user->id);
 
         $response->assertForbidden();
     }

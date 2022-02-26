@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Project\StoreImageRequest;
 use App\Http\Resources\V1\Project\ProjectResource;
 use App\Models\Project;
-use App\Services\Image\Contracts\ImageServiceContract;
+use App\Services\Contracts\Image\ImageService;
 
 class ImageController extends Controller
 {
     protected $image;
 
-    public function __construct(ImageServiceContract $imageService)
+    public function __construct(ImageService $imageService)
     {
         $this->image = $imageService;
     }

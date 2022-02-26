@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Services\Image\Contracts\ImageServiceContract;
+use App\Services\Contracts\Image\ImageService as ImageServiceContract;
 use App\Services\Image\ImageService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;

@@ -4,7 +4,7 @@ namespace App\Listeners\Api;
 
 use App\Events\Api\UserLeaveTeam;
 use App\Models\Team;
-use App\Services\Image\Contracts\ImageServiceContract;
+use App\Services\Contracts\Image\ImageService;
 use Illuminate\Database\Eloquent\Builder;
 
 class TeamEventSubscriber
@@ -40,7 +40,7 @@ class TeamEventSubscriber
      */
     public function handleTeamDeleting($team) {
         // Delete resources associated with team.
-        $imageService = app(ImageServiceContract::class);
+        $imageService = app(ImageService::class);
         $imageService->delete($team->logo);
     }
 

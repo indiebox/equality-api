@@ -40,6 +40,8 @@ class LeaderNominationController extends Controller
             ['nominated_id' => $user->id]
         );
 
+        // TODO: update current leader for project.
+
         return response('', 204);
     }
 }
