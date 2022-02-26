@@ -117,4 +117,43 @@ class LeaderNominationControllerTest extends TestCase
         $response->assertNoContent();
         $this->assertDatabaseCount('leader_nominations', 2);
     }
+    public function test_leader_recalculates_after_user_nominating()
+    {
+        $team = Team::factory()->create();
+        $users = User::factory(3)->hasAttached($team)->create();
+        $project = Project::factory()->team($team)->leader($users[0])->create();
+        Sanctum::actingAs($users[0]);
+
+        // 1(user[1]) - 0(user[0])
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $users[1]->id);
+
+        $response->assertNoContent();
+        $project->refresh();
+        $this->assertEquals($project->leader_id, $users[1]->id);
+
+        // 1(user[2]) - 0(user[1])
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $users[2]->id);
+
+        $response->assertNoContent();
+        $project->refresh();
+        $this->assertEquals($project->leader_id, $users[2]->id);
+
+        Sanctum::actingAs($users[1]);
+
+        // 1(user[2]) - 1(user[1])
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $users[1]->id);
+
+        $response->assertNoContent();
+        $project->refresh();
+        $this->assertEquals($project->leader_id, $users[2]->id);
+
+        Sanctum::actingAs($users[0]);
+
+        // 1(user[2]) - 2(user[1])
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $users[1]->id);
+
+        $response->assertNoContent();
+        $project->refresh();
+        $this->assertEquals($project->leader_id, $users[1]->id);
+    }
 }
