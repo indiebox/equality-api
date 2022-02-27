@@ -30,7 +30,7 @@ Another number is the maximum number of errors that will be shown.
     @endif
 
     @if($hasErrors)
-        @foreach ($errors->default->get($name) as $error)
+        @foreach($errors->default->get($name) as $error)
             @if($loop->iteration <= $errorsNumber || $errorsNumber == -1)
                 <div class="mdc-text-field-helper-text
                  mdc-text-field-helper-text--persistent

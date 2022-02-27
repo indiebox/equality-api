@@ -3,8 +3,8 @@
 namespace Tests\Feature\Console\Commands;
 
 use App\Models\User;
-use Artisan;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
 class DeleteUnverifiedUsersTest extends TestCase

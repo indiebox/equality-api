@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth;
-use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\Project;
+use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
 use App\Models\Invite;
+use Illuminate\Support\Facades\Route;
 
 /*
 |-------------------------------------------------------------
