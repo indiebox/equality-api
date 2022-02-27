@@ -12,8 +12,20 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+    }
 
+    /**
+     * Boot the testing helper traits.
+     *
+     * @return array
+     */
+    protected function setUpTraits()
+    {
+        // We migrate our database before setuping other traits,
+        // so database migration will not be included in transactions that are used by traits.
         $this->setupDatabase();
+
+        return parent::setUpTraits();
     }
 
     /**
