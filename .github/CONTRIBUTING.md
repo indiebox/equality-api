@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing to Equality! Please take a moment to review this document **before submitting a pull request**.
 
-**This repository is responsible only for **Equality** API.**
+**This repository is responsible only for Equality API.**
 
 If you want to add a request to change the Applications-related functionality, like UI/UX changes, go to [Equality Desktop repository](https://github.com/indiebox/equality-desktop).
 
