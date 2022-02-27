@@ -25,7 +25,7 @@ Route::view('/', 'welcome');
 Route::group([
     'prefix' => '/register',
     'as' => 'register.',
-], function() {
+], function () {
     Route::get('/', [Auth\RegisteredUserController::class, 'create'])->name('create');
     Route::post('/', [Auth\RegisteredUserController::class, 'store'])->name('store');
 });

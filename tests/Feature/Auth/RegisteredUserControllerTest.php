@@ -13,7 +13,8 @@ class RegisteredUserControllerTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_can_see_form() {
+    public function test_can_see_form()
+    {
         $response = $this->get('/register');
 
         $response
@@ -32,7 +33,7 @@ class RegisteredUserControllerTest extends TestCase
             config('recaptcha.field_name') => 'fake',
         ];
 
-        Http::fake(function() {
+        Http::fake(function () {
             $fakeData = [
                 'success' => true,
             ];

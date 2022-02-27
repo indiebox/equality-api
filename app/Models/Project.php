@@ -39,11 +39,13 @@ class Project extends Model
     |-------------------------------------------------------------
     */
 
-    public function leader() {
+    public function leader()
+    {
         return $this->belongsTo(User::class, 'leader_id');
     }
 
-    public function team() {
+    public function team()
+    {
         return $this->belongsTo(Team::class);
     }
 }

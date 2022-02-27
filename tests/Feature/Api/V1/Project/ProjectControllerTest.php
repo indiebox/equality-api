@@ -68,7 +68,8 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new ProjectResource(Project::first()))->response()->getData(true));;
+            ->assertJson((new ProjectResource(Project::first()))->response()->getData(true));
+        ;
         $this->assertDatabaseHas('projects', $data);
     }
 }

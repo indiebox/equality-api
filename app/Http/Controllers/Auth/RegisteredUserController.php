@@ -9,11 +9,13 @@ use Illuminate\Auth\Events\Registered;
 
 class RegisteredUserController extends Controller
 {
-    public function create() {
+    public function create()
+    {
         return view('auth.register');
     }
 
-    public function store(RegisterUserRequest $request) {
+    public function store(RegisterUserRequest $request)
+    {
         $request->ensureIsNotRateLimited();
 
         $user = User::create($request->validated());

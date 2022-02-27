@@ -7,7 +7,8 @@ use App\Http\Resources\V1\User\UserResource;
 
 class UserController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         return new UserResource(auth()->user());
     }
 }

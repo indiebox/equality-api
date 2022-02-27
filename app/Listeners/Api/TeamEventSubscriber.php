@@ -11,7 +11,8 @@ class TeamEventSubscriber
     /**
      * Handle user leave events.
      */
-    public function handleUserLeave(UserLeaveTeam $event) {
+    public function handleUserLeave(UserLeaveTeam $event)
+    {
         // Delete the team if there are no members left.
         if (!$event->team->members()->exists()) {
             $event->team->delete();
@@ -21,7 +22,8 @@ class TeamEventSubscriber
     /**
      * Handle team deleting events.
      */
-    public function handleTeamDeleting($team) {
+    public function handleTeamDeleting($team)
+    {
         // Delete resources associated with team.
         $imageService = app(ImageServiceContract::class);
         $imageService->delete($team->logo);

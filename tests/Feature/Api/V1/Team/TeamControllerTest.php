@@ -63,7 +63,8 @@ class TeamControllerTest extends TestCase
 
         $response->assertForbidden();
     }
-    public function test_can_view_members() {
+    public function test_can_view_members()
+    {
         $teamId = Team::factory()->has(User::factory(), 'members')->create()->id;
         $user = User::first();
         Sanctum::actingAs($user);

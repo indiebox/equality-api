@@ -12,7 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function login(LoginUserRequest $request) {
+    public function login(LoginUserRequest $request)
+    {
         $request->ensureIsNotRateLimited();
 
         $data = $request->validated();
@@ -36,7 +37,8 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         $request->user()->currentAccessToken()->delete();
 
         return response('', 204);

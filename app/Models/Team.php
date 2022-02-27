@@ -44,7 +44,8 @@ class Team extends Model
     |-------------------------------------------------------------
     */
 
-    public function isMember($user) {
+    public function isMember($user)
+    {
         if ($this->relationLoaded('members')) {
             return $this->members->contains($user);
         }
@@ -58,9 +59,10 @@ class Team extends Model
         return $this->members()->wherePivot('user_id', $key)->exists();
     }
 
-    public function creator() {
+    public function creator()
+    {
         if ($this->relationLoaded('members')) {
-            return $this->members->first(function($member) {
+            return $this->members->first(function ($member) {
                 return $member->pivot->is_creator;
             });
         }
@@ -74,17 +76,20 @@ class Team extends Model
     |-------------------------------------------------------------
     */
 
-    public function projects() {
+    public function projects()
+    {
         return $this->hasMany(Project::class);
     }
 
-    public function members() {
+    public function members()
+    {
         return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id')
             ->withTimestamps('joined_at')
             ->withPivot('is_creator');
     }
 
-    public function invites() {
+    public function invites()
+    {
         return $this->hasMany(Invite::class);
     }
 }

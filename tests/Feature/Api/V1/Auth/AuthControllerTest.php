@@ -79,7 +79,8 @@ class AuthControllerTest extends TestCase
         $this->assertDatabaseCount('personal_access_tokens', 2);
     }
 
-    public function test_can_logout() {
+    public function test_can_logout()
+    {
         User::factory()->create(['email' => 'test@mail.ru', 'password' => '123456']);
         $data = [
             'email' => 'test@mail.ru',

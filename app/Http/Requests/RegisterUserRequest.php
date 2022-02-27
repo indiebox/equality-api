@@ -27,7 +27,7 @@ class RegisterUserRequest extends FormRequest
             'name' => ['required', 'string', 'between:2,50'],
             'email' => ['required', 'email', 'max:128', 'unique:users'],
             'password' => ['required', 'confirmed', Password::default()],
-            config('recaptcha.field_name') => [new ValidRecaptcha],
+            config('recaptcha.field_name') => [new ValidRecaptcha()],
         ];
     }
 

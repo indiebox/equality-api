@@ -19,8 +19,9 @@ class InviteFactory extends Factory
     /** Indicate that the invite should be accepted.
      * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function accepted() {
-        return $this->state(function(array $attributes) {
+    public function accepted()
+    {
+        return $this->state(function (array $attributes) {
             return [
                 'accepted_at' => now(),
             ];
@@ -30,8 +31,9 @@ class InviteFactory extends Factory
     /** Indicate that the invite should be declined.
      * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function declined() {
-        return $this->state(function(array $attributes) {
+    public function declined()
+    {
+        return $this->state(function (array $attributes) {
             return [
                 'declined_at' => now(),
             ];
@@ -42,7 +44,8 @@ class InviteFactory extends Factory
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
      * @return static
      */
-    public function inviter($user) {
+    public function inviter($user)
+    {
         return $this->for($user, 'inviter');
     }
 
@@ -50,7 +53,8 @@ class InviteFactory extends Factory
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
      * @return static
      */
-    public function invited($user) {
+    public function invited($user)
+    {
         return $this->for($user, 'invited');
     }
 
@@ -58,7 +62,8 @@ class InviteFactory extends Factory
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
      * @return static
      */
-    public function team($team) {
+    public function team($team)
+    {
         return $this->for($team);
     }
 }

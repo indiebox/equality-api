@@ -35,7 +35,9 @@ class ImageControllerTest extends TestCase
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/v1/projects/' . $project->id . '/image', ['image' => UploadedFile::fake()->image('test.jpg')]);
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/image', [
+            'image' => UploadedFile::fake()->image('test.jpg')
+        ]);
 
         $response->assertOk();
         $project->refresh();
