@@ -1,0 +1,3 @@
+{
+    "preset": "App\\Support\\Linting\\LaravelPreset"
+}

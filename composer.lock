@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5e4170f117dbb1482c732b277dfade09",
+    "content-hash": "d251ee97f13577f9b8f22d57efd5c0e7",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -9779,6 +9779,60 @@
                 }
             ],
             "time": "2021-07-28T10:34:58+00:00"
+        },
+        {
+            "name": "tightenco/tlint",
+            "version": "v6.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tighten/tlint.git",
+                "reference": "c9d53ef9e20d5dccb027dba3edd07745675916a0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tighten/tlint/zipball/c9d53ef9e20d5dccb027dba3edd07745675916a0",
+                "reference": "c9d53ef9e20d5dccb027dba3edd07745675916a0",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/view": "*",
+                "nikic/php-parser": "^4.12",
+                "php": ">=7.3",
+                "symfony/console": "^4.4.30 || ^5.3.7 || ^6.0",
+                "symfony/process": "^4.3 || ^5.0 || ^6.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.1",
+                "phpunit/phpunit": "^9.3",
+                "symfony/var-dumper": "^5.3"
+            },
+            "bin": [
+                "bin/tlint"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tighten\\TLint\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Logan Henson",
+                    "email": "logan@loganhenson.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Tighten linter for Laravel conventions",
+            "homepage": "https://github.com/tighten/tlint",
+            "support": {
+                "issues": "https://github.com/tighten/tlint/issues",
+                "source": "https://github.com/tighten/tlint/tree/v6.2.1"
+            },
+            "time": "2021-11-12T16:22:12+00:00"
         }
     ],
     "aliases": [],

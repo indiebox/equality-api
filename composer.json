@@ -23,7 +23,8 @@
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^5.10",
         "phpunit/phpunit": "^9.5.10",
-        "squizlabs/php_codesniffer": "^3.6"
+        "squizlabs/php_codesniffer": "^3.6",
+        "tightenco/tlint": "^6.2"
     },
     "autoload": {
         "psr-4": {
@@ -41,8 +42,23 @@
         }
     },
     "scripts": {
+        "test": [
+            "@php artisan test --parallel",
+            "@lint-fix",
+            "@lint"
+        ],
+        "lint": [
+            "@tlint",
+            "@phpcs"
+        ],
+        "lint-fix": [
+            "@tlint-fix",
+            "@phpcs-fix"
+        ],
         "phpcs": "@php vendor/bin/phpcs",
         "phpcs-fix": "@php vendor/bin/phpcbf",
+        "tlint": "@php vendor/bin/tlint",
+        "tlint-fix": "@tlint format",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
