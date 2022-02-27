@@ -66,6 +66,26 @@ jobs:
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: vendor/bin/phpunit
 
+  code-style:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+      with:
+        php-version: ${{ env.PHP_VERSION }}
+
+    - uses: actions/setup-node@v2.4.1
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    - uses: mikeal/npx@1.0.0
+
+    - uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        npm install
+
     - name: Code style (PhpCS)
       if: always()
       run:
