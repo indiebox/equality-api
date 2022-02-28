@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<ruleset name="Custom Standard">
+    <!--
+        You can hard-code command line values into your custom standard.
+        Note that this does not work for the command line values:
+        -v[v][v], -l, -d, etc.
+
+        The following tags are equivalent to the command line arguments:
+        extensions=php,inc report=summary colors -sp
+    -->
+    <!-- <arg name="basepath" value="." /> -->
+
+    <!--
+        If no files or directories are specified on the command line
+        your custom standard can specify what files should be checked
+        instead.
+
+        Note that file and directory paths specified in a ruleset are
+        relative to the ruleset's location, and that specifying any file or
+        directory path on the command line will ignore all file tags.
+    -->
+    <file>./app</file>
+    <file>./config</file>
+    <file>./database</file>
+    <file>./routes</file>
+    <file>./tests</file>
+
+    <!--
+        Include all sniffs in the PSR12 standard except few. Note that
+        the name of the sniff being excluded is the code that the sniff
+        is given by PHP_CodeSniffer and is based on the file name and
+        path of the sniff class. You can display these codes using the
+        -s command line argument when checking a file.
+    -->
+    <rule ref="PSR12">
+        <!-- Disable rule for Traits in column -->
+        <exclude name="PSR12.Traits.UseDeclaration" />
+
+        <!-- Disable EOL -->
+        <exclude name="Generic.Files.LineEndings" />
+    </rule>
+
+    <!--
+        You can hard-code ignore patterns for specific sniffs,
+        a feature not available on the command line. Please note that
+        all sniff-specific ignore patterns are checked using absolute paths.
+
+        The code here will hide all messages from the PSR1 CamelCapsMethodName
+        sniff for files that match either of the exclude patterns.
+    -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName">
+        <!-- Methods in tests not in camel case -->
+        <exclude-pattern>tests/*</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR1.Classes.ClassDeclaration">
+        <!-- Allow define migrations without namespace -->
+        <exclude-pattern>database/migrations/*</exclude-pattern>
+    </rule>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="130" />
+            <property name="ignoreComments" value="true" />
+        </properties>
+    </rule>
+</ruleset>

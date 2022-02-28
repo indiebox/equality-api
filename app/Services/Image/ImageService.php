@@ -9,8 +9,10 @@ use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 use Intervention\Image\Image as ImageInstance;
 
-class ImageService implements ImageServiceContract {
-    public function save(UploadedFile $file, $directory, $name = null) {
+class ImageService implements ImageServiceContract
+{
+    public function save(UploadedFile $file, $directory, $name = null)
+    {
         Storage::makeDirectory($directory);
 
         $fileName = $name ?: $this->generateName($file);
@@ -22,11 +24,13 @@ class ImageService implements ImageServiceContract {
         return $path;
     }
 
-    public function delete($path) {
+    public function delete($path)
+    {
         return Storage::delete($path);
     }
 
-    protected function stripImage(ImageInstance $img) {
+    protected function stripImage(ImageInstance $img)
+    {
         $img->getCore()->stripImage();
         $img->encode(null, 80);
 

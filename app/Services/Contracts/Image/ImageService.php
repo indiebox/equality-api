@@ -4,7 +4,8 @@ namespace App\Services\Contracts\Image;
 
 use Illuminate\Http\UploadedFile;
 
-interface ImageService {
+interface ImageService
+{
     /** Save uploaded image to the storage.
      * @param UploadedFile $file
      * @param string $directory The directory for saving the image.

@@ -17,7 +17,8 @@ class ImageController extends Controller
         $this->image = $imageService;
     }
 
-    public function store(StoreImageRequest $request, Project $project) {
+    public function store(StoreImageRequest $request, Project $project)
+    {
         $directory = "projects/images/" . date('m.Y');
 
         $path = $this->image->save($request->file('image'), $directory);
@@ -29,7 +30,8 @@ class ImageController extends Controller
         return new ProjectResource($project);
     }
 
-    public function destroy(Project $project) {
+    public function destroy(Project $project)
+    {
         if ($this->image->delete($project->image)) {
             $project->image = null;
             $project->save();

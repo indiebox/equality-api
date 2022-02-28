@@ -31,7 +31,8 @@ class EnsureEmailIsVerified extends BaseMiddleware
         return $next($request);
     }
 
-    protected function needVerification($request) {
+    protected function needVerification($request)
+    {
         return !$request->user() ||
             ($request->user() instanceof MustVerifyEmail && !$request->user()->hasVerifiedEmail());
     }

@@ -23,7 +23,8 @@ class ProjectFactory extends Factory
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
      * @return static
      */
-    public function leader($user) {
+    public function leader($user)
+    {
         return $this->for($user, 'leader');
     }
 
@@ -31,7 +32,8 @@ class ProjectFactory extends Factory
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $team
      * @return static
      */
-    public function team($team) {
+    public function team($team)
+    {
         return $this->for($team);
     }
 }

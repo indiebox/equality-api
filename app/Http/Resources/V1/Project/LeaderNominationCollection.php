@@ -24,7 +24,7 @@ class LeaderNominationCollection extends ResourceCollection
     {
         $result = collect();
 
-        foreach($this->collection as $nomination) {
+        foreach ($this->collection as $nomination) {
             $result->add([
                 'nominated' => new UserResource($nomination->first()->nominated),
                 'count' => $nomination->count(),

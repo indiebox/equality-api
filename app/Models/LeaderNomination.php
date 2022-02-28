@@ -39,15 +39,18 @@ class LeaderNomination extends Model
     |-------------------------------------------------------------
     */
 
-    public function project() {
+    public function project()
+    {
         return $this->belongsTo(Project::class);
     }
 
-    public function voter() {
+    public function voter()
+    {
         return $this->belongsTo(User::class, 'voter_id');
     }
 
-    public function nominated() {
+    public function nominated()
+    {
         return $this->belongsTo(User::class, 'nominated_id');
     }
 }

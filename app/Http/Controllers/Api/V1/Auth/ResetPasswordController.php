@@ -26,7 +26,7 @@ class ResetPasswordController extends Controller
             $request->only('email')
         );
 
-        switch($status) {
+        switch ($status) {
             case Password::RESET_LINK_SENT:
                 return response([
                     'message' => __($status),
@@ -63,7 +63,7 @@ class ResetPasswordController extends Controller
             }
         );
 
-        switch($status) {
+        switch ($status) {
             case Password::PASSWORD_RESET:
                 return response([
                     'message' => __($status),

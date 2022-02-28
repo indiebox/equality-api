@@ -57,14 +57,16 @@ class LoginUserRequest extends FormRequest
     /**
      * Hit rate limit attempt for the request.
      */
-    public function hitAttempt() {
+    public function hitAttempt()
+    {
         RateLimiter::hit($this->throttleKey());
     }
 
     /**
      * Clear rate limit attempts for the request.
      */
-    public function clearAttempts() {
+    public function clearAttempts()
+    {
         RateLimiter::clear($this->throttleKey());
     }
 
@@ -75,6 +77,6 @@ class LoginUserRequest extends FormRequest
      */
     protected function throttleKey()
     {
-        return Str::lower($this->input('email')).'|'.$this->ip();
+        return Str::lower($this->input('email')) . '|' . $this->ip();
     }
 }

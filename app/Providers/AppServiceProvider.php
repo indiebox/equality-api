@@ -13,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public $singletons = [
         ImageServiceContract::class => ImageService::class,
-        LeaderServiceContract::class => LeaderService::class
+        LeaderServiceContract::class => LeaderService::class,
     ];
 
     /**
@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         // Setup default password rule.
-        Password::defaults(function() {
+        Password::defaults(function () {
             $rule = Password::min(6);
 
             return $this->app->isProduction()

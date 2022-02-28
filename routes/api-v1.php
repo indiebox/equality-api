@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth;
-use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\Project;
+use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
 use App\Models\Invite;
 use App\Models\LeaderNomination;
+use Illuminate\Support\Facades\Route;
 
 /*
 |-------------------------------------------------------------
@@ -17,7 +17,7 @@ use App\Models\LeaderNomination;
 Route::post('/login', [Auth\AuthController::class, 'login']);
 Route::post('/forgot-password', [Auth\ResetPasswordController::class, 'send']);
 Route::post('/reset-password', [Auth\ResetPasswordController::class, 'reset']);
-Route::middleware('auth')->group(function() {
+Route::middleware('auth')->group(function () {
     Route::post('/logout', [Auth\AuthController::class, 'logout']);
     Route::post('/verify-email/send', Auth\SendEmailVerificationLinkController::class)
         ->middleware(['throttle:mail_verification']);
@@ -29,14 +29,14 @@ Route::middleware('auth')->group(function() {
 |-------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'verified'])->group(function() {
+Route::middleware(['auth', 'verified'])->group(function () {
     /*
     |-------------------------------------------------------------
     | User actions.
     |-------------------------------------------------------------
     */
 
-    Route::prefix('user')->group(function() {
+    Route::prefix('user')->group(function () {
         Route::get('/', [User\UserController::class, 'index'])->withoutMiddleware('verified');
     });
 
@@ -46,7 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
     |-------------------------------------------------------------
     */
 
-    Route::prefix('teams')->group(function() {
+    Route::prefix('teams')->group(function () {
         Route::get('/', [Team\TeamController::class, 'index']);
         Route::post('/', [Team\TeamController::class, 'store']);
         Route::post('{team}/leave', [Team\TeamController::class, 'leave'])->can('leave', 'team');
@@ -54,7 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
         // Projects.
         Route::group([
             'prefix' => '{team}/projects',
-        ], function() {
+        ], function () {
             Route::get('/', [Team\ProjectController::class, 'index'])->can('viewAny', [Project::class, 'team']);
             Route::post('/', [Team\ProjectController::class, 'store'])->can('create', [Project::class, 'team']);
         });
@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
         // Invites.
         Route::group([
             'prefix' => '{team}/invites',
-        ], function() {
+        ], function () {
             Route::get('/', [Team\InviteController::class, 'index'])->can('viewAny', [Invite::class, 'team']);
             Route::post('/', [Team\InviteController::class, 'store'])->can('create', [Invite::class, 'team']);
         });
@@ -71,7 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
         Route::group([
             'prefix' => '{team}',
             'middleware' => 'can:update,team',
-        ], function() {
+        ], function () {
             Route::patch('/', [Team\TeamController::class, 'update']);
 
             Route::post('/logo', [Team\LogoController::class, 'store']);
@@ -88,10 +88,10 @@ Route::middleware(['auth', 'verified'])->group(function() {
     |-------------------------------------------------------------
     */
 
-    Route::prefix('invites')->group(function() {
+    Route::prefix('invites')->group(function () {
         Route::get('/', [User\InviteController::class, 'index']);
 
-        Route::prefix('/{pendingInvite}')->group(function() {
+        Route::prefix('/{pendingInvite}')->group(function () {
             Route::post('/accept', [User\InviteController::class, 'accept'])->can('accept', 'pendingInvite');
             Route::post('/decline', [User\InviteController::class, 'decline'])->can('decline', 'pendingInvite');
             Route::delete('/', [Team\InviteController::class, 'destroy'])->can('delete', 'pendingInvite');
@@ -104,11 +104,11 @@ Route::middleware(['auth', 'verified'])->group(function() {
     |-------------------------------------------------------------
     */
 
-    Route::prefix('projects')->group(function() {
+    Route::prefix('projects')->group(function () {
         // Leader nominations.
         Route::group([
-            'prefix' => '{project}/leader-nominations'
-        ], function() {
+            'prefix' => '{project}/leader-nominations',
+        ], function () {
             Route::get('/', [Project\LeaderNominationController::class, 'index'])
                 ->can('viewAny', [LeaderNomination::class, 'project']);
             Route::post('/{user}', [Project\LeaderNominationController::class, 'nominate'])
@@ -119,7 +119,7 @@ Route::middleware(['auth', 'verified'])->group(function() {
         Route::group([
             'prefix' => '{project}',
             'middleware' => 'can:update,project',
-        ], function() {
+        ], function () {
             Route::patch('/', [Project\ProjectController::class, 'update']);
 
             Route::post('/image', [Project\ImageController::class, 'store']);

@@ -58,7 +58,8 @@ class InvitePolicy
      * @param  \App\Models\Invite  $invite
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function accept(User $user, Invite $invite) {
+    public function accept(User $user, Invite $invite)
+    {
         return $invite->invited_id == $user->id;
     }
 
@@ -69,7 +70,8 @@ class InvitePolicy
      * @param  \App\Models\Invite  $invite
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function decline(User $user, Invite $invite) {
+    public function decline(User $user, Invite $invite)
+    {
         return $invite->invited_id == $user->id;
     }
 }

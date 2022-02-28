@@ -64,7 +64,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->by(auth()->id() ?: $request->ip());
         });
 
-        RateLimiter::for('mail_verification', function(Request $request) {
+        RateLimiter::for('mail_verification', function (Request $request) {
             return Limit::perMinute(5)
                 ->by(auth()->id());
         });

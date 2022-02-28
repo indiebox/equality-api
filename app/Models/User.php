@@ -75,7 +75,8 @@ class User extends Authenticatable implements MustVerifyEmail
     |-------------------------------------------------------------
     */
 
-    public function sendPasswordResetNotification($token) {
+    public function sendPasswordResetNotification($token)
+    {
         $this->notify(new ResetPasswordNotification($token));
     }
 
@@ -85,7 +86,8 @@ class User extends Authenticatable implements MustVerifyEmail
     |-------------------------------------------------------------
     */
 
-    public function setPasswordAttribute($password) {
+    public function setPasswordAttribute($password)
+    {
         $this->attributes['password'] = Hash::make($password);
     }
 
@@ -95,7 +97,8 @@ class User extends Authenticatable implements MustVerifyEmail
     |-------------------------------------------------------------
     */
 
-    public function scopeUnverified(Builder $query) {
+    public function scopeUnverified(Builder $query)
+    {
         return $query->whereNull('email_verified_at');
     }
 
@@ -105,13 +108,15 @@ class User extends Authenticatable implements MustVerifyEmail
     |-------------------------------------------------------------
     */
 
-    public function teams() {
+    public function teams()
+    {
         return $this->belongsToMany(Team::class)
             ->withTimestamps('joined_at')
             ->withPivot('is_creator');
     }
 
-    public function invites() {
+    public function invites()
+    {
         return $this->hasMany(Invite::class, 'invited_id')->onlyPending();
     }
 }

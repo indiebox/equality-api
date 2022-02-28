@@ -68,6 +68,10 @@ class ProjectControllerTest extends TestCase
             ->assertCreated()
             ->assertJson((new TeamProjectResource($project))->response()->getData(true));
         $this->assertDatabaseHas('projects', ['team_id' => $team->id, 'leader_id' => $user->id]);
-        $this->assertDatabaseHas('leader_nominations', ['project_id' => $project->id, 'voter_id' => $user->id, 'nominated_id' => $user->id]);
+        $this->assertDatabaseHas('leader_nominations', [
+            'project_id' => $project->id,
+            'voter_id' => $user->id,
+            'nominated_id' => $user->id,
+        ]);
     }
 }

@@ -22,7 +22,8 @@ class LeaderNominationFactory extends Factory
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
      * @return static
      */
-    public function nominated($user) {
+    public function nominated($user)
+    {
         return $this->for($user, 'nominated');
     }
 
@@ -30,7 +31,8 @@ class LeaderNominationFactory extends Factory
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
      * @return static
      */
-    public function voter($user) {
+    public function voter($user)
+    {
         return $this->for($user, 'voter');
     }
 
@@ -38,7 +40,8 @@ class LeaderNominationFactory extends Factory
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $project
      * @return static
      */
-    public function project($project) {
+    public function project($project)
+    {
         return $this->for($project);
     }
 }

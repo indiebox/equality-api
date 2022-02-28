@@ -17,7 +17,8 @@ class LogoController extends Controller
         $this->image = $imageService;
     }
 
-    public function store(StoreLogoRequest $request, Team $team) {
+    public function store(StoreLogoRequest $request, Team $team)
+    {
         $directory = "teams/logos/" . date('m.Y');
 
         $path = $this->image->save($request->file('logo'), $directory);
@@ -29,7 +30,8 @@ class LogoController extends Controller
         return new TeamResource($team);
     }
 
-    public function destroy(Team $team) {
+    public function destroy(Team $team)
+    {
         if ($this->image->delete($team->logo)) {
             $team->logo = null;
             $team->save();

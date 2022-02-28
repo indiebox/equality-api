@@ -49,7 +49,8 @@ class Invite extends Model
     |-------------------------------------------------------------
     */
 
-    public function getStatus() {
+    public function getStatus()
+    {
         if ($this->accepted_at == null && $this->declined_at == null) {
             return self::STATUS_PENDING;
         }
@@ -69,28 +70,32 @@ class Invite extends Model
     |-------------------------------------------------------------
     */
 
-    public function scopeFilterByStatus(Builder $query, $status) {
+    public function scopeFilterByStatus(Builder $query, $status)
+    {
         return $query
-            ->when($status == self::STATUS_PENDING, function($query) {
+            ->when($status == self::STATUS_PENDING, function ($query) {
                 return $query->onlyPending();
-            })->when($status == self::STATUS_ACCEPTED, function($query) {
+            })->when($status == self::STATUS_ACCEPTED, function ($query) {
                 return $query->onlyAccepted();
-            })->when($status == self::STATUS_DECLINED, function($query) {
+            })->when($status == self::STATUS_DECLINED, function ($query) {
                 return $query->onlyDeclined();
             });
     }
 
-    public function scopeOnlyPending(Builder $query) {
+    public function scopeOnlyPending(Builder $query)
+    {
         return $query
             ->whereNull('accepted_at')
             ->whereNull('declined_at');
     }
 
-    public function scopeOnlyAccepted(Builder $query) {
+    public function scopeOnlyAccepted(Builder $query)
+    {
         return $query->whereNotNull('accepted_at');
     }
 
-    public function scopeOnlyDeclined(Builder $query) {
+    public function scopeOnlyDeclined(Builder $query)
+    {
         return $query->whereNotNull('declined_at');
     }
 
@@ -100,15 +105,18 @@ class Invite extends Model
     |-------------------------------------------------------------
     */
 
-    public function inviter() {
+    public function inviter()
+    {
         return $this->belongsTo(User::class, 'inviter_id');
     }
 
-    public function invited() {
+    public function invited()
+    {
         return $this->belongsTo(User::class, 'invited_id');
     }
 
-    public function team() {
+    public function team()
+    {
         return $this->belongsTo(Team::class);
     }
 }
