@@ -2,7 +2,7 @@
 
 namespace App\Services\Image;
 
-use App\Services\Image\Contracts\ImageServiceContract;
+use App\Services\Contracts\Image\ImageService as ImageServiceContract;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;

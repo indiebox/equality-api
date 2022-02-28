@@ -57,11 +57,7 @@ class StoreInviteRequest extends FormRequest
     protected function isMemberOfTeam($user)
     {
         $team = $this->route('team');
-        $isMemberOfTeam = $team->members()
-            ->where('user_id', $user->id)
-            ->exists();
-
-        return $isMemberOfTeam;
+        return $team->isMember($user);
     }
 
     protected function isAlreadyInvited($user)
