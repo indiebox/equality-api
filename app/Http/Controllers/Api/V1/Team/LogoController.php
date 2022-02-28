@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Team\StoreLogoRequest;
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Models\Team;
-use App\Services\Image\Contracts\ImageServiceContract;
+use App\Services\Contracts\Image\ImageService;
 
 class LogoController extends Controller
 {
     protected $image;
 
-    public function __construct(ImageServiceContract $imageService)
+    public function __construct(ImageService $imageService)
     {
         $this->image = $imageService;
     }

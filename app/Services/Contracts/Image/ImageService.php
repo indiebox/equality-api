@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\Image\Contracts;
+namespace App\Services\Contracts\Image;
 
 use Illuminate\Http\UploadedFile;
 
-interface ImageServiceContract
+interface ImageService
 {
     /** Save uploaded image to the storage.
      * @param UploadedFile $file

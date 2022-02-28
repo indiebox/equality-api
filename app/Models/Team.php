@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|null $invites_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Project[] $projects
  * @property-read int|null $projects_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\LeaderNomination[] $projectsLeaderNominations
+ * @property-read int|null $projects_leader_nominations_count
  * @method static \Database\Factories\TeamFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|Team newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Team newQuery()
@@ -91,5 +93,9 @@ class Team extends Model
     public function invites()
     {
         return $this->hasMany(Invite::class);
+    }
+
+    public function projectsLeaderNominations() {
+        return $this->hasManyThrough(LeaderNomination::class, Project::class);
     }
 }

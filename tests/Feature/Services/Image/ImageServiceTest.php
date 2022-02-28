@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Services\Image;
 
-use App\Services\Image\Contracts\ImageServiceContract;
+use App\Services\Contracts\Image\ImageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -11,7 +11,7 @@ use Tests\TestCase;
 class ImageServiceTest extends TestCase
 {
     /**
-     * @var ImageServiceContract
+     * @var ImageService
      */
     protected $image;
 
@@ -19,7 +19,7 @@ class ImageServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->image = app(ImageServiceContract::class);
+        $this->image = app(ImageService::class);
     }
 
     public function test_save()

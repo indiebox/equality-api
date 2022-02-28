@@ -4,7 +4,8 @@ namespace App\Listeners\Api;
 
 use App\Events\Api\UserLeaveTeam;
 use App\Models\Team;
-use App\Services\Image\Contracts\ImageServiceContract;
+use App\Services\Contracts\Image\ImageService;
+use App\Services\Contracts\Projects\LeaderService;
 
 class TeamEventSubscriber
 {
@@ -16,7 +17,14 @@ class TeamEventSubscriber
         // Delete the team if there are no members left.
         if (!$event->team->members()->exists()) {
             $event->team->delete();
+            return;
         }
+
+        /**
+         * @var LeaderService
+         */
+        $leaderService = app(LeaderService::class);
+        $leaderService->deleteUserNominations($event->user, $event->team);
     }
 
     /**
@@ -25,7 +33,7 @@ class TeamEventSubscriber
     public function handleTeamDeleting($team)
     {
         // Delete resources associated with team.
-        $imageService = app(ImageServiceContract::class);
+        $imageService = app(ImageService::class);
         $imageService->delete($team->logo);
     }
 

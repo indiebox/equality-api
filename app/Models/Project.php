@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $leader_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\LeaderNomination[] $leaderNominations
+ * @property-read int|null $leader_nominations_count
  * @method static \Database\Factories\ProjectFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|Team newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Team newQuery()
@@ -35,6 +37,22 @@ class Project extends Model
 
     /*
     |-------------------------------------------------------------
+    | Methods
+    |-------------------------------------------------------------
+    */
+
+    public function isLeader($user) {
+        if ($user instanceof User) {
+            return $this->leader_id == $user->id;
+        } else if (is_numeric($user)) {
+            return $this->leader_id == $user;
+        } else {
+            return false;
+        }
+    }
+
+    /*
+    |-------------------------------------------------------------
     | Relationships
     |-------------------------------------------------------------
     */
@@ -47,5 +65,9 @@ class Project extends Model
     public function team()
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function leaderNominations() {
+        return $this->hasMany(LeaderNomination::class);
     }
 }

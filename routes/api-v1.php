@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
 use App\Models\Invite;
+use App\Models\LeaderNomination;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -104,6 +105,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::prefix('projects')->group(function () {
+        // Leader nominations.
+        Route::group([
+            'prefix' => '{project}/leader-nominations',
+        ], function () {
+            Route::get('/', [Project\LeaderNominationController::class, 'index'])
+                ->can('viewAny', [LeaderNomination::class, 'project']);
+            Route::post('/{user}', [Project\LeaderNominationController::class, 'nominate'])
+                ->can('nominate', [LeaderNomination::class, 'project', 'user']);
+        });
+
         // Update project settings.
         Route::group([
             'prefix' => '{project}',

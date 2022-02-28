@@ -33,6 +33,11 @@ class ProjectController extends Controller
         $project->leader()->associate(auth()->user());
         $project->save();
 
+        $project->leaderNominations()->create([
+            'voter_id' => auth()->id(),
+            'nominated_id' => auth()->id(),
+        ]);
+
         return (new TeamProjectResource($project))->response()->setStatusCode(201);
     }
 }
