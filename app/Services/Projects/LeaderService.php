@@ -10,7 +10,8 @@ use App\Services\Contracts\Projects\LeaderService as LeaderServiceContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
-class LeaderService implements LeaderServiceContract {
+class LeaderService implements LeaderServiceContract
+{
     public function deleteUserNominations(User $user, Team $team)
     {
         $nominations = $team->projectsLeaderNominations()

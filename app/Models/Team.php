@@ -95,7 +95,8 @@ class Team extends Model
         return $this->hasMany(Invite::class);
     }
 
-    public function projectsLeaderNominations() {
+    public function projectsLeaderNominations()
+    {
         return $this->hasManyThrough(LeaderNomination::class, Project::class);
     }
 }

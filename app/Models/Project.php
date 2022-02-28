@@ -41,10 +41,11 @@ class Project extends Model
     |-------------------------------------------------------------
     */
 
-    public function isLeader($user) {
+    public function isLeader($user)
+    {
         if ($user instanceof User) {
             return $this->leader_id == $user->id;
-        } else if (is_numeric($user)) {
+        } elseif (is_numeric($user)) {
             return $this->leader_id == $user;
         } else {
             return false;
@@ -67,7 +68,8 @@ class Project extends Model
         return $this->belongsTo(Team::class);
     }
 
-    public function leaderNominations() {
+    public function leaderNominations()
+    {
         return $this->hasMany(LeaderNomination::class);
     }
 }

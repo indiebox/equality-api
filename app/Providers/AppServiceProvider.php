@@ -13,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public $singletons = [
         ImageServiceContract::class => ImageService::class,
-        LeaderServiceContract::class => LeaderService::class
+        LeaderServiceContract::class => LeaderService::class,
     ];
 
     /**
