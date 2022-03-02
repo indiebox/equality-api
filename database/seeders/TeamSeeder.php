@@ -44,7 +44,13 @@ class TeamSeeder extends Seeder
 
         // Creating invites(user1 and user2 will have 2 invites).
         Invite::factory()->team($teams[0])->inviter($user1)->invited($user2)->create();
+        Invite::factory()->team($teams[0])->inviter($user1)->invited(User::factory())->declined()->create();
+        Invite::factory()->team($teams[0])->inviter($user1)->invited(User::factory())->accepted()->create();
+
         Invite::factory()->team($teams[1])->inviter($user2)->invited($user1)->create();
+        Invite::factory()->team($teams[1])->inviter($user2)->invited(User::factory())->declined()->create();
+        Invite::factory()->team($teams[1])->inviter($user2)->invited(User::factory())->accepted()->create();
+
         Invite::factory()->team($teams[2])->inviter($user3)->invited($user1)->create();
         Invite::factory()->team($teams[2])->inviter($user3)->invited($user2)->create();
     }
