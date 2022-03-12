@@ -10,16 +10,16 @@ use Illuminate\Database\Eloquent\Model;
  * App\Models\Invite
  *
  * @property int $id
- * @property int $team_id
- * @property int|null $inviter_id
+ * @property-read \App\Models\User $invited
  * @property int $invited_id
+ * @property-read \App\Models\User|null $inviter
+ * @property int|null $inviter_id
+ * @property-read \App\Models\Team $team
+ * @property int $team_id
  * @property \Illuminate\Support\Carbon|null $accepted_at
  * @property \Illuminate\Support\Carbon|null $declined_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $invited
- * @property-read \App\Models\User|null $inviter
- * @property-read \App\Models\Team $team
  * @method static \Database\Factories\InviteFactory factory(...$parameters)
  * @method static Builder|Invite newModelQuery()
  * @method static Builder|Invite newQuery()
