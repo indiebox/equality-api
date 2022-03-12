@@ -73,4 +73,43 @@ class BoardControllerTest extends TestCase
             ->assertJson((new BoardResource(Board::first()))->response()->getData(true));
         $this->assertDatabaseHas('boards', ['project_id' => $project->id] + $data);
     }
+
+    public function test_cant_restore_not_trashed()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/restore');
+
+        $response->assertNotFound();
+    }
+    public function test_cant_restore_trashed_without_permissions()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->deleted()->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/restore');
+
+        $response->assertForbidden();
+    }
+    public function test_can_restore_trashed()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->deleted()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/restore');
+
+        $response->assertNoContent();
+
+        $board->refresh();
+
+        $this->assertFalse($board->trashed());
+    }
 }

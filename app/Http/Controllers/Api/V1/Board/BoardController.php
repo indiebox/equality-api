@@ -44,4 +44,11 @@ class BoardController extends Controller
     {
         //
     }
+
+    public function restore(Board $board)
+    {
+        $board->restore();
+
+        return response('', 204);
+    }
 }
