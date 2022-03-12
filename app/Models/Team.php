@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $logo
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $creator
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\User[] $members
  * @property-read int|null $members_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Invite[] $invites

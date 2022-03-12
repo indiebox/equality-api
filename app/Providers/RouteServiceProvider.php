@@ -4,10 +4,14 @@ namespace App\Providers;
 
 use App\Models\Invite;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -36,6 +40,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->bindingsForScopes();
         $this->bindingsForInvites();
 
         $this->configureRateLimiting();
@@ -67,6 +72,32 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('mail_verification', function (Request $request) {
             return Limit::perMinute(5)
                 ->by(auth()->id());
+        });
+    }
+
+    protected function bindingsForScopes()
+    {
+        // This macro used to get onlyTrashed models with SoftDeletes trait.
+        // First parameter is model name (can be lowercased),
+        // second parameter is optional and it is a column name.
+        // Route::get('boards/{trashed:board}', ...)->can('someAction', 'trashed:board')
+        // Route::get('boards/{trashed:board_name}, ...)->can('someAction', 'trashed:board')
+        Route::bind('trashed', function ($id, RoutingRoute $route) {
+            $bindings = Str::of($route->bindingFieldFor('trashed'))->explode('_');
+
+            $model = app("App\\Models\\" . $bindings[0]);
+            if ($model == null || !in_array(SoftDeletes::class, class_uses_recursive($model))) {
+                throw (new ModelNotFoundException())->setModel(
+                    get_class($model),
+                    $id
+                );
+            }
+
+            $model = $model::onlyTrashed()->where($bindings[1] ?? $model->getRouteKeyName(), $id)->firstOrFail();
+
+            $route->setParameter('trashed:' . $bindings[0], $model);
+
+            return $model;
         });
     }
 
