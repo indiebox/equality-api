@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Znck\Eloquent\Traits\BelongsToThrough;
 
 /**
  * App\Models\Board
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Board extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToThrough;
 
     protected $fillable = [
         'name',
@@ -42,6 +43,6 @@ class Board extends Model
 
     public function team()
     {
-        return $this->hasOneThrough(Team::class, Project::class);
+        return $this->belongsToThrough(Team::class, Project::class);
     }
 }
