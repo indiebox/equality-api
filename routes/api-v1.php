@@ -149,9 +149,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::prefix('boards')->group(function () {
-        Route::patch('/{board}', [Board\BoardController::class, 'update'])->can('update', 'board');
-
-        Route::post('/{trashed:board}/restore', [Board\BoardController::class, 'restore'])->can('restore', 'trashed:board');
         Route::get('/{board}', [Board\BoardController::class, 'show'])->can('view', 'board');
+        Route::post('/{trashed:board}/restore', [Board\BoardController::class, 'restore'])->can('restore', 'trashed:board');
+        Route::patch('/{board}', [Board\BoardController::class, 'update'])->can('update', 'board');
+        Route::delete('/{board}', [Board\BoardController::class, 'destroy'])->can('delete', 'board');
     });
 });

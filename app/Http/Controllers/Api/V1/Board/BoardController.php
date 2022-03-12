@@ -42,9 +42,17 @@ class BoardController extends Controller
      */
     public function destroy(Board $board)
     {
-        //
+        $board->delete();
+
+        return response('', 204);
     }
 
+    /**
+     * Restore the specified resource.
+     *
+     * @param  \App\Models\Board  $board
+     * @return \Illuminate\Http\Response
+     */
     public function restore(Board $board)
     {
         $board->restore();

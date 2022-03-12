@@ -74,6 +74,34 @@ class BoardControllerTest extends TestCase
         $this->assertDatabaseHas('boards', ['project_id' => $project->id] + $data);
     }
 
+    public function test_cant_delete_without_permissions()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->deleteJson('/api/v1/boards/' . $board->id);
+
+        $response->assertForbidden();
+    }
+    public function test_can_delete()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->deleteJson('/api/v1/boards/' . $board->id);
+
+        $response->assertNoContent();
+
+        $board->refresh();
+
+        $this->assertTrue($board->trashed());
+    }
+
     public function test_cant_restore_not_trashed()
     {
         $project = Project::factory()->team(Team::factory())->create();
