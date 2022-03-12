@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\V1\Board;
 use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
-use App\Models\Board;
-use App\Models\Invite;
+use App\Models\Board as BoardModel;
+use App\Models\Invite as InviteModel;
 use App\Models\LeaderNomination;
+use App\Models\Project as ProjectModel;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -56,16 +58,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::group([
             'prefix' => '{team}/projects',
         ], function () {
-            Route::get('/', [Team\ProjectController::class, 'index'])->can('viewAny', [Project::class, 'team']);
-            Route::post('/', [Team\ProjectController::class, 'store'])->can('create', [Project::class, 'team']);
+            Route::get('/', [Team\ProjectController::class, 'index'])->can('viewAny', [ProjectModel::class, 'team']);
+            Route::post('/', [Team\ProjectController::class, 'store'])->can('create', [ProjectModel::class, 'team']);
         });
 
         // Invites.
         Route::group([
             'prefix' => '{team}/invites',
         ], function () {
-            Route::get('/', [Team\InviteController::class, 'index'])->can('viewAny', [Invite::class, 'team']);
-            Route::post('/', [Team\InviteController::class, 'store'])->can('create', [Invite::class, 'team']);
+            Route::get('/', [Team\InviteController::class, 'index'])->can('viewAny', [InviteModel::class, 'team']);
+            Route::post('/', [Team\InviteController::class, 'store'])->can('create', [InviteModel::class, 'team']);
         });
 
         // Update team settings.
@@ -120,8 +122,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::group([
             'prefix' => '{project}/boards',
         ], function () {
-            Route::get('/', [Project\BoardController::class, 'index'])->can('viewAny', [Board::class, 'project']);
-            Route::post('/', [Project\BoardController::class, 'store'])->can('create', [Board::class, 'project']);
+            Route::get('/', [Project\BoardController::class, 'index'])->can('viewAny', [BoardModel::class, 'project']);
+            Route::post('/', [Project\BoardController::class, 'store'])->can('create', [BoardModel::class, 'project']);
         });
 
         // Update project settings.
@@ -136,5 +138,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         Route::get('/{project}', [Project\ProjectController::class, 'show'])->can('view', 'project');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Boards actions.
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('boards')->group(function () {
+        Route::get('/{board}', [Board\BoardController::class, 'show'])->can('view', 'board');
     });
 });

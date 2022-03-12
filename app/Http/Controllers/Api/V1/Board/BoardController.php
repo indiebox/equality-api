@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Board;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Board\UpdateBoardRequest;
+use App\Http\Resources\V1\Board\BoardResource;
 use App\Models\Board;
 
 class BoardController extends Controller
@@ -16,7 +17,7 @@ class BoardController extends Controller
      */
     public function show(Board $board)
     {
-        //
+        return new BoardResource($board);
     }
 
     /**
