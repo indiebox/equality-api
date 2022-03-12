@@ -29,7 +29,9 @@ class BoardController extends Controller
      */
     public function update(UpdateBoardRequest $request, Board $board)
     {
-        //
+        $board->update($request->validated());
+
+        return new BoardResource($board);
     }
 
     /**

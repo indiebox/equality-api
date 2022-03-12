@@ -40,4 +40,37 @@ class BoardControllerTest extends TestCase
             ->assertOk()
             ->assertJson((new BoardResource($board))->response()->getData(true));
     }
+
+    public function test_cant_update_without_permissions()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $data = [
+            'name' => 'New name',
+        ];
+
+        $response = $this->patchJson('/api/v1/boards/' . $board->id, $data);
+
+        $response->assertForbidden();
+    }
+    public function test_can_update()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        $data = [
+            'name' => 'New name',
+        ];
+
+        $response = $this->patchJson('/api/v1/boards/' . $board->id, $data);
+
+        $response
+            ->assertOk()
+            ->assertJson((new BoardResource(Board::first()))->response()->getData(true));
+        $this->assertDatabaseHas('boards', ['project_id' => $project->id] + $data);
+    }
 }
