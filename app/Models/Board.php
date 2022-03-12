@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Znck\Eloquent\Traits\BelongsToThrough;
@@ -24,11 +25,21 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  */
 class Board extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToThrough;
+    use HasFactory, MassPrunable, SoftDeletes, BelongsToThrough;
 
     protected $fillable = [
         'name',
     ];
+
+    /**
+     * Get the prunable model query.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function prunable()
+    {
+        return static::where('deleted_at', '<=', now()->subWeek());
+    }
 
     /*
     |-------------------------------------------------------------
