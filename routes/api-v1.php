@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
+use App\Models\Board;
 use App\Models\Invite;
 use App\Models\LeaderNomination;
 use Illuminate\Support\Facades\Route;
@@ -113,6 +114,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->can('viewAny', [LeaderNomination::class, 'project']);
             Route::post('/{user}', [Project\LeaderNominationController::class, 'nominate'])
                 ->can('nominate', [LeaderNomination::class, 'project', 'user']);
+        });
+
+        // Boards.
+        Route::group([
+            'prefix' => '{project}/boards',
+        ], function () {
+            Route::get('/', [Project\BoardController::class, 'index'])->can('viewAny', [Board::class, 'project']);
         });
 
         // Update project settings.
