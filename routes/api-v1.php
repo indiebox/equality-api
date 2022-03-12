@@ -121,6 +121,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{project}/boards',
         ], function () {
             Route::get('/', [Project\BoardController::class, 'index'])->can('viewAny', [Board::class, 'project']);
+            Route::post('/', [Project\BoardController::class, 'store'])->can('create', [Board::class, 'project']);
         });
 
         // Update project settings.

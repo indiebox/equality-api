@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Project\StoreBoardRequest;
 use App\Http\Resources\V1\Project\ProjectBoardResource;
+use App\Models\Board;
 use App\Models\Project;
 
 class BoardController extends Controller
@@ -29,6 +30,10 @@ class BoardController extends Controller
      */
     public function store(StoreBoardRequest $request, Project $project)
     {
-        //
+        $board = new Board($request->validated());
+        $board->project()->associate($project);
+        $board->save();
+
+        return (new ProjectBoardResource($board))->response()->setStatusCode(201);
     }
 }

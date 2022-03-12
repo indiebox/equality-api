@@ -40,4 +40,35 @@ class BoardControllerTest extends TestCase
             ->assertOk()
             ->assertJson(ProjectBoardResource::collection($boards)->response()->getData(true));
     }
+
+    public function test_cant_store_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/boards');
+
+        $response->assertForbidden();
+    }
+    public function test_can_store()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        $data = [
+            'name' => 'Test project',
+        ];
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/boards', $data);
+
+        $board = Board::find($response->json('data.id'));
+
+        $response
+            ->assertCreated()
+            ->assertJson((new ProjectBoardResource($board))->response()->getData(true));
+        $this->assertDatabaseHas('boards', ['project_id' => $project->id, 'name' => $data['name']]);
+    }
 }
