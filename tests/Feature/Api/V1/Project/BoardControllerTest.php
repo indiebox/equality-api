@@ -40,6 +40,32 @@ class BoardControllerTest extends TestCase
             ->assertOk()
             ->assertJson(ProjectBoardResource::collection($boards)->response()->getData(true));
     }
+    public function test_cant_view_trashed_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/boards/trashed');
+
+        $response->assertForbidden();
+    }
+    public function test_can_view_trashed()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        Board::factory(2)->project($project)->create();
+        $trashedBoards = Board::factory(2)->project($project)->deleted()->create();
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/boards/trashed');
+
+        $response
+            ->assertOk()
+            ->assertJson(ProjectBoardResource::collection($trashedBoards)->response()->getData(true));
+    }
 
     public function test_cant_store_in_not_your_team()
     {

@@ -22,6 +22,17 @@ class BoardController extends Controller
     }
 
     /**
+     * Display a listing of the trashed resource.
+     *
+     * @param \App\Models\Project $project
+     * @return \Illuminate\Http\Response
+     */
+    public function indexTrashed(Project $project)
+    {
+        return ProjectBoardResource::collection($project->boards()->onlyTrashed()->get());
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreBoardRequest  $request

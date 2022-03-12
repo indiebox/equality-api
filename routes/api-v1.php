@@ -123,6 +123,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{project}/boards',
         ], function () {
             Route::get('/', [Project\BoardController::class, 'index'])->can('viewAny', [BoardModel::class, 'project']);
+            Route::get('/trashed', [Project\BoardController::class, 'indexTrashed'])
+                ->can('viewAny', [BoardModel::class, 'project']);
             Route::post('/', [Project\BoardController::class, 'store'])->can('create', [BoardModel::class, 'project']);
         });
 
