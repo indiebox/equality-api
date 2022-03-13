@@ -24,7 +24,7 @@ class ColumnController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreColumnRequest  $request
+     * @param  \App\Http\Requests\Api\V1\Board\StoreColumnRequest  $request
      * @param  \App\Models\Board  $board
      * @return \Illuminate\Http\Response
      */

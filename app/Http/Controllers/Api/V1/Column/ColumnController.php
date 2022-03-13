@@ -23,7 +23,7 @@ class ColumnController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateColumnRequest  $request
+     * @param  \App\Http\Requests\Api\V1\Column\UpdateColumnRequest  $request
      * @param  \App\Models\Column  $column
      * @return \Illuminate\Http\Response
      */
@@ -42,6 +42,8 @@ class ColumnController extends Controller
      */
     public function destroy(Column $column)
     {
-        //
+        $column->delete();
+
+        return response('', 204);
     }
 }
