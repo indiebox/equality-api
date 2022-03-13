@@ -178,6 +178,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{column}/cards',
         ], function () {
             Route::get('/', [Column\CardController::class, 'index'])->can('viewAny', [CardModel::class, 'column']);
+            Route::post('/', [Column\CardController::class, 'store'])->can('create', [CardModel::class, 'column']);
         });
 
         Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');

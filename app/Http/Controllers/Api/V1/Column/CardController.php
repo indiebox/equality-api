@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Column;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Column\StoreCardRequest;
 use App\Http\Resources\V1\Column\ColumnCardResource;
+use App\Models\Card;
 use App\Models\Column;
 
 class CardController extends Controller
@@ -29,6 +30,10 @@ class CardController extends Controller
      */
     public function store(StoreCardRequest $request, Column $column)
     {
-        //
+        $card = new Card($request->validated());
+        $card->column()->associate($column);
+        $card->save();
+
+        return (new ColumnCardResource($card))->response()->setStatusCode(201);
     }
 }
