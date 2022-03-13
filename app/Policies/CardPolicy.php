@@ -57,6 +57,12 @@ class CardPolicy
         return $card->team->isMember($user);
     }
 
+    public function move(User $user, Card $card, Column $column)
+    {
+        return $card->team->isMember($user)
+            && $column->team->is($card->team);
+    }
+
     /**
      * Determine whether the user can delete the model.
      *

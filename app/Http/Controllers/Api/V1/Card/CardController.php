@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Card\UpdateCardRequest;
 use App\Http\Resources\V1\Card\CardResource;
 use App\Models\Card;
+use App\Models\Column;
 
 class CardController extends Controller
 {
@@ -32,6 +33,14 @@ class CardController extends Controller
         $card->update($request->validated());
 
         return new CardResource($card);
+    }
+
+    public function move(Card $card, Column $column)
+    {
+        $card->column()->associate($column);
+        $card->save();
+
+        return response('', 204);
     }
 
     /**

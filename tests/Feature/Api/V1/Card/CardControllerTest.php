@@ -87,6 +87,100 @@ class CardControllerTest extends TestCase
         $this->assertDatabaseHas('cards', ['column_id' => $column->id] + $data);
     }
 
+    public function test_cant_move_without_permissions()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        $newColumn = Column::factory()->board($board)->create();
+
+        $card = Card::factory()->column($column)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id);
+
+        $response->assertForbidden();
+    }
+    public function test_cant_move_between_teams()
+    {
+        $team1 = Team::factory()->create();
+        $project1 = Project::factory()->team($team1)->create();
+        $board1 = Board::factory()->project($project1)->create();
+        $column = Column::factory()->board($board1)->create();
+
+        $team2 = Team::factory()->create();
+        $project2 = Project::factory()->team($team2)->create();
+        $board2 = Board::factory()->project($project2)->create();
+        $newColumn = Column::factory()->board($board2)->create();
+
+        $card = Card::factory()->column($column)->create();
+        $user = User::factory()->hasAttached($team1)->hasAttached($team2)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id);
+
+        $response->assertForbidden();
+    }
+    public function test_can_move()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        $newColumn = Column::factory()->board($board)->create();
+
+        $card = Card::factory()->column($column)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id);
+
+        $response->assertNoContent();
+        $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
+        $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
+    }
+    public function test_can_move_between_projects()
+    {
+        $team = Team::factory()->create();
+        $project1 = Project::factory()->team($team)->create();
+        $project2 = Project::factory()->team($team)->create();
+        $board1 = Board::factory()->project($project1)->create();
+        $board2 = Board::factory()->project($project2)->create();
+        $column = Column::factory()->board($board1)->create();
+        $newColumn = Column::factory()->board($board2)->create();
+
+        $card = Card::factory()->column($column)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id);
+
+        $response->assertNoContent();
+        $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
+        $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
+    }
+    public function test_can_move_between_boards()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board1 = Board::factory()->project($project)->create();
+        $board2 = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board1)->create();
+        $newColumn = Column::factory()->board($board2)->create();
+
+        $card = Card::factory()->column($column)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id);
+
+        $response->assertNoContent();
+        $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
+        $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
+    }
+
     public function test_cant_delete_without_permissions()
     {
         $team = Team::factory()->create();
