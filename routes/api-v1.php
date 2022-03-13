@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Api\V1\Board;
+use App\Http\Controllers\Api\V1\Column;
 use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
 use App\Models\Board as BoardModel;
+use App\Models\Column as ColumnModel;
 use App\Models\Invite as InviteModel;
-use App\Models\LeaderNomination;
+use App\Models\LeaderNomination as LeaderNominationModel;
 use App\Models\Project as ProjectModel;
 use Illuminate\Support\Facades\Route;
 
@@ -113,9 +115,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{project}/leader-nominations',
         ], function () {
             Route::get('/', [Project\LeaderNominationController::class, 'index'])
-                ->can('viewAny', [LeaderNomination::class, 'project']);
+                ->can('viewAny', [LeaderNominationModel::class, 'project']);
             Route::post('/{user}', [Project\LeaderNominationController::class, 'nominate'])
-                ->can('nominate', [LeaderNomination::class, 'project', 'user']);
+                ->can('nominate', [LeaderNominationModel::class, 'project', 'user']);
         });
 
         // Boards.
@@ -149,9 +151,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::prefix('boards')->group(function () {
+        // Columns.
+        Route::group([
+            'prefix' => '{board}/columns',
+        ], function () {
+            Route::get('/', [Board\ColumnController::class, 'index'])->can('viewAny', [ColumnModel::class, 'board']);
+            Route::post('/', [Board\ColumnController::class, 'store'])->can('create', [ColumnModel::class, 'board']);
+        });
+
         Route::get('/{board}', [Board\BoardController::class, 'show'])->can('view', 'board');
         Route::post('/{trashed:board}/restore', [Board\BoardController::class, 'restore'])->can('restore', 'trashed:board');
         Route::patch('/{board}', [Board\BoardController::class, 'update'])->can('update', 'board');
         Route::delete('/{board}', [Board\BoardController::class, 'destroy'])->can('delete', 'board');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Columns actions.
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('columns')->group(function () {
+        Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');
+        Route::patch('/{column}', [Column\ColumnController::class, 'update'])->can('update', 'column');
+        Route::delete('/{column}', [Column\ColumnController::class, 'destroy'])->can('delete', 'column');
     });
 });
