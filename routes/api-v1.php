@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Api\V1\Board;
+use App\Http\Controllers\Api\V1\Column;
 use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
@@ -162,5 +163,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{trashed:board}/restore', [Board\BoardController::class, 'restore'])->can('restore', 'trashed:board');
         Route::patch('/{board}', [Board\BoardController::class, 'update'])->can('update', 'board');
         Route::delete('/{board}', [Board\BoardController::class, 'destroy'])->can('delete', 'board');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Columns actions.
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('columns')->group(function () {
+        Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');
     });
 });
