@@ -12,11 +12,14 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * App\Models\Board
  *
  * @property int $id
+ * @property string $name
  * @property-read \App\Models\Project $project
  * @property int $project_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Team $team
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Column[] $columns
+ * @property-read int|null $columns_count
  * @method static \Database\Factories\BoardFactory factory(...$parameters)
  * @method static Builder|Invite newModelQuery()
  * @method static Builder|Invite newQuery()
@@ -50,6 +53,11 @@ class Board extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function columns()
+    {
+        return $this->hasMany(Column::class);
     }
 
     public function team()
