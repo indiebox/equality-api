@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
 use App\Models\Board as BoardModel;
+use App\Models\Card as CardModel;
 use App\Models\Column as ColumnModel;
 use App\Models\Invite as InviteModel;
 use App\Models\LeaderNomination as LeaderNominationModel;
@@ -172,6 +173,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::prefix('columns')->group(function () {
+        // Cards.
+        Route::group([
+            'prefix' => '{column}/cards',
+        ], function () {
+            Route::get('/', [Column\CardController::class, 'index'])->can('viewAny', [CardModel::class, 'column']);
+        });
+
         Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');
         Route::patch('/{column}', [Column\ColumnController::class, 'update'])->can('update', 'column');
         Route::delete('/{column}', [Column\ColumnController::class, 'destroy'])->can('delete', 'column');
