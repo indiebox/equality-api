@@ -47,4 +47,43 @@ class CardControllerTest extends TestCase
             ->assertOk()
             ->assertJson((new CardResource($card))->response()->getData(true));
     }
+
+    public function test_cant_update_without_permissions()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        $card = Card::factory()->column($column)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $data = [
+            'name' => 'New card name',
+        ];
+
+        $response = $this->patchJson('/api/v1/cards/' . $card->id, $data);
+
+        $response->assertForbidden();
+    }
+    public function test_can_update()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        $card = Card::factory()->column($column)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        $data = [
+            'name' => 'New card name',
+            'description' => 'New desc',
+        ];
+
+        $response = $this->patchJson('/api/v1/cards/' . $card->id, $data);
+
+        $response
+            ->assertOk()
+            ->assertJson((new CardResource(Card::first()))->response()->getData(true));
+        $this->assertDatabaseHas('cards', ['column_id' => $column->id] + $data);
+    }
 }
