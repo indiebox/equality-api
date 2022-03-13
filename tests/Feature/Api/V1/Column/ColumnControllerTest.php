@@ -91,7 +91,7 @@ class ColumnControllerTest extends TestCase
 
         $response->assertForbidden();
     }
-    public function test_can_delete_dd()
+    public function test_can_delete()
     {
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();

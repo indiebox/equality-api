@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Api\V1\Board;
+use App\Http\Controllers\Api\V1\Card;
 use App\Http\Controllers\Api\V1\Column;
 use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
@@ -184,5 +185,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');
         Route::patch('/{column}', [Column\ColumnController::class, 'update'])->can('update', 'column');
         Route::delete('/{column}', [Column\ColumnController::class, 'destroy'])->can('delete', 'column');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cards actions.
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('cards')->group(function () {
+        Route::get('/{card}', [Card\CardController::class, 'show'])->can('view', 'card');
     });
 });
