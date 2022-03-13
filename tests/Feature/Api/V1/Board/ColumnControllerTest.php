@@ -43,4 +43,37 @@ class ColumnControllerTest extends TestCase
             ->assertOk()
             ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
     }
+
+    public function test_cant_store_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/columns');
+
+        $response->assertForbidden();
+    }
+    public function test_can_store()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        $data = [
+            'name' => 'Col 1',
+        ];
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/columns', $data);
+
+        $column = Column::find($response->json('data.id'));
+
+        $response
+            ->assertCreated()
+            ->assertJson((new BoardColumnResource($column))->response()->getData(true));
+        $this->assertDatabaseHas('columns', ['board_id' => $board->id, 'name' => $data['name']]);
+    }
 }

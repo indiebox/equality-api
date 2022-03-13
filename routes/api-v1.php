@@ -155,6 +155,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{board}/columns',
         ], function () {
             Route::get('/', [Board\ColumnController::class, 'index'])->can('viewAny', [ColumnModel::class, 'board']);
+            Route::post('/', [Board\ColumnController::class, 'store'])->can('create', [ColumnModel::class, 'board']);
         });
 
         Route::get('/{board}', [Board\BoardController::class, 'show'])->can('view', 'board');
