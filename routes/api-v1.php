@@ -196,5 +196,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('cards')->group(function () {
         Route::get('/{card}', [Card\CardController::class, 'show'])->can('view', 'card');
         Route::patch('/{card}', [Card\CardController::class, 'update'])->can('update', 'card');
+        Route::delete('/{card}', [Card\CardController::class, 'destroy'])->can('delete', 'card');
     });
 });
