@@ -29,7 +29,9 @@ class ColumnController extends Controller
      */
     public function update(UpdateColumnRequest $request, Column $column)
     {
-        //
+        $column->update($request->validated());
+
+        return new ColumnResource($column);
     }
 
     /**

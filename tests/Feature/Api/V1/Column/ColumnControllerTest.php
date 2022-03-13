@@ -43,4 +43,39 @@ class ColumnControllerTest extends TestCase
             ->assertOk()
             ->assertJson((new ColumnResource($column))->response()->getData(true));
     }
+
+    public function test_cant_update_without_permissions()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory($board)->board($board)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $data = [
+            'name' => 'New column',
+        ];
+
+        $response = $this->patchJson('/api/v1/columns/' . $column->id, $data);
+
+        $response->assertForbidden();
+    }
+    public function test_can_update()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory($board)->board($board)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        $data = [
+            'name' => 'New name',
+        ];
+
+        $response = $this->patchJson('/api/v1/columns/' . $column->id, $data);
+
+        $response
+            ->assertOk()
+            ->assertJson((new ColumnResource(Column::first()))->response()->getData(true));
+        $this->assertDatabaseHas('columns', ['board_id' => $board->id] + $data);
+    }
 }

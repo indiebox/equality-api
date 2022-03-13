@@ -173,5 +173,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('columns')->group(function () {
         Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');
+        Route::patch('/{column}', [Column\ColumnController::class, 'update'])->can('update', 'column');
     });
 });
