@@ -6,8 +6,9 @@ use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
 use App\Models\Board as BoardModel;
+use App\Models\Column as ColumnModel;
 use App\Models\Invite as InviteModel;
-use App\Models\LeaderNomination;
+use App\Models\LeaderNomination as LeaderNominationModel;
 use App\Models\Project as ProjectModel;
 use Illuminate\Support\Facades\Route;
 
@@ -113,9 +114,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{project}/leader-nominations',
         ], function () {
             Route::get('/', [Project\LeaderNominationController::class, 'index'])
-                ->can('viewAny', [LeaderNomination::class, 'project']);
+                ->can('viewAny', [LeaderNominationModel::class, 'project']);
             Route::post('/{user}', [Project\LeaderNominationController::class, 'nominate'])
-                ->can('nominate', [LeaderNomination::class, 'project', 'user']);
+                ->can('nominate', [LeaderNominationModel::class, 'project', 'user']);
         });
 
         // Boards.
@@ -149,6 +150,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::prefix('boards')->group(function () {
+        // Columns.
+        Route::group([
+            'prefix' => '{board}/columns',
+        ], function () {
+            Route::get('/', [Board\ColumnController::class, 'index'])->can('viewAny', [ColumnModel::class, 'board']);
+        });
+
         Route::get('/{board}', [Board\BoardController::class, 'show'])->can('view', 'board');
         Route::post('/{trashed:board}/restore', [Board\BoardController::class, 'restore'])->can('restore', 'trashed:board');
         Route::patch('/{board}', [Board\BoardController::class, 'update'])->can('update', 'board');
