@@ -15,7 +15,6 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @property int $board_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Project $project
  * @property-read \App\Models\Team $team
  * @method static \Database\Factories\ColumnFactory factory(...$parameters)
  * @method static Builder|Invite newModelQuery()
@@ -40,11 +39,6 @@ class Column extends Model
     public function board()
     {
         return $this->belongsTo(Board::class);
-    }
-
-    public function project()
-    {
-        return $this->belongsToThrough(Project::class, Board::class);
     }
 
     public function team()
