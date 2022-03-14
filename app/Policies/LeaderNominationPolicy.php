@@ -19,6 +19,8 @@ class LeaderNominationPolicy
      */
     public function viewAny(User $user, Project $project)
     {
+        $project->load('team.members');
+
         return $project->team->isMember($user);
     }
 
