@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ImplicitRule;
 class MaxCardsPerColumn implements ImplicitRule
 {
     /** Max cards per column.*/
-    public const MAX_CARDS = 50;
+    public const MAX_CARDS = 100;
 
     protected $column;
 
