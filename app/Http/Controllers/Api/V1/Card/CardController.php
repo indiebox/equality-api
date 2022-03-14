@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Card;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Card\MoveCardRequest;
 use App\Http\Requests\Api\V1\Card\UpdateCardRequest;
 use App\Http\Resources\V1\Card\CardResource;
 use App\Models\Card;
@@ -35,7 +36,7 @@ class CardController extends Controller
         return new CardResource($card);
     }
 
-    public function move(Card $card, Column $column)
+    public function move(MoveCardRequest $request, Card $card, Column $column)
     {
         $card->column()->associate($column);
         $card->save();

@@ -9,6 +9,7 @@ use App\Models\Column;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
+use App\Rules\Api\MaxCardsPerColumn;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -59,6 +60,24 @@ class CardControllerTest extends TestCase
         $response = $this->postJson('/api/v1/columns/' . $column->id . '/cards');
 
         $response->assertForbidden();
+    }
+    public function test_cant_store_with_exceeded_cards_limit()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        Card::factory(MaxCardsPerColumn::MAX_CARDS)->column($column)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/columns/' . $column->id . '/cards');
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.column', [
+                trans('validation.max_cards_per_column', ['max' => MaxCardsPerColumn::MAX_CARDS])
+            ]);
     }
     public function test_can_store()
     {
