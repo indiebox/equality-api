@@ -141,6 +141,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/image', [Project\ImageController::class, 'destroy']);
         });
 
+        Route::get('/{project}/leader', [Project\ProjectController::class, 'leader'])->can('view', 'project');
         Route::get('/{project}', [Project\ProjectController::class, 'show'])->can('view', 'project');
     });
 

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1\Project;
 
 use App\Http\Resources\V1\Project\ProjectResource;
+use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
@@ -36,6 +37,30 @@ class ProjectControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJson((new ProjectResource($project))->response()->getData(true));
+    }
+
+    public function test_cant_view_leader_of_not_your_team()
+    {
+        $user = User::factory()->create();
+        $project = Project::factory()->team(Team::factory())->leader($user)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/leader');
+
+        $response->assertForbidden();
+    }
+    public function test_can_view_leader()
+    {
+        $team = Team::factory()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        $project = Project::factory()->team($team)->leader($user)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/leader');
+
+        $response
+            ->assertOk()
+            ->assertJson((new UserResource($user))->response()->getData(true));
     }
 
     public function test_cant_update_without_permissions()
