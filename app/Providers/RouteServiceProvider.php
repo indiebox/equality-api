@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Board;
 use App\Models\Invite;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -42,6 +43,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->bindingsForScopes();
         $this->bindingsForInvites();
+        $this->bindingsForBoards();
 
         $this->configureRateLimiting();
 
@@ -128,6 +130,13 @@ class RouteServiceProvider extends ServiceProvider
     {
         Route::bind('pendingInvite', function ($id) {
             return Invite::onlyPending()->findOrFail($id);
+        });
+    }
+
+    protected function bindingsForBoards()
+    {
+        Route::bind('withClosedAndTrashedBoard', function ($id) {
+            return Board::withClosed()->withTrashed()->findOrFail($id);
         });
     }
 }

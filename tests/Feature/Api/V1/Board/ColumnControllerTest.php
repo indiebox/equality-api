@@ -43,6 +43,36 @@ class ColumnControllerTest extends TestCase
             ->assertOk()
             ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
     }
+    public function test_can_view_any_in_closed_board()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->closed()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        $columns = Column::factory(2)->board($board)->create();
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/columns');
+
+        $response
+            ->assertOk()
+            ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
+    }
+    public function test_can_view_any_in_trashed_board()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->deleted()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        $columns = Column::factory(2)->board($board)->create();
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/columns');
+
+        $response
+            ->assertOk()
+            ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
+    }
 
     public function test_cant_store_in_not_your_team()
     {

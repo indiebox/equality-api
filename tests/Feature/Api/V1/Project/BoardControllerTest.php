@@ -32,6 +32,8 @@ class BoardControllerTest extends TestCase
         $project = Project::factory()->team($team)->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
+        Board::factory()->project($project)->deleted()->create();
+        Board::factory()->project($project)->closed()->create();
         $boards = Board::factory(2)->project($project)->create();
 
         $response = $this->getJson('/api/v1/projects/' . $project->id . '/boards');
