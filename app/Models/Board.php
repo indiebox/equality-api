@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Closable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
@@ -28,7 +29,7 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  */
 class Board extends Model
 {
-    use HasFactory, MassPrunable, SoftDeletes, BelongsToThrough;
+    use HasFactory, MassPrunable, SoftDeletes, BelongsToThrough, Closable;
 
     protected $fillable = [
         'name',

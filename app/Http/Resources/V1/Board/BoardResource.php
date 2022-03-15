@@ -21,6 +21,8 @@ class BoardResource extends JsonResource
             'project' => new ProjectResource($this->project),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'closed_at' => $this->when($this->isClosed(), $this->closed_at),
+            'deleted_at' => $this->when($this->trashed(), $this->deleted_at),
         ];
     }
 }
