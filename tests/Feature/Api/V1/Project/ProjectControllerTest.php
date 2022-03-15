@@ -156,10 +156,11 @@ class ProjectControllerTest extends TestCase
 
         $response = $this->postJson('/api/v1/projects/' . $project->id . '/restore');
 
-        $response->assertNoContent();
-
         $project->refresh();
 
+        $response
+            ->assertOk()
+            ->assertJson((new ProjectResource($project))->response()->getData(true));
         $this->assertFalse($project->trashed());
     }
 }

@@ -57,6 +57,6 @@ class ProjectController extends Controller
     {
         $project->restore();
 
-        return response('', 204);
+        return new ProjectResource($project);
     }
 }
