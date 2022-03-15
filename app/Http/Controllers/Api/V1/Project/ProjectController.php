@@ -48,6 +48,15 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        //
+        $project->delete();
+
+        return response('', 204);
+    }
+
+    public function restore(Project $project)
+    {
+        $project->restore();
+
+        return response('', 204);
     }
 }

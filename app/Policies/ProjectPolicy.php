@@ -66,6 +66,18 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project)
     {
-        return false;
+        return $project->team->isMember($user);
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Project  $project
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function restore(User $user, Project $project)
+    {
+        return $project->team->isMember($user);
     }
 }

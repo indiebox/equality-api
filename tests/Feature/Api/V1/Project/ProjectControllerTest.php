@@ -97,4 +97,69 @@ class ProjectControllerTest extends TestCase
         ;
         $this->assertDatabaseHas('projects', $data);
     }
+
+    public function test_cant_delete_without_permissions()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->deleteJson('/api/v1/projects/' . $project->id);
+
+        $response->assertForbidden();
+    }
+    public function test_can_delete()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->deleteJson('/api/v1/projects/' . $project->id);
+
+        $response->assertNoContent();
+
+        $project->refresh();
+
+        $this->assertTrue($project->trashed());
+    }
+
+    public function test_cant_restore_not_trashed()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/restore');
+
+        $response->assertNotFound();
+    }
+    public function test_cant_restore_trashed_without_permissions()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->deleted()->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/restore');
+
+        $response->assertForbidden();
+    }
+    public function test_can_restore_trashed()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->deleted()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/restore');
+
+        $response->assertNoContent();
+
+        $project->refresh();
+
+        $this->assertFalse($project->trashed());
+    }
 }
