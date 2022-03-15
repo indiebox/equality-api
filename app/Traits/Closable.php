@@ -40,11 +40,8 @@ trait Closable
      */
     public function close()
     {
-        $column = $this->getClosedAtColumn();
-
-        $result = $this->forceFill([
-            $column => $this->freshTimestampString(),
-        ])->save();
+        $this->{$this->getClosedAtColumn()} = $this->freshTimestamp();
+        $result = $this->save();
 
         if ($result) {
             $this->fireModelEvent('closed', false);
