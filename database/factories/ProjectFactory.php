@@ -19,6 +19,13 @@ class ProjectFactory extends Factory
         ];
     }
 
+    public function deleted()
+    {
+        return $this->state([
+            'deleted_at' => now(),
+        ]);
+    }
+
     /** Setup leader user to the project.
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $user
      * @return static

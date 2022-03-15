@@ -61,6 +61,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{team}/projects',
         ], function () {
             Route::get('/', [Team\ProjectController::class, 'index'])->can('viewAny', [ProjectModel::class, 'team']);
+            Route::get('/trashed', [Team\ProjectController::class, 'indexTrashed'])
+                ->can('viewAny', [ProjectModel::class, 'team']);
             Route::post('/', [Team\ProjectController::class, 'store'])->can('create', [ProjectModel::class, 'team']);
         });
 
@@ -141,8 +143,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/image', [Project\ImageController::class, 'destroy']);
         });
 
+        Route::post('/{trashed:project}/restore', [Project\ProjectController::class, 'restore'])
+            ->can('restore', 'trashed:project');
         Route::get('/{project}/leader', [Project\ProjectController::class, 'leader'])->can('view', 'project');
         Route::get('/{project}', [Project\ProjectController::class, 'show'])->can('view', 'project');
+        Route::delete('/{project}', [Project\ProjectController::class, 'destroy'])->can('delete', 'project');
     });
 
     /*
