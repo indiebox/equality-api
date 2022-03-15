@@ -31,5 +31,8 @@ class ProjectSeeder extends Seeder
 
         Project::factory()->team($teams[5])->leader($user1)->create();
         Project::factory()->team($teams[5])->leader($user2)->create();
+
+        // Archived projects
+        Project::factory()->team($teams[5])->leader($user1)->deleted()->create();
     }
 }
