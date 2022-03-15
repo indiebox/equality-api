@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1\Project;
 
 use App\Http\Resources\V1\Project\ProjectResource;
+use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
 use App\Models\Team;
@@ -118,10 +119,11 @@ class ProjectControllerTest extends TestCase
 
         $response = $this->deleteJson('/api/v1/projects/' . $project->id);
 
-        $response->assertNoContent();
-
         $project->refresh();
 
+        $response
+            ->assertOk()
+            ->assertJson((new TeamProjectResource($project))->response()->getData(true));
         $this->assertTrue($project->trashed());
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Project\UpdateProjectRequest;
 use App\Http\Resources\V1\Project\ProjectResource;
+use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
 
@@ -50,7 +51,7 @@ class ProjectController extends Controller
     {
         $project->delete();
 
-        return response('', 204);
+        return new TeamProjectResource($project);
     }
 
     public function restore(Project $project)
