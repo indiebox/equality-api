@@ -44,7 +44,7 @@ class BoardController extends Controller
     {
         $board->delete();
 
-        return response('', 204);
+        return new BoardResource($board);
     }
 
     /**
@@ -57,6 +57,6 @@ class BoardController extends Controller
     {
         $board->restore();
 
-        return response('', 204);
+        return new BoardResource($board);
     }
 }

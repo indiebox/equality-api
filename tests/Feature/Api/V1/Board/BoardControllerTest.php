@@ -95,10 +95,11 @@ class BoardControllerTest extends TestCase
 
         $response = $this->deleteJson('/api/v1/boards/' . $board->id);
 
-        $response->assertNoContent();
-
         $board->refresh();
 
+        $response
+            ->assertOk()
+            ->assertJson((new BoardResource($board))->response()->getData(true));
         $this->assertTrue($board->trashed());
     }
 
@@ -134,10 +135,11 @@ class BoardControllerTest extends TestCase
 
         $response = $this->postJson('/api/v1/boards/' . $board->id . '/restore');
 
-        $response->assertNoContent();
-
         $board->refresh();
 
+        $response
+            ->assertOk()
+            ->assertJson((new BoardResource($board))->response()->getData(true));
         $this->assertFalse($board->trashed());
     }
 }
