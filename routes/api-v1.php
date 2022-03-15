@@ -61,6 +61,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{team}/projects',
         ], function () {
             Route::get('/', [Team\ProjectController::class, 'index'])->can('viewAny', [ProjectModel::class, 'team']);
+            Route::get('/trashed', [Team\ProjectController::class, 'indexTrashed'])
+                ->can('viewAny', [ProjectModel::class, 'team']);
             Route::post('/', [Team\ProjectController::class, 'store'])->can('create', [ProjectModel::class, 'team']);
         });
 
