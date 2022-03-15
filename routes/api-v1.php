@@ -160,13 +160,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('boards')->group(function () {
         // Columns.
-        Route::get('{withClosedAndTrashedBoard}/columns', [Board\ColumnController::class, 'index'])
-            ->can('viewAny', [ColumnModel::class, 'withClosedAndTrashedBoard']);
+        Route::get('{anyBoard}/columns', [Board\ColumnController::class, 'index'])
+            ->can('viewAny', [ColumnModel::class, 'anyBoard']);
         Route::post('{board}/columns', [Board\ColumnController::class, 'store'])
             ->can('create', [ColumnModel::class, 'board']);
 
-        Route::get('/{withClosedAndTrashedBoard}', [Board\BoardController::class, 'show'])
-            ->can('view', 'withClosedAndTrashedBoard');
+        Route::get('/{anyBoard}', [Board\BoardController::class, 'show'])
+            ->can('view', 'anyBoard');
         Route::patch('/{board}', [Board\BoardController::class, 'update'])->can('update', 'board');
 
         Route::post('/{closed:board}/open', [Board\BoardController::class, 'open'])->can('update', 'closed:board');

@@ -135,7 +135,7 @@ class RouteServiceProvider extends ServiceProvider
 
     protected function bindingsForBoards()
     {
-        Route::bind('withClosedAndTrashedBoard', function ($id) {
+        Route::bind('anyBoard', function ($id) {
             return Board::withClosed()->withTrashed()->findOrFail($id);
         });
     }
