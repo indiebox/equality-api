@@ -74,6 +74,75 @@ class BoardControllerTest extends TestCase
         $this->assertDatabaseHas('boards', ['project_id' => $project->id] + $data);
     }
 
+    public function test_cant_close_without_permissions()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/close');
+
+        $response->assertForbidden();
+    }
+    public function test_can_close()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/close');
+
+        $board->refresh();
+
+        $response
+            ->assertOk()
+            ->assertJson((new BoardResource($board))->response()->getData(true));
+        $this->assertTrue($board->isClosed());
+    }
+
+    public function test_cant_open_not_closed()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/open');
+
+        $response->assertNotFound();
+    }
+    public function test_cant_open_without_permissions()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->closed()->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/open');
+
+        $response->assertForbidden();
+    }
+    public function test_can_open()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->closed()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/open');
+
+        $board->refresh();
+
+        $response
+            ->assertOk()
+            ->assertJson((new BoardResource($board))->response()->getData(true));
+        $this->assertFalse($board->isClosed());
+    }
+
     public function test_cant_delete_without_permissions()
     {
         $project = Project::factory()->team(Team::factory())->create();

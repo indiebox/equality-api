@@ -40,6 +40,34 @@ class BoardControllerTest extends TestCase
             ->assertOk()
             ->assertJson(ProjectBoardResource::collection($boards)->response()->getData(true));
     }
+
+    public function test_cant_view_closed_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/boards/closed');
+
+        $response->assertForbidden();
+    }
+    public function test_can_view_closed()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+        Board::factory(2)->project($project)->create();
+        $closedBoards = Board::factory(2)->project($project)->closed()->create();
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/boards/closed');
+
+        $response
+            ->assertOk()
+            ->assertJson(ProjectBoardResource::collection($closedBoards)->response()->getData(true));
+    }
+
     public function test_cant_view_trashed_in_not_your_team()
     {
         $team = Team::factory()->create();
