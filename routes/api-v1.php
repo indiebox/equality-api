@@ -129,6 +129,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [Project\BoardController::class, 'index'])->can('viewAny', [BoardModel::class, 'project']);
             Route::get('/trashed', [Project\BoardController::class, 'indexTrashed'])
                 ->can('viewAny', [BoardModel::class, 'project']);
+            Route::get('/closed', [Project\BoardController::class, 'indexClosed'])
+                ->can('viewAny', [BoardModel::class, 'project']);
             Route::post('/', [Project\BoardController::class, 'store'])->can('create', [BoardModel::class, 'project']);
         });
 
@@ -158,16 +160,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('boards')->group(function () {
         // Columns.
-        Route::group([
-            'prefix' => '{board}/columns',
-        ], function () {
-            Route::get('/', [Board\ColumnController::class, 'index'])->can('viewAny', [ColumnModel::class, 'board']);
-            Route::post('/', [Board\ColumnController::class, 'store'])->can('create', [ColumnModel::class, 'board']);
-        });
+        Route::get('{anyBoard}/columns', [Board\ColumnController::class, 'index'])
+            ->can('viewAny', [ColumnModel::class, 'anyBoard']);
+        Route::post('{board}/columns', [Board\ColumnController::class, 'store'])
+            ->can('create', [ColumnModel::class, 'board']);
 
-        Route::get('/{board}', [Board\BoardController::class, 'show'])->can('view', 'board');
-        Route::post('/{trashed:board}/restore', [Board\BoardController::class, 'restore'])->can('restore', 'trashed:board');
+        Route::get('/{anyBoard}', [Board\BoardController::class, 'show'])
+            ->can('view', 'anyBoard');
         Route::patch('/{board}', [Board\BoardController::class, 'update'])->can('update', 'board');
+
+        Route::post('/{closed:board}/open', [Board\BoardController::class, 'open'])->can('update', 'closed:board');
+        Route::post('/{board}/close', [Board\BoardController::class, 'close'])->can('update', 'board');
+
+        Route::post('/{trashed:board}/restore', [Board\BoardController::class, 'restore'])->can('restore', 'trashed:board');
         Route::delete('/{board}', [Board\BoardController::class, 'destroy'])->can('delete', 'board');
     });
 

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Board;
 use App\Models\Invite;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -42,6 +43,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->bindingsForScopes();
         $this->bindingsForInvites();
+        $this->bindingsForBoards();
 
         $this->configureRateLimiting();
 
@@ -99,12 +101,42 @@ class RouteServiceProvider extends ServiceProvider
 
             return $model;
         });
+
+        // This macro used to get onlyClosed models with Closable trait.
+        // First parameter is model name (can be lowercased),
+        // second parameter is optional and it is a column name.
+        // Route::get('boards/{closed:board}', ...)->can('someAction', 'closed:board')
+        // Route::get('boards/{closed:board_name}, ...)->can('someAction', 'closed:board')
+        Route::bind('closed', function ($id, RoutingRoute $route) {
+            $bindings = Str::of($route->bindingFieldFor('closed'))->explode('_');
+
+            $model = app("App\\Models\\" . $bindings[0]);
+            if ($model == null || !in_array(SoftDeletes::class, class_uses_recursive($model))) {
+                throw (new ModelNotFoundException())->setModel(
+                    get_class($model),
+                    $id
+                );
+            }
+
+            $model = $model::onlyClosed()->where($bindings[1] ?? $model->getRouteKeyName(), $id)->firstOrFail();
+
+            $route->setParameter('closed:' . $bindings[0], $model);
+
+            return $model;
+        });
     }
 
     protected function bindingsForInvites()
     {
         Route::bind('pendingInvite', function ($id) {
             return Invite::onlyPending()->findOrFail($id);
+        });
+    }
+
+    protected function bindingsForBoards()
+    {
+        Route::bind('anyBoard', function ($id) {
+            return Board::withClosed()->withTrashed()->findOrFail($id);
         });
     }
 }

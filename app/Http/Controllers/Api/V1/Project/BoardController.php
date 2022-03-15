@@ -22,6 +22,17 @@ class BoardController extends Controller
     }
 
     /**
+     * Display a listing of the closed resource.
+     *
+     * @param \App\Models\Project $project
+     * @return \Illuminate\Http\Response
+     */
+    public function indexClosed(Project $project)
+    {
+        return ProjectBoardResource::collection($project->boards()->onlyClosed()->get());
+    }
+
+    /**
      * Display a listing of the trashed resource.
      *
      * @param \App\Models\Project $project

@@ -35,6 +35,32 @@ class BoardController extends Controller
     }
 
     /**
+     * Close the specified board.
+     *
+     * @param  \App\Models\Board  $board
+     * @return \Illuminate\Http\Response
+     */
+    public function close(Board $board)
+    {
+        $board->close();
+
+        return new BoardResource($board);
+    }
+
+    /**
+     * Open the specified board.
+     *
+     * @param  \App\Models\Board  $board
+     * @return \Illuminate\Http\Response
+     */
+    public function open(Board $board)
+    {
+        $board->open();
+
+        return new BoardResource($board);
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Board  $board
@@ -44,7 +70,7 @@ class BoardController extends Controller
     {
         $board->delete();
 
-        return response('', 204);
+        return new BoardResource($board);
     }
 
     /**
@@ -57,6 +83,6 @@ class BoardController extends Controller
     {
         $board->restore();
 
-        return response('', 204);
+        return new BoardResource($board);
     }
 }
