@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Project;
 
+use App\Http\Resources\V1\Team\TeamMemberResource;
 use App\Models\LeaderNomination;
 use App\Models\Project;
 use App\Models\Team;
@@ -30,9 +31,8 @@ class LeaderNominationControllerTest extends TestCase
     {
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
-        $user1 = User::factory()->hasAttached($team)->create();
-        $user2 = User::factory()->hasAttached($team)->create();
-        $user3 = User::factory()->hasAttached($team)->create();
+        User::factory(3)->hasAttached($team)->create();
+        [$user1, $user2, $user3] = Team::first()->members;
         LeaderNomination::factory()
             ->project($project)
             ->voter($user1)
@@ -55,15 +55,26 @@ class LeaderNominationControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJson(function (AssertableJson $json) use ($user1, $user2, $user3) {
+                TeamMemberResource::withoutWrapping();
+
                 $json->whereAll([
-                    'data.0.nominated' => $user1,
+                    'data.0.nominated_id' => $user1->id,
+                    'data.0.nominated' => (new TeamMemberResource($user1))->response()->getData(true),
                     'data.0.count' => 2,
-                    'data.0.voters' => [$user1->id, $user2->id],
+                    'data.0.voters' => TeamMemberResource::collection([$user1, $user2])->response()->getData(true),
                 ])->whereAll([
-                    'data.1.nominated' => $user3,
+                    'data.1.nominated_id' => $user3->id,
+                    'data.1.nominated' => (new TeamMemberResource($user3))->response()->getData(true),
                     'data.1.count' => 1,
-                    'data.1.voters' => [$user3->id],
+                    'data.1.voters' => TeamMemberResource::collection([$user3])->response()->getData(true),
+                ])->whereAll([
+                    'data.2.nominated_id' => $user2->id,
+                    'data.2.nominated' => (new TeamMemberResource($user2))->response()->getData(true),
+                    'data.2.count' => 0,
+                    'data.2.voters' => [],
                 ])->interacted();
+
+                TeamMemberResource::wrap('data');
             });
     }
 

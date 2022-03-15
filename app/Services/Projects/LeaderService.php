@@ -53,6 +53,37 @@ class LeaderService implements LeaderServiceContract
         }
     }
 
+    public function makeNominationsCollection(Project $project)
+    {
+        $members = $project->team->members;
+
+        $membersNominations = $members->map(function ($member) {
+            return [
+                'nominated_id' => $member->id,
+                'nominated' => $member,
+                'count' => 0,
+                'voters' => [],
+            ];
+        });
+
+        $nominations = $project->leaderNominations()
+            ->get()
+            ->groupBy('nominated_id')
+            ->map(function ($nomination) use ($members) {
+                return [
+                    'nominated_id' => $nomination->first()->nominated_id,
+                    'nominated' => $members->find($nomination->first()->nominated_id),
+                    'count' => $nomination->count(),
+                    'voters' => $members->find($nomination->pluck('voter_id')),
+                ];
+            });
+
+        return $nominations->merge($membersNominations)
+            ->unique('nominated_id')
+            ->sortByDesc('count')
+            ->values();
+    }
+
     protected function getSqlForGetNominationQuery()
     {
         return DB::raw('(' .

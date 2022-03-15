@@ -17,14 +17,9 @@ class LeaderNominationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Project $project)
+    public function index(LeaderService $leaderService, Project $project)
     {
-        $nominations = $project->leaderNominations()
-            ->with('nominated')
-            ->get()
-            ->groupBy('nominated_id');
-
-        return new LeaderNominationCollection($nominations);
+        return new LeaderNominationCollection($leaderService->makeNominationsCollection($project));
     }
 
     /**
