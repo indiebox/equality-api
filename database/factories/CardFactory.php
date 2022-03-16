@@ -19,6 +19,13 @@ class CardFactory extends Factory
         ];
     }
 
+    public function order($order)
+    {
+        return $this->state([
+            'order' => $order,
+        ]);
+    }
+
     /** Setup column for the card.
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $column
      * @return static

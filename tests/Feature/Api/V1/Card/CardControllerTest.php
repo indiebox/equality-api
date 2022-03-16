@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use App\Rules\Api\MaxCardsPerColumn;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -86,6 +87,136 @@ class CardControllerTest extends TestCase
             ->assertOk()
             ->assertJson((new CardResource(Card::first()))->response()->getData(true));
         $this->assertDatabaseHas('cards', ['column_id' => $column->id] + $data);
+    }
+
+    public function test_cant_change_order_without_permissions()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        $card = Card::factory()->column($column)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order');
+
+        $response->assertForbidden();
+    }
+    public function test_cant_change_order_with_incorrect_request()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+
+        Card::factory()->column($column)
+            ->state(new Sequence(
+                ['order' => 1],
+                ['order' => 2],
+                ['order' => 3],
+            ))->create();
+        $card = Card::factory()->column($column)->order(4)->create();
+
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order');
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['after']);
+    }
+    public function test_cant_change_order_after_card_in_other_column()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+
+        $cards = Card::factory(3)->column($column)
+            ->state(new Sequence(
+                ['order' => 1],
+                ['order' => 2],
+                ['order' => 3],
+            ))->create();
+        $card = Card::factory()->column(Column::factory()->board($board))->order(4)->create();
+
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[0]->id]);
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['after' => 'The selected after is invalid.']);
+    }
+    public function test_can_change_order()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+
+        $cards = Card::factory(3)->column($column)
+            ->state(new Sequence(
+                ['order' => 1],
+                ['order' => 2],
+                ['order' => 3],
+            ))->create();
+        $card = Card::factory()->column($column)->order(4)->create();
+
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[1]->id]);
+
+        $card->refresh();
+        $cards = $cards->fresh();
+
+        $response
+            ->assertOk()
+            ->assertJson((new CardResource($card))->response()->getData(true));
+        $this->assertEquals(3, $card->order);
+        $this->assertEquals(4, $cards[2]->order);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => null]);
+
+        $card->refresh();
+        $cards = $cards->fresh();
+
+        $response
+            ->assertOk()
+            ->assertJson((new CardResource($card))->response()->getData(true));
+        $this->assertEquals(1, $card->order);
+        $this->assertEquals(2, $cards[0]->order);
+        $this->assertEquals(3, $cards[1]->order);
+        $this->assertEquals(4, $cards[2]->order);
+
+        $response = $this->postJson('/api/v1/cards/' . $cards[1]->id . '/order', ['after' => null]);
+
+        $card->refresh();
+        $cards = $cards->fresh();
+
+        $response
+            ->assertOk()
+            ->assertJson((new CardResource($cards[1]))->response()->getData(true));
+        $this->assertEquals(1, $cards[1]->order);
+        $this->assertEquals(2, $card->order);
+        $this->assertEquals(3, $cards[0]->order);
+        $this->assertEquals(4, $cards[2]->order);
+
+        $response = $this->postJson('/api/v1/cards/' . $cards[2]->id . '/order', ['after' => $card->id]);
+
+        $card->refresh();
+        $cards = $cards->fresh();
+
+        $response
+            ->assertOk()
+            ->assertJson((new CardResource($cards[2]))->response()->getData(true));
+        $this->assertEquals(1, $cards[1]->order);
+        $this->assertEquals(2, $card->order);
+        $this->assertEquals(3, $cards[2]->order);
+        $this->assertEquals(4, $cards[0]->order);
     }
 
     public function test_cant_move_without_permissions()
