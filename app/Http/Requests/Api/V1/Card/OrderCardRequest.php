@@ -33,7 +33,7 @@ class OrderCardRequest extends FormRequest
                 $card = Card::where('column_id', $this->route('card')->column->id)->find($this->after);
 
                 if ($card == null) {
-                    $validator->errors()->add('after', trans('validation.exists'));
+                    $validator->errors()->add('after', trans('validation.exists', ['attribute' => 'after']));
 
                     return;
                 }

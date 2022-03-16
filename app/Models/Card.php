@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Znck\Eloquent\Traits\BelongsToThrough;
@@ -19,9 +20,10 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Team $team
  * @method static \Database\Factories\CardFactory factory(...$parameters)
- * @method static Builder|Invite newModelQuery()
- * @method static Builder|Invite newQuery()
- * @method static Builder|Invite query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Card newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Card newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Card query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Card ordered()
  * @mixin \Eloquent
  */
 class Card extends Model
@@ -32,6 +34,17 @@ class Card extends Model
         'name',
         'description',
     ];
+
+    /*
+    |-------------------------------------------------------------
+    | Scopes
+    |-------------------------------------------------------------
+    */
+
+    public function scopeOrdered(Builder $query)
+    {
+        return $query->orderByRaw("CASE WHEN `order` is NULL THEN 1 ELSE 0 end, `order`");
+    }
 
     /*
     |-------------------------------------------------------------

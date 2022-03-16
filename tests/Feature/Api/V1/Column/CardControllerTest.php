@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use App\Rules\Api\MaxCardsPerColumn;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -39,13 +40,20 @@ class CardControllerTest extends TestCase
         $column = Column::factory()->board($board)->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
-        $cards = Card::factory(2)->column($column)->create();
+        $cards = Card::factory(4)->column($column)->state(new Sequence(
+            ['order' => null],
+            ['order' => 3],
+            ['order' => 1],
+            ['order' => 2],
+        ))->create();
 
         $response = $this->getJson('/api/v1/columns/' . $column->id . '/cards');
 
         $response
             ->assertOk()
-            ->assertJson(ColumnCardResource::collection($cards)->response()->getData(true));
+            ->assertJson(
+                ColumnCardResource::collection([$cards[2], $cards[3], $cards[1], $cards[0]])->response()->getData(true)
+            );
     }
 
     public function test_cant_store_in_not_your_team()
