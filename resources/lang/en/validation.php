@@ -143,6 +143,8 @@ return [
     'is_member_of_team' => 'This user is already a member of this team.',
     'already_invited' => 'This user is already invited in this team.',
 
+    'max_columns_per_board' => 'The columns limit for this board has been exceeded (:max).',
+
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',
