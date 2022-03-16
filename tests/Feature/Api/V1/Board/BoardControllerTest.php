@@ -7,6 +7,7 @@ use App\Models\Board;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
+use App\Rules\Api\MaxBoardsPerProject;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -203,6 +204,23 @@ class BoardControllerTest extends TestCase
 
         $response->assertForbidden();
     }
+    public function test_cant_open_with_exceeded_boards_limit()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        Board::factory(MaxBoardsPerProject::MAX_BOARDS)->project($project)->create();
+        $board = Board::factory()->project($project)->closed()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/open');
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.project', [
+                trans('validation.max_boards_per_project', ['max' => MaxBoardsPerProject::MAX_BOARDS])
+            ]);
+    }
     public function test_can_open()
     {
         $team = Team::factory()->create();
@@ -295,6 +313,23 @@ class BoardControllerTest extends TestCase
         $response = $this->postJson('/api/v1/boards/' . $board->id . '/restore');
 
         $response->assertForbidden();
+    }
+    public function test_cant_restore_with_exceeded_boards_limit()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        Board::factory(MaxBoardsPerProject::MAX_BOARDS)->project($project)->create();
+        $board = Board::factory()->project($project)->deleted()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/restore');
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.project', [
+                trans('validation.max_boards_per_project', ['max' => MaxBoardsPerProject::MAX_BOARDS])
+            ]);
     }
     public function test_can_restore_trashed()
     {

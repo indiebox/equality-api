@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Board;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Board\OpenBoardRequest;
+use App\Http\Requests\Api\V1\Board\RestoreBoardRequest;
 use App\Http\Requests\Api\V1\Board\UpdateBoardRequest;
 use App\Http\Resources\V1\Board\BoardResource;
 use App\Models\Board;
@@ -53,7 +55,7 @@ class BoardController extends Controller
      * @param  \App\Models\Board  $board
      * @return \Illuminate\Http\Response
      */
-    public function open(Board $board)
+    public function open(OpenBoardRequest $request, Board $board)
     {
         $board->open();
 
@@ -79,7 +81,7 @@ class BoardController extends Controller
      * @param  \App\Models\Board  $board
      * @return \Illuminate\Http\Response
      */
-    public function restore(Board $board)
+    public function restore(RestoreBoardRequest $request, Board $board)
     {
         $board->restore();
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api\V1\Project;
+namespace App\Http\Requests\Api\V1\Board;
 
 use App\Rules\Api\MaxBoardsPerProject;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreBoardRequest extends FormRequest
+class RestoreBoardRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -15,8 +15,7 @@ class StoreBoardRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'project' => [new MaxBoardsPerProject($this->route('project'))],
+            'project' => [new MaxBoardsPerProject($this->route('trashed:board')->project)],
         ];
     }
 }
