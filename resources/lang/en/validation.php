@@ -144,7 +144,7 @@ return [
     'is_member_of_team' => 'This user is already a member of this team.',
     'already_invited' => 'This user is already invited in this team.',
 
-    'max_cards_per_column' => 'The card limit for this column has been exceeded (:max).',
+    'max_cards_per_column' => 'The cards limit for this column has been exceeded (:max).',
 
     'custom' => [
         'attribute-name' => [
