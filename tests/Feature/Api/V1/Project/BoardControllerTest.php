@@ -7,6 +7,7 @@ use App\Models\Board;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
+use App\Rules\Api\MaxBoardsPerProject;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -107,6 +108,22 @@ class BoardControllerTest extends TestCase
         $response = $this->postJson('/api/v1/projects/' . $project->id . '/boards');
 
         $response->assertForbidden();
+    }
+    public function test_cant_store_with_exceeded_boards_limit()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        Board::factory(MaxBoardsPerProject::MAX_BOARDS)->project($project)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/projects/' . $project->id . '/boards');
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.project', [
+                trans('validation.max_boards_per_project', ['max' => MaxBoardsPerProject::MAX_BOARDS])
+            ]);
     }
     public function test_can_store()
     {
