@@ -40,16 +40,7 @@ class CardController extends Controller
     public function order(OrderCardRequest $request, Card $card)
     {
         $after = $request->after;
-        $order = 1;
-
-        if ($after != null) {
-            $order = $after->order + 1;
-        }
-
-        $card->column->cards()
-            ->where('order', '>=', $order)
-            ->where('order', '<', $card->order)
-            ->increment('order');
+        $order = $this->changeOrder($card, $after);
 
         $card->order = $order;
         $card->save();
@@ -59,10 +50,71 @@ class CardController extends Controller
 
     public function move(MoveCardRequest $request, Card $card, Column $column)
     {
+        $after = $request->after_card;
+        $order = 1;
+
+        if ($after == null) {
+            $lastCard = $column->cards()
+            ->orderedDesc()
+            ->take(1)
+            ->get(['order'])
+            ->first();
+
+            if ($lastCard != null) {
+                $order = $lastCard->order + 1;
+            }
+        } else {
+            $order = $after->order + 1;
+
+            $column->cards()
+            ->where('order', '>=', $order)
+            // ->where('order', '<', $card->order)
+            ->increment('order');
+        }
+
+        $card->order = $order;
         $card->column()->associate($column);
         $card->save();
 
-        return response('', 204);
+        return new CardResource($card);
+    }
+
+    protected function changeOrder($card, $after)
+    {
+        $order = 1;
+        $toBottom = false;
+
+        // Move to up or bottom
+        if ($after != null) {
+            if ($card->order < $after->order) {
+                $order = $after->order;
+                $toBottom = true;
+            } else {
+                $order = $after->order + 1;
+            }
+        }
+
+        if ($toBottom) {
+            $cardExists = Card::where('id', $order)->exists();
+
+            if ($cardExists) {
+                $card->column->cards()
+                ->where('order', '>', $card->order)
+                ->where('order', '<=', $order)
+                ->decrement('order');
+            }
+        } else {
+            $cardExists = Card::where('id', $order)->exists();
+
+            if ($cardExists) {
+                $card->column->cards()
+                    ->where('order', '>=', $order)
+                    ->where('order', '<', $card->order)
+                    ->increment('order');
+            }
+        }
+
+        return $order;
     }
 
     /**

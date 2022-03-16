@@ -16,6 +16,7 @@ class CardFactory extends Factory
         return [
             'name' => $this->faker->sentence(),
             'description' => $this->faker->sentences(3, true),
+            'order' => 1,
         ];
     }
 

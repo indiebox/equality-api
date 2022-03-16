@@ -43,7 +43,12 @@ class Card extends Model
 
     public function scopeOrdered(Builder $query)
     {
-        return $query->orderByRaw("CASE WHEN `order` is NULL THEN 1 ELSE 0 end, `order`");
+        return $query->orderBy('order');
+    }
+
+    public function scopeOrderedDesc(Builder $query)
+    {
+        return $query->orderByDesc('order');
     }
 
     /*

@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests\Api\V1\Card;
 
-use App\Models\Card;
+use App\Rules\Api\CardInSameColumn;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 class OrderCardRequest extends FormRequest
 {
@@ -16,30 +15,7 @@ class OrderCardRequest extends FormRequest
     public function rules()
     {
         return [
-            'after' => ['present', 'nullable', 'integer'],
+            'after' => ['present', 'nullable', 'integer', new CardInSameColumn($this->route('card')->column)],
         ];
-    }
-
-    /**
-     * Configure the validator instance.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     * @return void
-     */
-    public function withValidator($validator)
-    {
-        $validator->after(function (Validator $validator) {
-            if ($this->filled('after')) {
-                $card = Card::where('column_id', $this->route('card')->column->id)->find($this->after);
-
-                if ($card == null) {
-                    $validator->errors()->add('after', trans('validation.exists', ['attribute' => 'after']));
-
-                    return;
-                }
-
-                $this->merge(['after' => $card]);
-            }
-        });
     }
 }

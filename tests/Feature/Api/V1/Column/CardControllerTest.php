@@ -41,7 +41,6 @@ class CardControllerTest extends TestCase
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
         $cards = Card::factory(4)->column($column)->state(new Sequence(
-            ['order' => null],
             ['order' => 3],
             ['order' => 1],
             ['order' => 2],
@@ -52,7 +51,7 @@ class CardControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJson(
-                ColumnCardResource::collection([$cards[2], $cards[3], $cards[1], $cards[0]])->response()->getData(true)
+                ColumnCardResource::collection([$cards[1], $cards[2], $cards[0]])->response()->getData(true)
             );
     }
 
