@@ -17,9 +17,9 @@ class ProjectControllerTest extends TestCase
     public function test_cant_view_any_in_not_your_team()
     {
         $team = Team::factory()->create();
+        Project::factory()->team($team)->create();
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-        Project::factory()->team(Team::factory())->create();
 
         $response = $this->getJson('/api/v1/teams/' . $team->id . '/projects');
 
@@ -28,12 +28,37 @@ class ProjectControllerTest extends TestCase
     public function test_can_view_any()
     {
         $team = Team::factory()->create();
+        $projects = Project::factory(2)->team($team)->create();
+        Project::factory()->team($team)->deleted()->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
-        Project::factory()->team($team)->create();
-        $projects = Project::all();
 
         $response = $this->getJson('/api/v1/teams/' . $team->id . '/projects');
+
+        $response
+            ->assertOk()
+            ->assertJson(TeamProjectResource::collection($projects)->response()->getData(true));
+    }
+    public function test_cant_view_trashed_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        Project::factory()->team($team)->deleted()->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/projects/trashed');
+
+        $response->assertForbidden();
+    }
+    public function test_can_view_trashed()
+    {
+        $team = Team::factory()->create();
+        $projects = Project::factory(2)->team($team)->deleted()->create();
+        Project::factory()->team($team)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/projects/trashed');
 
         $response
             ->assertOk()

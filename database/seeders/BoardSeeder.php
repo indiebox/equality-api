@@ -19,6 +19,7 @@ class BoardSeeder extends Seeder
 
         foreach ($projects as $project) {
             $project->boards()->save(Board::factory()->make());
+            $project->boards()->save(Board::factory()->closed()->make());
         }
     }
 }

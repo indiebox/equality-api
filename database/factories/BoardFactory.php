@@ -25,6 +25,13 @@ class BoardFactory extends Factory
         ]);
     }
 
+    public function closed()
+    {
+        return $this->state([
+            'closed_at' => now(),
+        ]);
+    }
+
     /** Setup project for the board.
      * @param \Illuminate\Database\Eloquent\Factories\Factory|\Illuminate\Database\Eloquent\Model $project
      * @return static

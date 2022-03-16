@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\V1\Project;
 
-use App\Http\Resources\V1\User\UserResource;
+use App\Http\Resources\V1\Team\TeamMemberResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class LeaderNominationCollection extends ResourceCollection
@@ -26,13 +26,12 @@ class LeaderNominationCollection extends ResourceCollection
 
         foreach ($this->collection as $nomination) {
             $result->add([
-                'nominated' => new UserResource($nomination->first()->nominated),
-                'count' => $nomination->count(),
-                'voters' => $nomination->pluck('voter_id'),
+                'nominated_id' => $nomination['nominated_id'],
+                'nominated' => new TeamMemberResource($nomination['nominated']),
+                'count' => $nomination['count'],
+                'voters' => TeamMemberResource::collection($nomination['voters']),
             ]);
         }
-
-        $result = $result->sortByDesc('count');
 
         return [
             'data' => $result,

@@ -18,10 +18,11 @@ class DeleteOldArchivedBoardsTest extends TestCase
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         Board::factory(2)->project($project)->create();
+        Board::factory(2)->project($project)->closed()->create();
 
         Artisan::call('model:prune');
 
-        $this->assertDatabaseCount('boards', 2);
+        $this->assertDatabaseCount('boards', 4);
     }
 
     public function test_cant_delete_trashed_boards_before_time()

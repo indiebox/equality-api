@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Contracts\Projects\LeaderService;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -26,7 +27,24 @@ class LeaderServiceTest extends TestCase
         $this->service = app(LeaderService::class);
     }
 
-    public function test_recalculate_project_leader_by_nominations()
+    public function test_delete_user_nominations_method()
+    {
+        $team = Team::factory()->create();
+        $users = User::factory(3)->hasAttached($team)->create();
+        $project = Project::factory()->team($team)->leader($users[0])->create();
+        LeaderNomination::factory()->project($project)->voter($users[0])->nominated($users[0])->create();
+        LeaderNomination::factory()->project($project)->voter($users[1])->nominated($users[0])->create();
+        LeaderNomination::factory()->project($project)->voter($users[2])->nominated($users[1])->create();
+
+        $this->service->deleteUserNominations($users[0], $team);
+
+        $this->assertDatabaseCount('leader_nominations', 1);
+        $this->assertDatabaseHas('leader_nominations', ['voter_id' => $users[2]->id, 'nominated_id' => $users[1]->id]);
+        $project->refresh();
+        $this->assertEquals($project->leader_id, $users[1]->id);
+    }
+
+    public function test_determine_new_leader_method()
     {
         $users = User::factory(3)->create();
         $team = Team::factory()->hasAttached($users, [], 'members')->create();
@@ -63,7 +81,7 @@ class LeaderServiceTest extends TestCase
 
         $this->assertEquals($project->leader_id, $users[1]->id);
     }
-    public function test_recalculate_project_leader_by_most_old_member()
+    public function test_recalculates_project_leader_by_most_old_member()
     {
         $team = Team::factory()->create();
         $oldMember = User::factory()->hasAttached($team)->create();
@@ -75,20 +93,70 @@ class LeaderServiceTest extends TestCase
 
         $this->assertEquals($project->leader_id, $oldMember->id);
     }
-    public function test_delete_associated_nominations_and_detemine_new_leader()
+
+    public function test_make_nominations_collection_method_without_nominations()
     {
         $team = Team::factory()->create();
-        $users = User::factory(3)->hasAttached($team)->create();
+        $project = Project::factory()->team($team)->create();
+        User::factory(3)->hasAttached($team)->create();
+        $users = $project->team->members;
+        $project = Project::factory()->team($team)->leader($users[0])->create();
+
+        $collection = $this->service->makeNominationsCollection($project);
+
+        $this->assertEquals([
+            [
+                'nominated_id' => $users[0]->id,
+                'nominated' => $users[0],
+                'count' => 0,
+                'voters' => [],
+            ],
+            [
+                'nominated_id' => $users[1]->id,
+                'nominated' => $users[1],
+                'count' => 0,
+                'voters' => [],
+            ],
+            [
+                'nominated_id' => $users[2]->id,
+                'nominated' => $users[2],
+                'count' => 0,
+                'voters' => [],
+            ],
+        ], $collection->toArray());
+    }
+    public function test_make_nominations_collection_method_with_nominations()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        User::factory(3)->hasAttached($team)->create();
+        $users = $project->team->members;
         $project = Project::factory()->team($team)->leader($users[0])->create();
         LeaderNomination::factory()->project($project)->voter($users[0])->nominated($users[0])->create();
         LeaderNomination::factory()->project($project)->voter($users[1])->nominated($users[0])->create();
-        LeaderNomination::factory()->project($project)->voter($users[2])->nominated($users[1])->create();
+        LeaderNomination::factory()->project($project)->voter($users[2])->nominated($users[2])->create();
 
-        $this->service->deleteUserNominations($users[0], $team);
+        $collection = $this->service->makeNominationsCollection($project);
 
-        $this->assertDatabaseCount('leader_nominations', 1);
-        $this->assertDatabaseHas('leader_nominations', ['voter_id' => $users[2]->id, 'nominated_id' => $users[1]->id]);
-        $project->refresh();
-        $this->assertEquals($project->leader_id, $users[1]->id);
+        $this->assertEquals([
+            [
+                'nominated_id' => $users[0]->id,
+                'nominated' => $users[0],
+                'count' => 2,
+                'voters' => new EloquentCollection([$users[0], $users[1]]),
+            ],
+            [
+                'nominated_id' => $users[2]->id,
+                'nominated' => $users[2],
+                'count' => 1,
+                'voters' => new EloquentCollection([2 => $users[2]]),
+            ],
+            [
+                'nominated_id' => $users[1]->id,
+                'nominated' => $users[1],
+                'count' => 0,
+                'voters' => [],
+            ],
+        ], $collection->toArray());
     }
 }

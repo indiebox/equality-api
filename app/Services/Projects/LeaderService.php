@@ -26,7 +26,9 @@ class LeaderService implements LeaderServiceContract
 
         // Determine the new leader by nominations for affected projects.
         $result = $team->projects()
-            ->whereIn('id', $projects)
+            ->when($projects->count() != 0, function ($query) use ($projects) {
+                return $query->whereIn('id', $projects);
+            })
             ->orWhere('leader_id', $user->id)
             ->update([
                 'leader_id' => $this->getSqlForGetNominationQuery(),
@@ -51,6 +53,37 @@ class LeaderService implements LeaderServiceContract
         } else {
             Project::where('id', $project->id)->update(['leader_id' => $this->getSqlForGetMostOlderMember()]);
         }
+    }
+
+    public function makeNominationsCollection(Project $project)
+    {
+        $members = $project->team->members;
+
+        $membersNominations = $members->map(function ($member) {
+            return [
+                'nominated_id' => $member->id,
+                'nominated' => $member,
+                'count' => 0,
+                'voters' => [],
+            ];
+        });
+
+        $nominations = collect($project->leaderNominations()
+            ->get()
+            ->groupBy('nominated_id')
+            ->map(function ($nomination) use ($members) {
+                return [
+                    'nominated_id' => $nomination->first()->nominated_id,
+                    'nominated' => $members->find($nomination->first()->nominated_id),
+                    'count' => $nomination->count(),
+                    'voters' => $members->find($nomination->pluck('voter_id')),
+                ];
+            })->toArray());
+
+        return $nominations->merge($membersNominations)
+            ->unique('nominated_id')
+            ->sortByDesc('count')
+            ->values();
     }
 
     protected function getSqlForGetNominationQuery()

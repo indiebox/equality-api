@@ -40,7 +40,7 @@ class CardControllerTest extends TestCase
         $column = Column::factory()->board($board)->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
-        $cards = Card::factory(4)->column($column)->state(new Sequence(
+        $cards = Card::factory(3)->column($column)->state(new Sequence(
             ['order' => 3],
             ['order' => 1],
             ['order' => 2],

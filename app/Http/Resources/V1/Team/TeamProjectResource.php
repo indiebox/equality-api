@@ -21,6 +21,7 @@ class TeamProjectResource extends JsonResource
             'description' => $this->description,
             'image' => image($this->image),
             'leader' => new UserResource($this->leader),
+            'deleted_at' => $this->when($this->deleted_at != null, $this->deleted_at),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

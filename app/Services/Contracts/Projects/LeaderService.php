@@ -21,4 +21,12 @@ interface LeaderService
      * @param Project $project
      */
     public function determineNewLeader(Project $project);
+
+    /**
+     * Make collection from project nominations.
+     *
+     * @param Project $project
+     * @return \Illuminate\Support\Collection
+     */
+    public function makeNominationsCollection(Project $project);
 }
