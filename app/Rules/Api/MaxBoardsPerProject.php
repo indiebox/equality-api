@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ImplicitRule;
 class MaxBoardsPerProject implements ImplicitRule
 {
     /** Max boards per project.*/
-    public const MAX_BOARDS = 100;
+    public const MAX_BOARDS = 10;
 
     protected $project;
 
