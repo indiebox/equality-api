@@ -20,5 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(LeaderNominationSeeder::class);
         $this->call(BoardSeeder::class);
         $this->call(ColumnSeeder::class);
+        $this->call(CardSeeder::class);
     }
 }

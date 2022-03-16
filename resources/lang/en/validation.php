@@ -139,11 +139,16 @@ return [
     */
 
     'recaptcha' => 'You must confirm that you are not a robot.',
+
     'invalid_user' => 'This user is invalid.',
     'is_member_of_team' => 'This user is already a member of this team.',
     'already_invited' => 'This user is already invited in this team.',
 
+    /*
+     * Item limits.
+     */
     'max_columns_per_board' => 'The columns limit for this board has been exceeded (:max).',
+    'max_cards_per_column' => 'The cards limit for this column has been exceeded (:max).',
 
     'custom' => [
         'attribute-name' => [
