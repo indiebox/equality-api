@@ -147,6 +147,7 @@ return [
     /*
      * Item limits.
      */
+    'max_boards_per_project' => 'The boards limit for this project has been exceeded (:max).',
     'max_columns_per_board' => 'The columns limit for this board has been exceeded (:max).',
     'max_cards_per_column' => 'The cards limit for this column has been exceeded (:max).',
 
