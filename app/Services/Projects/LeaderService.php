@@ -26,7 +26,9 @@ class LeaderService implements LeaderServiceContract
 
         // Determine the new leader by nominations for affected projects.
         $result = $team->projects()
-            ->whereIn('id', $projects)
+            ->when($projects->count() != 0, function ($query) use ($projects) {
+                return $query->whereIn('id', $projects);
+            })
             ->orWhere('leader_id', $user->id)
             ->update([
                 'leader_id' => $this->getSqlForGetNominationQuery(),
@@ -57,14 +59,14 @@ class LeaderService implements LeaderServiceContract
     {
         $members = $project->team->members;
 
-        $membersNominations = collect($members->map(function ($member) {
+        $membersNominations = $members->map(function ($member) {
             return [
                 'nominated_id' => $member->id,
                 'nominated' => $member,
                 'count' => 0,
                 'voters' => [],
             ];
-        })->toArray());
+        });
 
         $nominations = collect($project->leaderNominations()
             ->get()
