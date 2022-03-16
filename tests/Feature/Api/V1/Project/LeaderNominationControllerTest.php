@@ -77,6 +77,41 @@ class LeaderNominationControllerTest extends TestCase
                 TeamMemberResource::wrap('data');
             });
     }
+    public function test_can_view_with_empty_nominations()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        User::factory(3)->hasAttached($team)->create();
+        [$user1, $user2, $user3] = $team->members;
+        Sanctum::actingAs($user1);
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/leader-nominations');
+
+        $response
+            ->assertOk()
+            ->assertJson(function (AssertableJson $json) use ($user1, $user2, $user3) {
+                TeamMemberResource::withoutWrapping();
+
+                $json->whereAll([
+                    'data.0.nominated_id' => $user1->id,
+                    'data.0.nominated' => (new TeamMemberResource($user1))->response()->getData(true),
+                    'data.0.count' => 0,
+                    'data.0.voters' => [],
+                ])->whereAll([
+                    'data.1.nominated_id' => $user2->id,
+                    'data.1.nominated' => (new TeamMemberResource($user2))->response()->getData(true),
+                    'data.1.count' => 0,
+                    'data.1.voters' => [],
+                ])->whereAll([
+                    'data.2.nominated_id' => $user3->id,
+                    'data.2.nominated' => (new TeamMemberResource($user3))->response()->getData(true),
+                    'data.2.count' => 0,
+                    'data.2.voters' => [],
+                ])->interacted();
+
+                TeamMemberResource::wrap('data');
+            });
+    }
 
     public function test_cant_nominate_in_not_your_team()
     {

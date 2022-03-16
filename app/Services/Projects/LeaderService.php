@@ -57,16 +57,16 @@ class LeaderService implements LeaderServiceContract
     {
         $members = $project->team->members;
 
-        $membersNominations = $members->map(function ($member) {
+        $membersNominations = collect($members->map(function ($member) {
             return [
                 'nominated_id' => $member->id,
                 'nominated' => $member,
                 'count' => 0,
                 'voters' => [],
             ];
-        });
+        })->toArray());
 
-        $nominations = $project->leaderNominations()
+        $nominations = collect($project->leaderNominations()
             ->get()
             ->groupBy('nominated_id')
             ->map(function ($nomination) use ($members) {
@@ -76,7 +76,7 @@ class LeaderService implements LeaderServiceContract
                     'count' => $nomination->count(),
                     'voters' => $members->find($nomination->pluck('voter_id')),
                 ];
-            });
+            })->toArray());
 
         return $nominations->merge($membersNominations)
             ->unique('nominated_id')
