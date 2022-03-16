@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Api\V1\Board;
+use App\Http\Controllers\Api\V1\Card;
 use App\Http\Controllers\Api\V1\Column;
 use App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Api\V1\User;
 use App\Models\Board as BoardModel;
+use App\Models\Card as CardModel;
 use App\Models\Column as ColumnModel;
 use App\Models\Invite as InviteModel;
 use App\Models\LeaderNomination as LeaderNominationModel;
@@ -183,8 +185,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::prefix('columns')->group(function () {
+        // Cards.
+        Route::group([
+            'prefix' => '{column}/cards',
+        ], function () {
+            Route::get('/', [Column\CardController::class, 'index'])->can('viewAny', [CardModel::class, 'column']);
+            Route::post('/', [Column\CardController::class, 'store'])->can('create', [CardModel::class, 'column']);
+        });
+
         Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');
         Route::patch('/{column}', [Column\ColumnController::class, 'update'])->can('update', 'column');
         Route::delete('/{column}', [Column\ColumnController::class, 'destroy'])->can('delete', 'column');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cards actions.
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('cards')->group(function () {
+        Route::post('/{card}/move/{column}', [Card\CardController::class, 'move'])->can('move', ['card', 'column']);
+        Route::get('/{card}', [Card\CardController::class, 'show'])->can('view', 'card');
+        Route::patch('/{card}', [Card\CardController::class, 'update'])->can('update', 'card');
+        Route::delete('/{card}', [Card\CardController::class, 'destroy'])->can('delete', 'card');
     });
 });
