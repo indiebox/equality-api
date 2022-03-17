@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
+use App\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Znck\Eloquent\Traits\BelongsToThrough;
@@ -28,27 +28,16 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  */
 class Card extends Model
 {
-    use HasFactory, BelongsToThrough;
+    use HasFactory, BelongsToThrough, HasOrder;
 
     protected $fillable = [
         'name',
         'description',
     ];
 
-    /*
-    |-------------------------------------------------------------
-    | Scopes
-    |-------------------------------------------------------------
-    */
-
-    public function scopeOrdered(Builder $query)
+    public function getOrderQuery($query)
     {
-        return $query->orderBy('order');
-    }
-
-    public function scopeOrderedDesc(Builder $query)
-    {
-        return $query->orderByDesc('order');
+        return $query->where('column_id', $this->column_id);
     }
 
     /*

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Card;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Card\MoveCardRequest;
-// use App\Http\Requests\Api\V1\Card\OrderCardRequest;
+use App\Http\Requests\Api\V1\Card\OrderCardRequest;
 use App\Http\Requests\Api\V1\Card\UpdateCardRequest;
 use App\Http\Resources\V1\Card\CardResource;
 use App\Models\Card;
@@ -37,85 +37,27 @@ class CardController extends Controller
         return new CardResource($card);
     }
 
-    // public function order(OrderCardRequest $request, Card $card)
-    // {
-    //     $after = $request->after;
-    //     $order = $this->changeOrder($card, $after);
-
-    //     $card->order = $order;
-    //     $card->save();
-
-    //     return new CardResource($card);
-    // }
-
-    public function move(MoveCardRequest $request, Card $card, Column $column)
+    public function order(OrderCardRequest $request, Card $card)
     {
-        // $after = $request->after_card;
-        // $order = 1;
+        $after = $request->after;
 
-        // if ($after == null) {
-        //     $lastCard = $column->cards()
-        //     ->orderedDesc()
-        //     ->take(1)
-        //     ->get(['order'])
-        //     ->first();
-
-        //     if ($lastCard != null) {
-        //         $order = $lastCard->order + 1;
-        //     }
-        // } else {
-        //     $order = $after->order + 1;
-
-        //     $column->cards()
-        //     ->where('order', '>=', $order)
-        //     // ->where('order', '<', $card->order)
-        //     ->increment('order');
-        // }
-
-        // $card->order = $order;
-
-        $card->column()->associate($column);
-        $card->save();
+        is_null($after)
+            ? $card->moveToStart()
+            : $card->moveAfter($after);
 
         return new CardResource($card);
     }
 
-    protected function changeOrder($card, $after)
+    public function move(MoveCardRequest $request, Card $card, Column $column)
     {
-        $order = 1;
-        $toBottom = false;
+        $card->column()->associate($column);
 
-        // Move to up or bottom
-        if ($after != null) {
-            if ($card->order < $after->order) {
-                $order = $after->order;
-                $toBottom = true;
-            } else {
-                $order = $after->order + 1;
-            }
-        }
+        $after = $request->after_card;
+        is_null($after)
+            ? $card->moveToEnd()
+            : $card->moveAfter($after);
 
-        if ($toBottom) {
-            $cardExists = Card::where('id', $order)->exists();
-
-            if ($cardExists) {
-                $card->column->cards()
-                ->where('order', '>', $card->order)
-                ->where('order', '<=', $order)
-                ->decrement('order');
-            }
-        } else {
-            $cardExists = Card::where('id', $order)->exists();
-
-            if ($cardExists) {
-                $card->column->cards()
-                    ->where('order', '>=', $order)
-                    ->where('order', '<', $card->order)
-                    ->increment('order');
-            }
-        }
-
-        return $order;
+        return new CardResource($card);
     }
 
     /**

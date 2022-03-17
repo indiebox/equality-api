@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Api\V1\Card;
 
-// use App\Rules\Api\CardInSameColumn;
+use App\Rules\Api\CardInSameColumn;
 use App\Rules\Api\MaxCardsPerColumn;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -17,7 +17,7 @@ class MoveCardRequest extends FormRequest
     {
         return [
             'column' => [new MaxCardsPerColumn($this->route('column'))],
-            // 'after_card' => ['nullable', 'integer', new CardInSameColumn($this->route('column'))],
+            'after_card' => ['nullable', 'integer', new CardInSameColumn($this->route('column'))],
         ];
     }
 }

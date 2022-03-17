@@ -14,11 +14,7 @@ class AddOrderColumnToCardsTable extends Migration
     public function up()
     {
         Schema::table('cards', function (Blueprint $table) {
-            $table->smallInteger('order')->nullable()->after('description');
-        });
-
-        Schema::table('cards', function (Blueprint $table) {
-            $table->index('order');
+            $table->decimal('order', 6, 1)->nullable()->after('description');
         });
     }
 
@@ -30,7 +26,6 @@ class AddOrderColumnToCardsTable extends Migration
     public function down()
     {
         Schema::table('cards', function (Blueprint $table) {
-            $table->dropIndex(['order']);
             $table->dropColumn('order');
         });
     }
