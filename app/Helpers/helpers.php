@@ -33,7 +33,8 @@ if (!function_exists('image')) {
 if (!function_exists('field')) {
     /** Get field if its not null or return MissingValue otherwise.
      * @param mixed $value Value.
-     * If `$value` is not a `null` it will be returned without changes.
+     * If `$value` is not a null it will be returned without changes.
+     * @param Closure $callback Callback that will be called when `$value` is not a null.
      *
      * @return mixed Returns `$value` or `MissingValue` on null.
      *
@@ -47,10 +48,14 @@ if (!function_exists('field')) {
      * ];
      * ```
      */
-    function field($value)
+    function field($value, Closure $callback = null)
     {
-        if ($value == null) {
+        if ($value === null) {
             return new MissingValue();
+        }
+
+        if ($callback != null) {
+            return $callback($value);
         }
 
         return $value;
