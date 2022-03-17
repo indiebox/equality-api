@@ -15,7 +15,7 @@ class OrderCardRequest extends FormRequest
     public function rules()
     {
         return [
-            'after' => ['present', 'nullable', 'integer', new CardInSameColumn($this->route('card')->column)],
+            'after' => ['present', 'nullable', 'integer', new CardInSameColumn($this, $this->route('card')->column)],
         ];
     }
 }

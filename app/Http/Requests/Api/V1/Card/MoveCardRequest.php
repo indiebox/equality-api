@@ -17,7 +17,7 @@ class MoveCardRequest extends FormRequest
     {
         return [
             'column' => [new MaxCardsPerColumn($this->route('column'))],
-            'after_card' => ['nullable', 'integer', new CardInSameColumn($this->route('column'))],
+            'after_card' => ['nullable', 'integer', new CardInSameColumn($this, $this->route('column'))],
         ];
     }
 }

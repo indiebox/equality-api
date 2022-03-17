@@ -107,5 +107,80 @@ class CardControllerTest extends TestCase
             ->assertCreated()
             ->assertJson((new ColumnCardResource($card))->response()->getData(true));
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
+        $this->assertEquals(1, $card->order);
+
+        $response = $this->postJson('/api/v1/columns/' . $column->id . '/cards', $data);
+
+        $card = Card::find($response->json('data.id'));
+
+        $response
+            ->assertCreated()
+            ->assertJson((new ColumnCardResource($card))->response()->getData(true));
+        $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
+        $this->assertEquals(2, $card->order);
+    }
+    public function test_can_store_after_card()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        $cards = Card::factory(2)->column($column)
+            ->state(new Sequence(
+                ['order' => 1],
+                ['order' => 2],
+            ))->create();
+
+        $user = User::factory()->hasAttached($team)->create();
+        $data = [
+            'name' => 'Card 1',
+            'description' => 'Card desc',
+            'after_card' => $cards[0]->id,
+        ];
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/columns/' . $column->id . '/cards', $data);
+
+        $card = Card::find($response->json('data.id'));
+        $cards = $cards->fresh();
+
+        $response
+            ->assertCreated()
+            ->assertJson((new ColumnCardResource($card))->response()->getData(true));
+        $this->assertEquals(1, $cards[0]->order);
+        $this->assertEquals(2, $card->order);
+        $this->assertEquals(3, $cards[1]->order);
+    }
+    public function test_can_store_at_first_position()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        $cards = Card::factory(2)->column($column)
+            ->state(new Sequence(
+                ['order' => 1],
+                ['order' => 2],
+            ))->create();
+
+        $user = User::factory()->hasAttached($team)->create();
+        $data = [
+            'name' => 'Card 1',
+            'description' => 'Card desc',
+            'after_card' => null,
+        ];
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/columns/' . $column->id . '/cards', $data);
+
+        $card = Card::find($response->json('data.id'));
+        $cards = $cards->fresh();
+
+        $response
+            ->assertCreated()
+            ->assertJson((new ColumnCardResource($card))->response()->getData(true));
+        $this->assertEquals(1, $card->order);
+        $this->assertEquals(2, $cards[0]->order);
+        $this->assertEquals(3, $cards[1]->order);
     }
 }

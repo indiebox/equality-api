@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1\Column;
 
+use App\Rules\Api\CardInSameColumn;
 use App\Rules\Api\MaxCardsPerColumn;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -17,6 +18,8 @@ class StoreCardRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:65535'],
+            'after_card' => ['nullable', 'integer', new CardInSameColumn($this, $this->route('column'))],
+
             'column' => [new MaxCardsPerColumn($this->route('column'))],
         ];
     }

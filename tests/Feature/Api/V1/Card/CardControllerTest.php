@@ -406,7 +406,7 @@ class CardControllerTest extends TestCase
                 trans('validation.max_cards_per_column', ['max' => MaxCardsPerColumn::MAX_CARDS])
             ]);
     }
-    public function test_can_move_without_order()
+    public function test_can_move()
     {
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
@@ -442,7 +442,7 @@ class CardControllerTest extends TestCase
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(2, $card->order);
     }
-    public function test_can_move_with_order_after_card()
+    public function test_can_move_after_card()
     {
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
@@ -471,6 +471,37 @@ class CardControllerTest extends TestCase
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $card->order);
+        $this->assertEquals(3, $cards[1]->order);
+    }
+    public function test_can_move_at_first_position()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create();
+        $newColumn = Column::factory()->board($board)->create();
+        $cards = Card::factory(2)->column($newColumn)
+            ->state(new Sequence(
+                ['order' => 1],
+                ['order' => 2],
+            ))->create();
+
+        $card = Card::factory()->column($column)->order(1)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id, ['after_card' => null]);
+
+        $card->refresh();
+        $cards = $cards->fresh();
+
+        $response
+            ->assertOk()
+            ->assertJson((new CardResource($card))->response()->getData(true));
+        $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
+        $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
+        $this->assertEquals(1, $card->order);
+        $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);
     }
     public function test_can_move_between_projects()

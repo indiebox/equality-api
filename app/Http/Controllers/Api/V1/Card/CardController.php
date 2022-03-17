@@ -52,10 +52,15 @@ class CardController extends Controller
     {
         $card->column()->associate($column);
 
-        $after = $request->after_card;
-        is_null($after)
-            ? $card->moveToEnd()
-            : $card->moveAfter($after);
+        if ($request->has('after_card')) {
+            $after = $request->after_card;
+
+            is_null($after)
+                ? $card->moveToStart()
+                : $card->moveAfter($after);
+        } else {
+            $card->moveToEnd();
+        }
 
         return new CardResource($card);
     }

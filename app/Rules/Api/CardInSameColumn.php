@@ -5,9 +5,12 @@ namespace App\Rules\Api;
 use App\Models\Card;
 use App\Models\Column;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Http\Request;
 
 class CardInSameColumn implements Rule
 {
+    protected $request;
+
     protected $column;
 
     protected $attribute;
@@ -17,8 +20,9 @@ class CardInSameColumn implements Rule
      *
      * @return void
      */
-    public function __construct(Column $column)
+    public function __construct(Request $request, Column $column)
     {
+        $this->request = $request;
         $this->column = $column;
     }
 
@@ -33,13 +37,13 @@ class CardInSameColumn implements Rule
     {
         $this->attribute = $attribute;
 
-        $card = Card::where('column_id', $this->column->id)->find($value);
+        $card = Card::where('column_id', $this->column->id)->find((int)$value);
 
         if ($card == null) {
             return false;
         }
 
-        request()->merge([$attribute => $card]);
+        $this->request->merge([$attribute => $card]);
 
         return true;
     }
