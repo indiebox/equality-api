@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Database;
+namespace Tests\Feature\Traits\Closable;
 
 use App\Traits\Closable;
 use Illuminate\Support\Carbon;
@@ -24,6 +24,7 @@ class ClosableTraitTest extends TestCase
         $model->close();
 
         $this->assertInstanceOf(Carbon::class, $model->closed_at);
+        $this->assertTrue($model->isClosed());
     }
 
     public function testOpen()
@@ -37,12 +38,11 @@ class ClosableTraitTest extends TestCase
         $model->open();
 
         $this->assertNull($model->closed_at);
+        $this->assertFalse($model->isClosed());
     }
 }
 
-// @codingStandardsIgnoreStart
 class ClosableTraitStub
-// @codingStandardsIgnoreEnd
 {
     use Closable;
 

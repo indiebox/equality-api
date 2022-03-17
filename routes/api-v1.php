@@ -205,6 +205,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::prefix('cards')->group(function () {
+        Route::post('/{card}/order', [Card\CardController::class, 'order'])->can('update', 'card');
         Route::post('/{card}/move/{column}', [Card\CardController::class, 'move'])->can('move', ['card', 'column']);
         Route::get('/{card}', [Card\CardController::class, 'show'])->can('view', 'card');
         Route::patch('/{card}', [Card\CardController::class, 'update'])->can('update', 'card');

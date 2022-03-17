@@ -21,13 +21,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Database\Factories\InviteFactory factory(...$parameters)
- * @method static Builder|Invite newModelQuery()
- * @method static Builder|Invite newQuery()
- * @method static Builder|Invite query()
- * @method static Builder|Invite onlyAccepted()
- * @method static Builder|Invite onlyDeclined()
- * @method static Builder|Invite onlyPending()
- * @method static Builder|Invite filterByStatus($status)
+ * @method static \Illuminate\Database\Eloquent\Builder|Invite newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Invite newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Invite query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Invite onlyAccepted()
+ * @method static \Illuminate\Database\Eloquent\Builder|Invite onlyDeclined()
+ * @method static \Illuminate\Database\Eloquent\Builder|Invite onlyPending()
+ * @method static \Illuminate\Database\Eloquent\Builder|Invite filterByStatus($status)
  * @mixin \Eloquent
  */
 class Invite extends Model

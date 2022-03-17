@@ -18,9 +18,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Database\Factories\LeaderNominationFactory factory(...$parameters)
- * @method static \Illuminate\Database\Eloquent\Builder|Team newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Team newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Team query()
+ * @method static \Illuminate\Database\Eloquent\Builder|LeaderNomination newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|LeaderNomination newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|LeaderNomination query()
  * @mixin \Eloquent
  */
 class LeaderNomination extends Model

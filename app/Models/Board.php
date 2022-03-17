@@ -22,9 +22,9 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Column[] $columns
  * @property-read int|null $columns_count
  * @method static \Database\Factories\BoardFactory factory(...$parameters)
- * @method static Builder|Invite newModelQuery()
- * @method static Builder|Invite newQuery()
- * @method static Builder|Invite query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Board newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Board newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Board query()
  * @mixin \Eloquent
  */
 class Board extends Model

@@ -19,7 +19,9 @@ class CardController extends Controller
      */
     public function index(Column $column)
     {
-        return ColumnCardResource::collection($column->cards);
+        $cards = $column->cards()->orderByPosition()->get();
+
+        return ColumnCardResource::collection($cards);
     }
 
     /**
@@ -33,7 +35,7 @@ class CardController extends Controller
     {
         $card = new Card($request->validated());
         $card->column()->associate($column);
-        $card->save();
+        $card->moveTo($request->after_card);
 
         return (new CardResource($card))->response()->setStatusCode(201);
     }

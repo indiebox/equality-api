@@ -19,9 +19,9 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Card[] $cards
  * @property-read int|null $cards_count
  * @method static \Database\Factories\ColumnFactory factory(...$parameters)
- * @method static Builder|Invite newModelQuery()
- * @method static Builder|Invite newQuery()
- * @method static Builder|Invite query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Column newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Column newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Column query()
  * @mixin \Eloquent
  */
 class Column extends Model

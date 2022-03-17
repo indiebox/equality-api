@@ -16,7 +16,15 @@ class CardFactory extends Factory
         return [
             'name' => $this->faker->sentence(),
             'description' => $this->faker->sentences(3, true),
+            'order' => 1,
         ];
+    }
+
+    public function order($order)
+    {
+        return $this->state([
+            'order' => $order,
+        ]);
     }
 
     /** Setup column for the card.
