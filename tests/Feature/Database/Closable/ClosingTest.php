@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Database;
+namespace Tests\Feature\Database\Closable;
 
 use App\Traits\Closable;
 use Illuminate\Database\Eloquent\Model;
@@ -60,9 +60,7 @@ class ClosingTest extends TestCase
     }
 }
 
-// @codingStandardsIgnoreStart
 class ClosingModel extends Model
-// @codingStandardsIgnoreEnd
 {
     use Closable;
 

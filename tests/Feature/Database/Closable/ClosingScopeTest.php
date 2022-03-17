@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Database;
+namespace Tests\Feature\Database\Closable;
 
 use App\Scopes\ClosingScope;
 use Illuminate\Database\ConnectionInterface;
@@ -29,6 +29,8 @@ class ClosingScopeTest extends TestCase
         $builder->shouldReceive('whereNull')->once()->with('table.closed_at');
 
         $scope->apply($builder, $model);
+
+        // Hide PHPUnit warning.
         $this->assertTrue(true);
     }
 
