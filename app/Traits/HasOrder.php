@@ -39,10 +39,12 @@ trait HasOrder
      */
     public function moveToStart()
     {
-        $this->{$this->getOrderColumn()} = 0.9;
-        $this->save();
+        DB::transaction(function () {
+            $this->{$this->getOrderColumn()} = 0.9;
+            $this->save();
 
-        $this->processNewOrder();
+            $this->processNewOrder();
+        });
     }
 
     /**
@@ -58,11 +60,12 @@ trait HasOrder
             ->orderByPositionDesc()
             ->first(['order']);
 
-        if ($lastItem == null) {
-            return $this->moveToStart();
+        $order = 1;
+        if ($lastItem != null) {
+            $order = $lastItem->{$column} + 1;
         }
 
-        $this->{$column} = $lastItem->{$column} + 1;
+        $this->{$column} = $order;
         $this->save();
     }
 
@@ -77,15 +80,17 @@ trait HasOrder
             return false;
         }
 
-        $column = $this->getOrderColumn();
-        $afterModelOrder = $model->{$column};
+        return DB::transaction(function () use ($model) {
+            $column = $this->getOrderColumn();
+            $afterModelOrder = $model->{$column};
 
-        $this->{$column} = $afterModelOrder + 0.1;
-        $this->save();
+            $this->{$column} = $afterModelOrder + 0.1;
+            $this->save();
 
-        $this->processNewOrder();
+            $this->processNewOrder();
 
-        return true;
+            return true;
+        });
     }
 
     /**
