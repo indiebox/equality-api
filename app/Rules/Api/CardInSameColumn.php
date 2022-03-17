@@ -35,6 +35,10 @@ class CardInSameColumn implements Rule
      */
     public function passes($attribute, $value)
     {
+        if ($value == 0) {
+            return true;
+        }
+
         $this->attribute = $attribute;
 
         $card = Card::where('column_id', $this->column->id)->find((int)$value);

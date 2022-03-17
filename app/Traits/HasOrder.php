@@ -39,11 +39,13 @@ trait HasOrder
      */
     public function moveToStart()
     {
-        DB::transaction(function () {
+        return DB::transaction(function () {
             $this->{$this->getOrderColumn()} = 0.9;
             $this->save();
 
             $this->processNewOrder();
+
+            return true;
         });
     }
 
@@ -67,6 +69,8 @@ trait HasOrder
 
         $this->{$column} = $order;
         $this->save();
+
+        return true;
     }
 
     /**
@@ -91,6 +95,30 @@ trait HasOrder
 
             return true;
         });
+    }
+
+    /**
+     * Move current model.
+     *
+     * If `value` is `null`, moves to the end.
+     *
+     * If `value` is instance of `Model` moves after that model.
+     *
+     * If `value` is `0` or `false`, moves to the start.
+     */
+    public function moveTo($value)
+    {
+        if ($value === null) {
+            return $this->moveToEnd();
+        }
+
+        if ($value instanceof Model) {
+            return $this->moveAfter($value);
+        }
+
+        if ($value == 0) {
+            return $this->moveToStart();
+        }
     }
 
     /**

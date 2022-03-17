@@ -140,6 +140,46 @@ class EloquentHasOrderIntegrationTest extends TestCase
         $this->assertFalse($result);
     }
 
+    public function test_move_to_method()
+    {
+        $models = $this->createModels();
+        $models[0]->moveTo(null);
+
+        $this->assertEquals(2, $models[1]->order);
+        $this->assertEquals(3, $models[2]->order);
+        $this->assertEquals(4, $models[0]->order);
+
+        $this->refreshModels($models);
+
+        $this->assertEquals(2, $models[1]->order);
+        $this->assertEquals(3, $models[2]->order);
+        $this->assertEquals(4, $models[0]->order);
+
+        $models[0]->moveTo(0);
+
+        $this->assertEquals(0.9, $models[0]->order);
+        $this->assertEquals(2, $models[1]->order);
+        $this->assertEquals(3, $models[2]->order);
+
+        $this->refreshModels($models);
+
+        $this->assertEquals(1, $models[0]->order);
+        $this->assertEquals(2, $models[1]->order);
+        $this->assertEquals(3, $models[2]->order);
+
+        $models[0]->moveTo($models[1]);
+
+        $this->assertEquals(2, $models[1]->order);
+        $this->assertEquals(2.1, $models[0]->order);
+        $this->assertEquals(3, $models[2]->order);
+
+        $this->refreshModels($models);
+
+        $this->assertEquals(1, $models[1]->order);
+        $this->assertEquals(2, $models[0]->order);
+        $this->assertEquals(3, $models[2]->order);
+    }
+
     public function test_move_in_one_group_doesnt_affect_other_group()
     {
         $otherModels = $this->createModels();

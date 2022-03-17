@@ -167,7 +167,7 @@ class CardControllerTest extends TestCase
         $data = [
             'name' => 'Card 1',
             'description' => 'Card desc',
-            'after_card' => null,
+            'after_card' => 0,
         ];
         Sanctum::actingAs($user);
 

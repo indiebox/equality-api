@@ -35,16 +35,7 @@ class CardController extends Controller
     {
         $card = new Card($request->validated());
         $card->column()->associate($column);
-
-        if ($request->has('after_card')) {
-            $after = $request->after_card;
-
-            is_null($after)
-                ? $card->moveToStart()
-                : $card->moveAfter($after);
-        } else {
-            $card->moveToEnd();
-        }
+        $card->moveTo($request->after_card);
 
         return (new CardResource($card))->response()->setStatusCode(201);
     }

@@ -39,11 +39,7 @@ class CardController extends Controller
 
     public function order(OrderCardRequest $request, Card $card)
     {
-        $after = $request->after;
-
-        is_null($after)
-            ? $card->moveToStart()
-            : $card->moveAfter($after);
+        $card->moveTo($request->after);
 
         return new CardResource($card);
     }
@@ -51,16 +47,7 @@ class CardController extends Controller
     public function move(MoveCardRequest $request, Card $card, Column $column)
     {
         $card->column()->associate($column);
-
-        if ($request->has('after_card')) {
-            $after = $request->after_card;
-
-            is_null($after)
-                ? $card->moveToStart()
-                : $card->moveAfter($after);
-        } else {
-            $card->moveToEnd();
-        }
+        $card->moveTo($request->after_card);
 
         return new CardResource($card);
     }

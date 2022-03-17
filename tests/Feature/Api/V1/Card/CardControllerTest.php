@@ -181,7 +181,7 @@ class CardControllerTest extends TestCase
         $this->assertEquals(3, $card->order);
         $this->assertEquals(4, $cards[2]->order);
 
-        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => null]);
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => 0]);
 
         $card->refresh();
         $cards = $cards->fresh();
@@ -194,7 +194,7 @@ class CardControllerTest extends TestCase
         $this->assertEquals(3, $cards[1]->order);
         $this->assertEquals(4, $cards[2]->order);
 
-        $response = $this->postJson('/api/v1/cards/' . $cards[1]->id . '/order', ['after' => null]);
+        $response = $this->postJson('/api/v1/cards/' . $cards[1]->id . '/order', ['after' => 0]);
 
         $card->refresh();
         $cards = $cards->fresh();
@@ -490,7 +490,7 @@ class CardControllerTest extends TestCase
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id, ['after_card' => null]);
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id, ['after_card' => 0]);
 
         $card->refresh();
         $cards = $cards->fresh();
