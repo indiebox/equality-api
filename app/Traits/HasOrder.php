@@ -73,7 +73,7 @@ trait HasOrder
      */
     public function moveAfter(Model $model)
     {
-        if (!($model instanceof $this)) {
+        if (!(get_class($model) === get_class($this))) {
             return false;
         }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Database\Closable;
+namespace Tests\Feature\Traits\Closable;
 
 use App\Scopes\ClosingScope;
 use Illuminate\Database\ConnectionInterface;
