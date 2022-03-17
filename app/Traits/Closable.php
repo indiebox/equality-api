@@ -66,13 +66,23 @@ trait Closable
     }
 
     /**
+     * Determine if the model instance has been opened.
+     *
+     * @return bool
+     */
+    public function isOpened()
+    {
+        return is_null($this->{$this->getClosedAtColumn()});
+    }
+
+    /**
      * Determine if the model instance has been closed.
      *
      * @return bool
      */
     public function isClosed()
     {
-        return ! is_null($this->{$this->getClosedAtColumn()});
+        return !$this->isOpened();
     }
 
     /**

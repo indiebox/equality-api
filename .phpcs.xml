@@ -52,6 +52,10 @@
         <!-- Methods in tests not in camel case -->
         <exclude-pattern>tests/*</exclude-pattern>
     </rule>
+    <rule ref="PSR1.Classes.ClassDeclaration">
+        <!-- Allow multiple classes in one file -->
+        <exclude-pattern>tests/*</exclude-pattern>
+    </rule>
 
     <rule ref="PSR1.Classes.ClassDeclaration">
         <!-- Allow define migrations without namespace -->

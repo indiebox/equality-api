@@ -118,7 +118,7 @@ trait HasOrder
         $this->getOrderQuery($baseQuery);
         $baseQuery
             ->whereRaw(DB::raw("0 IN (@row_number:=0)"))
-            ->orderByPosition();
+            ->orderBy($column);
 
         return $baseQuery->update([$column => DB::raw('(@row_number:=@row_number+1)')]);
     }
