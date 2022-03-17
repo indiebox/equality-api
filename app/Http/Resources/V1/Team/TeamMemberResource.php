@@ -17,8 +17,10 @@ class TeamMemberResource extends JsonResource
     public function toArray($request)
     {
         return array_merge((new UserResource($this))->toArray($request), [
-            'joined_at' => Carbon::parse($this->pivot->joined_at),
-            'is_creator' => (bool)$this->pivot->is_creator,
+            'joined_at' => field($this->joined_at, fn($v) => Carbon::parse($v)),
+            'is_creator' => field($this->is_creator, fn($v) => (bool)$v),
+            // 'joined_at' => Carbon::parse($this->pivot->joined_at),
+            // 'is_creator' => (bool)$this->pivot->is_creator,
         ]);
     }
 }

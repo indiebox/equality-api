@@ -9,6 +9,8 @@ use App\Http\Requests\Api\V1\Team\UpdateTeamRequest;
 use App\Http\Resources\V1\Team\TeamMemberResource;
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Models\Team;
+use Spatie\QueryBuilder\AllowedSort;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class TeamController extends Controller
 {
@@ -19,7 +21,13 @@ class TeamController extends Controller
      */
     public function index()
     {
-        return TeamResource::collection(auth()->user()->teams);
+        $query = QueryBuilder::for(auth()->user()->teams()->select(['teams.id', 'name']))
+            ->allowedFields(TeamResource::$allowedFilters)
+            ->allowedSorts(AllowedSort::field('created_at', 'teams.created_at'))
+            ->allowedIncludes('members')
+            ->get();
+
+        return TeamResource::collection($query);
     }
 
     /**

@@ -6,6 +6,20 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TeamResource extends JsonResource
 {
+    public static $allowedFilters = [
+        'id',
+        'name',
+        'description',
+        'url',
+        'logo',
+        'created_at',
+        'updated_at',
+
+        'members.name',
+        'members.joined_at',
+        'members.is_creator',
+    ];
+
     /**
      * Transform the resource into an array.
      *
@@ -15,14 +29,15 @@ class TeamResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
-            'url' => $this->url,
-            'logo' => image($this->logo),
+            'id' => field($this->id),
+            'name' => field($this->name),
+            'description' => field($this->description),
+            'url' => field($this->url),
+            'logo' => field(image($this->logo)),
             'members' => TeamMemberResource::collection($this->whenLoaded('members')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'members_count' => field($this->members_count),
+            'created_at' => field($this->created_at),
+            'updated_at' => field($this->updated_at),
         ];
     }
 }
