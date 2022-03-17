@@ -19,7 +19,7 @@ class CardController extends Controller
      */
     public function index(Column $column)
     {
-        $cards = $column->cards()->ordered()->get();
+        $cards = $column->cards()->orderByPosition()->get();
 
         return ColumnCardResource::collection($cards);
     }

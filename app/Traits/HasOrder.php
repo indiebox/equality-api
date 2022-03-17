@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder ordered()
- * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder orderedDesc()
+ * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder orderByPosition()
+ * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder orderByPositionDesc()
  */
 trait HasOrder
 {
@@ -24,6 +24,19 @@ trait HasOrder
         }
     }
 
+    public function scopeOrderByPosition(Builder $query)
+    {
+        return $query->orderBy($this->getOrderColumn());
+    }
+
+    public function scopeOrderByPositionDesc(Builder $query)
+    {
+        return $query->orderByDesc($this->getOrderColumn());
+    }
+
+    /**
+     * Move current model to the start.
+     */
     public function moveToStart()
     {
         $this->{$this->getOrderColumn()} = 0.9;
@@ -32,15 +45,17 @@ trait HasOrder
         $this->processNewOrder();
     }
 
+    /**
+     * Move current model to the end.
+     */
     public function moveToEnd()
     {
         $column = $this->getOrderColumn();
 
         $query = static::query();
         $this->getOrderQuery($query);
-
         $lastItem = $query
-            ->orderByDesc($column)
+            ->orderByPositionDesc()
             ->first(['order']);
 
         if ($lastItem == null) {
@@ -51,6 +66,11 @@ trait HasOrder
         $this->save();
     }
 
+    /**
+     * Move current model after specified model.
+     * @param Model $model
+     * @return bool Returns `false` if model is not instance of current model.
+     */
     public function moveAfter(Model $model)
     {
         if (!($model instanceof $this)) {
@@ -64,22 +84,17 @@ trait HasOrder
         $this->save();
 
         $this->processNewOrder();
+
+        return true;
     }
 
-    public function getOrderQuery($query)
-    {
-        return null;
-    }
-
-    public function scopeOrdered(Builder $query)
-    {
-        return $query->orderBy($this->getOrderColumn());
-    }
-
-    public function scopeOrderedDesc(Builder $query)
-    {
-        return $query->orderByDesc($this->getOrderColumn());
-    }
+    /**
+     * Build additional order query.
+     * It is a great place to filter elements by id of the list in which
+     * models should be ordered.
+     * @param \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder $query
+     */
+    abstract public function getOrderQuery($query);
 
     /**
      * Get the name of the "order" column.
@@ -91,6 +106,10 @@ trait HasOrder
         return defined('static::ORDER_COLUMN') ? static::ORDER_COLUMN : 'order';
     }
 
+    /**
+     * Recalculate the order of all elements filtered by `getOrderQuery`.
+     * @return int The number of updated rows.
+     */
     protected function processNewOrder()
     {
         $column = $this->getOrderColumn();
@@ -99,7 +118,7 @@ trait HasOrder
         $this->getOrderQuery($baseQuery);
         $baseQuery
             ->whereRaw(DB::raw("0 IN (@row_number:=0)"))
-            ->orderBy($column);
+            ->orderByPosition();
 
         return $baseQuery->update([$column => DB::raw('(@row_number:=@row_number+1)')]);
     }

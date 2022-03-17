@@ -23,7 +23,6 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @method static \Illuminate\Database\Eloquent\Builder|Card newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Card newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Card query()
- * @method static \Illuminate\Database\Eloquent\Builder|Card ordered()
  * @mixin \Eloquent
  */
 class Card extends Model
