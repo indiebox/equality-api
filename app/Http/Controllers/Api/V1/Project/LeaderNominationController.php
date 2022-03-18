@@ -39,6 +39,6 @@ class LeaderNominationController extends Controller
 
         $leaderService->determineNewLeader($project);
 
-        return response('', 204);
+        return new LeaderNominationCollection($leaderService->makeNominationsCollection($project));
     }
 }

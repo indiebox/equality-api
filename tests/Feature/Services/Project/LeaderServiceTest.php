@@ -110,18 +110,21 @@ class LeaderServiceTest extends TestCase
                 'nominated' => $users[0],
                 'count' => 0,
                 'voters' => [],
+                'is_leader' => true,
             ],
             [
                 'nominated_id' => $users[1]->id,
                 'nominated' => $users[1],
                 'count' => 0,
                 'voters' => [],
+                'is_leader' => false,
             ],
             [
                 'nominated_id' => $users[2]->id,
                 'nominated' => $users[2],
                 'count' => 0,
                 'voters' => [],
+                'is_leader' => false,
             ],
         ], $collection->toArray());
     }
@@ -144,18 +147,21 @@ class LeaderServiceTest extends TestCase
                 'nominated' => $users[0],
                 'count' => 2,
                 'voters' => new EloquentCollection([$users[0], $users[1]]),
+                'is_leader' => true,
             ],
             [
                 'nominated_id' => $users[2]->id,
                 'nominated' => $users[2],
                 'count' => 1,
                 'voters' => new EloquentCollection([2 => $users[2]]),
+                'is_leader' => false,
             ],
             [
                 'nominated_id' => $users[1]->id,
                 'nominated' => $users[1],
                 'count' => 0,
                 'voters' => [],
+                'is_leader' => false,
             ],
         ], $collection->toArray());
     }

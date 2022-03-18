@@ -59,29 +59,32 @@ class LeaderService implements LeaderServiceContract
     {
         $members = $project->team->members;
 
-        $membersNominations = $members->map(function ($member) {
+        $membersNominations = $members->map(function ($member) use ($project) {
             return [
                 'nominated_id' => $member->id,
                 'nominated' => $member,
                 'count' => 0,
                 'voters' => [],
+                'is_leader' => $project->leader_id == $member->id,
             ];
         });
 
         $nominations = collect($project->leaderNominations()
             ->get()
             ->groupBy('nominated_id')
-            ->map(function ($nomination) use ($members) {
+            ->map(function ($nomination) use ($project, $members) {
                 return [
                     'nominated_id' => $nomination->first()->nominated_id,
                     'nominated' => $members->find($nomination->first()->nominated_id),
                     'count' => $nomination->count(),
                     'voters' => $members->find($nomination->pluck('voter_id')),
+                    'is_leader' => $nomination->first()->nominated_id == $project->leader_id,
                 ];
             })->toArray());
 
         return $nominations->merge($membersNominations)
             ->unique('nominated_id')
+            ->sortByDesc('is_leader')
             ->sortByDesc('count')
             ->values();
     }
