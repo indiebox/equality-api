@@ -21,8 +21,8 @@ class TeamController extends Controller
      */
     public function index()
     {
-        $query = QueryBuilder::for(auth()->user()->teams()->select(['teams.id', 'name']))
-            ->allowedFields(TeamResource::$allowedFilters)
+        $query = QueryBuilder::for(auth()->user()->teams()->select(['teams.id', 'name', 'logo']))
+            ->allowedFields(TeamResource::$allowedFields)
             ->allowedSorts(AllowedSort::field('created_at', 'teams.created_at'))
             ->allowedIncludes('members')
             ->get();

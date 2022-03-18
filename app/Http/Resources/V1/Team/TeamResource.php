@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources\V1\Team;
 
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\JsonResource;
 
 class TeamResource extends JsonResource
 {
-    public static $allowedFilters = [
+    public static $allowedFields = [
         'id',
         'name',
         'description',
@@ -20,6 +20,12 @@ class TeamResource extends JsonResource
         'members.is_creator',
     ];
 
+    public static $defaultFields = [
+        'id',
+        'name',
+        'logo',
+    ];
+
     /**
      * Transform the resource into an array.
      *
@@ -29,15 +35,16 @@ class TeamResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => field($this->id),
-            'name' => field($this->name),
-            'description' => field($this->description),
-            'url' => field($this->url),
-            'logo' => field(image($this->logo)),
-            'members' => TeamMemberResource::collection($this->whenLoaded('members')),
-            'members_count' => field($this->members_count),
-            'created_at' => field($this->created_at),
-            'updated_at' => field($this->updated_at),
+            'id' => $this->whenFieldRequested('id'),
+            'name' => $this->whenFieldRequested('name'),
+            'description' => $this->whenFieldRequested('description'),
+            'url' => $this->whenFieldRequested('url'),
+            'logo' => $this->whenFieldRequested('logo', image($this->logo)),
+            // 'members' => TeamMemberResource::collection($this->whenLoaded('members')),
+            'members' => TeamMemberResource::collection($this->whenIncludeRequested('members')),
+            // 'members_count' => $this->whenFieldRequested('teams.members_count', $this->members_count),
+            'created_at' => $this->whenFieldRequested('created_at'),
+            'updated_at' => $this->whenFieldRequested('updated_at'),
         ];
     }
 }
