@@ -138,7 +138,10 @@ class LeaderNominationControllerTest extends TestCase
     }
     public function test_can_nominate()
     {
-        $team = Team::factory()->hasAttached(User::factory(), [], 'members')->hasAttached(User::factory(), [], 'members')->create();
+        $team = Team::factory()
+            ->hasAttached(User::factory(), [], 'members')
+            ->hasAttached(User::factory(), [], 'members')
+            ->create();
         $project = Project::factory()->team($team)->create();
         [$user, $nominated] = $team->members;
         Sanctum::actingAs($user);
