@@ -15,7 +15,15 @@ class ColumnFactory extends Factory
     {
         return [
             'name' => $this->faker->words(2, true),
+            'order' => 1,
         ];
+    }
+
+    public function order($order)
+    {
+        return $this->state([
+            'order' => $order,
+        ]);
     }
 
     /** Setup board for the column.
