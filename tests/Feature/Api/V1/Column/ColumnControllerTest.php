@@ -138,7 +138,7 @@ class ColumnControllerTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['after' => 'The selected after is invalid.']);
     }
-    public function test_can_change_order_to_up()
+    public function test_can_change_order()
     {
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
@@ -154,6 +154,7 @@ class ColumnControllerTest extends TestCase
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
+        // Move to up dirrection
         $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => $columns[1]->id]);
 
         $column->refresh();
@@ -165,6 +166,7 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(3, $column->order);
         $this->assertEquals(4, $columns[2]->order);
 
+        // First position
         $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => 0]);
 
         $column->refresh();
@@ -176,55 +178,7 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(3, $columns[1]->order);
         $this->assertEquals(4, $columns[2]->order);
 
-        $response = $this->postJson('/api/v1/columns/' . $columns[1]->id . '/order', ['after' => 0]);
-
-        $column->refresh();
-        $columns = $columns->fresh();
-
-        $response->assertNoContent();
-        $this->assertEquals(1, $columns[1]->order);
-        $this->assertEquals(2, $column->order);
-        $this->assertEquals(3, $columns[0]->order);
-        $this->assertEquals(4, $columns[2]->order);
-
-        $response = $this->postJson('/api/v1/columns/' . $columns[2]->id . '/order', ['after' => $column->id]);
-
-        $column->refresh();
-        $columns = $columns->fresh();
-
-        $response->assertNoContent();
-        $this->assertEquals(1, $columns[1]->order);
-        $this->assertEquals(2, $column->order);
-        $this->assertEquals(3, $columns[2]->order);
-        $this->assertEquals(4, $columns[0]->order);
-    }
-    public function test_can_change_order_to_bottom()
-    {
-        $team = Team::factory()->create();
-        $project = Project::factory()->team($team)->create();
-        $board = Board::factory()->project($project)->create();
-        $column = Column::factory()->board($board)->order(1)->create();
-        $columns = Column::factory(3)->board($board)
-            ->state(new Sequence(
-                ['order' => 2],
-                ['order' => 3],
-                ['order' => 4],
-            ))->create();
-
-        $user = User::factory()->hasAttached($team)->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => $columns[1]->id]);
-
-        $column->refresh();
-        $columns = $columns->fresh();
-
-        $response->assertNoContent();
-        $this->assertEquals(1, $columns[0]->order);
-        $this->assertEquals(2, $columns[1]->order);
-        $this->assertEquals(3, $column->order);
-        $this->assertEquals(4, $columns[2]->order);
-
+        // Move to bottom direction
         $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => $columns[2]->id]);
 
         $column->refresh();
@@ -235,28 +189,6 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(2, $columns[1]->order);
         $this->assertEquals(3, $columns[2]->order);
         $this->assertEquals(4, $column->order);
-
-        $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => $columns[0]->id]);
-
-        $column->refresh();
-        $columns = $columns->fresh();
-
-        $response->assertNoContent();
-        $this->assertEquals(1, $columns[0]->order);
-        $this->assertEquals(2, $column->order);
-        $this->assertEquals(3, $columns[1]->order);
-        $this->assertEquals(4, $columns[2]->order);
-
-        $response = $this->postJson('/api/v1/columns/' . $columns[0]->id . '/order', ['after' => $columns[2]->id]);
-
-        $column->refresh();
-        $columns = $columns->fresh();
-
-        $response->assertNoContent();
-        $this->assertEquals(1, $column->order);
-        $this->assertEquals(2, $columns[1]->order);
-        $this->assertEquals(3, $columns[2]->order);
-        $this->assertEquals(4, $columns[0]->order);
     }
 
     public function test_cant_delete_without_permissions()

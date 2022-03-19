@@ -101,7 +101,7 @@ class EloquentHasOrderIntegrationTest extends TestCase
         $this->assertEquals(4, $models[0]->order);
     }
 
-    public function test_move_after_method_up()
+    public function test_move_after_method_to_top_direction()
     {
         $models = $this->createModels();
         $models[2]->moveAfter($models[0]);
@@ -116,7 +116,7 @@ class EloquentHasOrderIntegrationTest extends TestCase
         $this->assertEquals(2, $models[2]->order);
         $this->assertEquals(3, $models[1]->order);
     }
-    public function test_move_after_method_bottom()
+    public function test_move_after_method_to_bottom_direction()
     {
         $models = $this->createModels();
         $models[0]->moveAfter($models[1]);
