@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\V1\Team;
 
+use App\Http\Resources\JsonResource;
 use App\Http\Resources\V1\User\UserResource;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 
 class TeamMemberResource extends JsonResource
@@ -16,9 +16,11 @@ class TeamMemberResource extends JsonResource
      */
     public function toArray($request)
     {
-        return array_merge((new UserResource($this))->toArray($request), [
-            'joined_at' => field($this->joined_at, fn($v) => Carbon::parse($v)),
-            'is_creator' => field($this->is_creator, fn($v) => (bool)$v),
+        return array_merge((new UserResource($this, $this->resourceName))->toArray($request), [
+            'joined_at' => $this->whenFieldRequested('joined_at', fn() => Carbon::parse($this->pivot->joined_at)),
+            'is_creator' => $this->whenFieldRequested('is_creator', fn() => (bool)$this->pivot->is_creator),
+
+
             // 'joined_at' => Carbon::parse($this->pivot->joined_at),
             // 'is_creator' => (bool)$this->pivot->is_creator,
         ]);

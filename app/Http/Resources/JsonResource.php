@@ -10,9 +10,24 @@ class JsonResource extends BaseResource
 {
     public static $allowedFields = [];
 
+    public static function getAllowedFields($resourceName = null)
+    {
+        $result = static::$allowedFields;
+
+        if ($resourceName != null) {
+            foreach ($result as $key => $field) {
+                $result[$key] = $resourceName . "." . $field;
+            }
+        }
+
+        return $result;
+    }
+
     public static $defaultFields = [];
 
     protected $resourceName = null;
+
+    public $loadRelationsOnRequest = true;
 
     /**
      * Create a new resource instance.
@@ -24,11 +39,33 @@ class JsonResource extends BaseResource
     {
         parent::__construct($resource);
 
-        // if ($resourceName == null) {
+        if ($this->resourceName !== null) {
+            return;
+        }
+
+        if (
+            $resourceName == null
+            && !($this->resource instanceof MissingValue)
+        ) {
             $resourceName = $this->getModel()->getTable();
-        // }
+        }
 
         $this->resourceName = $resourceName;
+    }
+
+    /**
+     * Create a new anonymous resource collection.
+     *
+     * @param  mixed  $resource
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public static function collection($resource, $resourceName = null)
+    {
+        return tap(new AnonymousResourceCollection($resource, static::class, $resourceName), function ($collection) {
+            if (property_exists(static::class, 'preserveKeys')) {
+                $collection->preserveKeys = (new static([]))->preserveKeys === true;
+            }
+        });
     }
 
     /**
@@ -43,7 +80,10 @@ class JsonResource extends BaseResource
         [$fieldPath, $field] = $this->prependSourceName($field);
 
         // If our model doesnt have loaded attribute we just return MissingValue.
-        if (!array_key_exists($field, $this->resource->getAttributes())) {
+        if (
+            func_get_args() == 1
+            && !array_key_exists($field, $this->resource->getAttributes())
+        ) {
             return new MissingValue();
         }
 
@@ -70,6 +110,19 @@ class JsonResource extends BaseResource
         return new MissingValue();
     }
 
+    public function whenFilled($field, $value = null)
+    {
+        if (isset($this->resource->{$field})) {
+            if (func_num_args() == 1) {
+                return $this->resource->{$field};
+            }
+
+            return value($value);
+        }
+
+        return new MissingValue();
+    }
+
     /**
      * Retrieve and include a relationship in response if it has been requested.
      *
@@ -80,11 +133,30 @@ class JsonResource extends BaseResource
     public function whenIncludeRequested($include, $value = null)
     {
         if ($this->isIncludeRequested($include)) {
-            if (func_num_args() == 1) {
-                return $this->resource->{$include};
-            }
+            // Relation count
+            if (str_ends_with($include, config('query-builder.count_suffix'))) {
+                if (!array_key_exists($include, $this->resource->getAttributes())) {
+                    if ($this->loadRelationsOnRequest) {
+                        $this->resource->loadCount(explode(config('query-builder.count_suffix'), $include)[0]);
 
-            return value($value);
+                        return $this->resource->{$include};
+                    }
+
+                    return new MissingValue();
+                } else {
+                    return $this->resource->{$include};
+                }
+            } else {
+                if (func_num_args() == 1) {
+                    if ($this->loadRelationsOnRequest) {
+                        return $this->resource->{$include};
+                    } else {
+                        return $this->whenLoaded(...func_get_args());
+                    }
+                } else {
+                    return value($value);
+                }
+            }
         }
 
         return new MissingValue();

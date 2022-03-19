@@ -15,9 +15,9 @@ class TeamResource extends JsonResource
         'created_at',
         'updated_at',
 
-        'members.name',
-        'members.joined_at',
-        'members.is_creator',
+        // 'members.name',
+        // 'members.joined_at',
+        // 'members.is_creator',
     ];
 
     public static $defaultFields = [
@@ -41,10 +41,11 @@ class TeamResource extends JsonResource
             'url' => $this->whenFieldRequested('url'),
             'logo' => $this->whenFieldRequested('logo', image($this->logo)),
             // 'members' => TeamMemberResource::collection($this->whenLoaded('members')),
-            'members' => TeamMemberResource::collection($this->whenIncludeRequested('members')),
-            // 'members_count' => $this->whenFieldRequested('teams.members_count', $this->members_count),
             'created_at' => $this->whenFieldRequested('created_at'),
             'updated_at' => $this->whenFieldRequested('updated_at'),
+
+            'members' => TeamMemberResource::collection($this->whenLoaded('members'), 'members'),
+            'members_count' => $this->whenFilled('members_count'),
         ];
     }
 }
