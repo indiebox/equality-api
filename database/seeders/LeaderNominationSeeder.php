@@ -15,17 +15,26 @@ class LeaderNominationSeeder extends Seeder
      */
     public function run()
     {
-        $projects = Project::has('team.members')->get();
+        $projects = Project::has('team.members')->withoutGlobalScopes()->get();
 
         foreach ($projects as $project) {
             $members = $project->team->members;
             $nominations = [];
 
+            $countsForLeader = ceil($members->count() / 2);
+
             foreach ($members as $member) {
+                if ($countsForLeader != 0) {
+                    $nominated = $members->where('id', $project->leader_id)->first();
+                    $countsForLeader--;
+                } else {
+                    $nominated = $members[rand(0, count($members) - 1)];
+                }
+
                 $nominations[] = LeaderNomination::factory()
                     ->project($project)
                     ->voter($member)
-                    ->nominated($members[rand(0, count($members) - 1)])
+                    ->nominated($nominated)
                     ->make();
             }
 
