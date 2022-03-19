@@ -290,64 +290,6 @@ class CardControllerTest extends TestCase
         $this->assertEquals(3, $cards[2]->order);
         $this->assertEquals(4, $cards[0]->order);
     }
-    public function test_order_not_recalculated_with_inconsistent_order_on_ordering_to_up()
-    {
-        $team = Team::factory()->create();
-        $project = Project::factory()->team($team)->create();
-        $board = Board::factory()->project($project)->create();
-        $column = Column::factory()->board($board)->create();
-
-        $cards = Card::factory(2)->column($column)
-        ->state(new Sequence(
-            ['order' => 1],
-            ['order' => 3],
-        ))->create();
-        $card = Card::factory()->column($column)->order(4)->create();
-
-        $user = User::factory()->hasAttached($team)->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[0]->id]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
-        $this->assertEquals(1, $cards[0]->order);
-        $this->assertEquals(2, $card->order);
-        $this->assertEquals(3, $cards[1]->order);
-    }
-    public function test_order_not_recalculated_with_inconsistent_order_on_ordering_to_bottom()
-    {
-        $team = Team::factory()->create();
-        $project = Project::factory()->team($team)->create();
-        $board = Board::factory()->project($project)->create();
-        $column = Column::factory()->board($board)->create();
-
-        $card = Card::factory()->column($column)->order(1)->create();
-        $cards = Card::factory(2)->column($column)
-        ->state(new Sequence(
-            ['order' => 2],
-            ['order' => 4],
-        ))->create();
-
-        $user = User::factory()->hasAttached($team)->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[0]->id]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
-        $this->assertEquals(1, $cards[0]->order);
-        $this->assertEquals(2, $card->order);
-        $this->assertEquals(3, $cards[1]->order);
-    }
 
     public function test_cant_move_without_permissions()
     {

@@ -258,58 +258,6 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(3, $columns[2]->order);
         $this->assertEquals(4, $columns[0]->order);
     }
-    public function test_order_not_recalculated_with_inconsistent_order_on_ordering_to_up()
-    {
-        $team = Team::factory()->create();
-        $project = Project::factory()->team($team)->create();
-        $board = Board::factory()->project($project)->create();
-
-        $columns = Column::factory(2)->board($board)
-            ->state(new Sequence(
-                ['order' => 1],
-                ['order' => 3],
-            ))->create();
-        $column = Column::factory()->board($board)->order(4)->create();
-
-        $user = User::factory()->hasAttached($team)->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => $columns[0]->id]);
-
-        $column->refresh();
-        $columns = $columns->fresh();
-
-        $response->assertNoContent();
-        $this->assertEquals(1, $columns[0]->order);
-        $this->assertEquals(2, $column->order);
-        $this->assertEquals(3, $columns[1]->order);
-    }
-    public function test_order_not_recalculated_with_inconsistent_order_on_ordering_to_bottom()
-    {
-        $team = Team::factory()->create();
-        $project = Project::factory()->team($team)->create();
-        $board = Board::factory()->project($project)->create();
-
-        $column = Column::factory()->board($board)->order(1)->create();
-        $columns = Column::factory(2)->board($board)
-        ->state(new Sequence(
-            ['order' => 2],
-            ['order' => 4],
-        ))->create();
-
-        $user = User::factory()->hasAttached($team)->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => $columns[0]->id]);
-
-        $column->refresh();
-        $columns = $columns->fresh();
-
-        $response->assertNoContent();
-        $this->assertEquals(1, $columns[0]->order);
-        $this->assertEquals(2, $column->order);
-        $this->assertEquals(3, $columns[1]->order);
-    }
 
     public function test_cant_delete_without_permissions()
     {
