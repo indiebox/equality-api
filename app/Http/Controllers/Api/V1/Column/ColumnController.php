@@ -39,7 +39,7 @@ class ColumnController extends Controller
     {
         $column->moveTo($request->after);
 
-        return new ColumnResource($column);
+        return response('', 204);
     }
 
     /**

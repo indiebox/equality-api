@@ -159,9 +159,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $columns[0]->order);
         $this->assertEquals(2, $columns[1]->order);
         $this->assertEquals(3, $column->order);
@@ -172,9 +170,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $column->order);
         $this->assertEquals(2, $columns[0]->order);
         $this->assertEquals(3, $columns[1]->order);
@@ -185,9 +181,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($columns[1]))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $columns[1]->order);
         $this->assertEquals(2, $column->order);
         $this->assertEquals(3, $columns[0]->order);
@@ -198,9 +192,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($columns[2]))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $columns[1]->order);
         $this->assertEquals(2, $column->order);
         $this->assertEquals(3, $columns[2]->order);
@@ -227,9 +219,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $columns[0]->order);
         $this->assertEquals(2, $columns[1]->order);
         $this->assertEquals(3, $column->order);
@@ -240,9 +230,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $columns[0]->order);
         $this->assertEquals(2, $columns[1]->order);
         $this->assertEquals(3, $columns[2]->order);
@@ -253,9 +241,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $columns[0]->order);
         $this->assertEquals(2, $column->order);
         $this->assertEquals(3, $columns[1]->order);
@@ -266,9 +252,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($columns[0]))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $column->order);
         $this->assertEquals(2, $columns[1]->order);
         $this->assertEquals(3, $columns[2]->order);
@@ -295,9 +279,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $columns[0]->order);
         $this->assertEquals(2, $column->order);
         $this->assertEquals(3, $columns[1]->order);
@@ -323,9 +305,7 @@ class ColumnControllerTest extends TestCase
         $column->refresh();
         $columns = $columns->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $columns[0]->order);
         $this->assertEquals(2, $column->order);
         $this->assertEquals(3, $columns[1]->order);
