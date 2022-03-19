@@ -15,7 +15,7 @@ class LeaderNominationSeeder extends Seeder
      */
     public function run()
     {
-        $projects = Project::has('team.members')->get();
+        $projects = Project::has('team.members')->withoutGlobalScopes()->get();
 
         foreach ($projects as $project) {
             $members = $project->team->members;
