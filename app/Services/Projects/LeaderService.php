@@ -63,7 +63,7 @@ class LeaderService implements LeaderServiceContract
             return [
                 'nominated_id' => $member->id,
                 'nominated' => $member,
-                'count' => 0,
+                'voters_count' => 0,
                 'voters' => [],
                 'is_leader' => $project->leader_id == $member->id,
             ];
@@ -76,7 +76,7 @@ class LeaderService implements LeaderServiceContract
                 return [
                     'nominated_id' => $nomination->first()->nominated_id,
                     'nominated' => $members->find($nomination->first()->nominated_id),
-                    'count' => $nomination->count(),
+                    'voters_count' => $nomination->count(),
                     'voters' => $members->find($nomination->pluck('voter_id')),
                     'is_leader' => $nomination->first()->nominated_id == $project->leader_id,
                 ];
@@ -85,7 +85,7 @@ class LeaderService implements LeaderServiceContract
         return $nominations->merge($membersNominations)
             ->unique('nominated_id')
             ->sortByDesc('is_leader')
-            ->sortByDesc('count')
+            ->sortByDesc('voters_count')
             ->values();
     }
 

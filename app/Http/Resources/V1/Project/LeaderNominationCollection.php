@@ -28,7 +28,7 @@ class LeaderNominationCollection extends ResourceCollection
             $result->add([
                 'is_leader' => $nomination['is_leader'],
                 'nominated' => new TeamMemberResource($nomination['nominated']),
-                'count' => $nomination['count'],
+                'voters_count' => $nomination['voters_count'],
                 'voters' => TeamMemberResource::collection($nomination['voters']),
             ]);
         }

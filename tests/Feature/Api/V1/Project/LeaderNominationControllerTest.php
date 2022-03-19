@@ -60,17 +60,17 @@ class LeaderNominationControllerTest extends TestCase
                 $json->whereAll([
                     'data.0.is_leader' => true,
                     'data.0.nominated' => (new TeamMemberResource($user1))->response()->getData(true),
-                    'data.0.count' => 2,
+                    'data.0.voters_count' => 2,
                     'data.0.voters' => TeamMemberResource::collection([$user1, $user2])->response()->getData(true),
                 ])->whereAll([
                     'data.1.is_leader' => false,
                     'data.1.nominated' => (new TeamMemberResource($user3))->response()->getData(true),
-                    'data.1.count' => 1,
+                    'data.1.voters_count' => 1,
                     'data.1.voters' => TeamMemberResource::collection([$user3])->response()->getData(true),
                 ])->whereAll([
                     'data.2.is_leader' => false,
                     'data.2.nominated' => (new TeamMemberResource($user2))->response()->getData(true),
-                    'data.2.count' => 0,
+                    'data.2.voters_count' => 0,
                     'data.2.voters' => [],
                 ])->interacted();
 
@@ -95,17 +95,17 @@ class LeaderNominationControllerTest extends TestCase
                 $json->whereAll([
                     'data.0.is_leader' => false,
                     'data.0.nominated' => (new TeamMemberResource($user1))->response()->getData(true),
-                    'data.0.count' => 0,
+                    'data.0.voters_count' => 0,
                     'data.0.voters' => [],
                 ])->whereAll([
                     'data.1.is_leader' => false,
                     'data.1.nominated' => (new TeamMemberResource($user2))->response()->getData(true),
-                    'data.1.count' => 0,
+                    'data.1.voters_count' => 0,
                     'data.1.voters' => [],
                 ])->whereAll([
                     'data.2.is_leader' => false,
                     'data.2.nominated' => (new TeamMemberResource($user3))->response()->getData(true),
-                    'data.2.count' => 0,
+                    'data.2.voters_count' => 0,
                     'data.2.voters' => [],
                 ])->interacted();
 
@@ -156,7 +156,7 @@ class LeaderNominationControllerTest extends TestCase
                 $json->whereAll([
                     'data.0.is_leader' => true,
                     'data.0.nominated' => (new TeamMemberResource($nominated))->response()->getData(true),
-                    'data.0.count' => 1,
+                    'data.0.voters_count' => 1,
                     'data.0.voters' => TeamMemberResource::collection([$user])->response()->getData(true),
                 ])->interacted();
 
@@ -177,7 +177,7 @@ class LeaderNominationControllerTest extends TestCase
                 $json->whereAll([
                     'data.0.is_leader' => true,
                     'data.0.nominated' => (new TeamMemberResource($nominated))->response()->getData(true),
-                    'data.0.count' => 1,
+                    'data.0.voters_count' => 1,
                     'data.0.voters' => TeamMemberResource::collection([$user])->response()->getData(true),
                 ])->interacted();
 
@@ -197,7 +197,7 @@ class LeaderNominationControllerTest extends TestCase
                 $json->whereAll([
                     'data.0.is_leader' => true,
                     'data.0.nominated' => (new TeamMemberResource($nominated))->response()->getData(true),
-                    'data.0.count' => 2,
+                    'data.0.voters_count' => 2,
                     'data.0.voters' => TeamMemberResource::collection([$user, $nominated])->response()->getData(true),
                 ])->interacted();
 
