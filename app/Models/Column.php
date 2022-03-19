@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Znck\Eloquent\Traits\BelongsToThrough;
@@ -11,6 +12,7 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  *
  * @property int $id
  * @property string $name
+ * @property double|null $order
  * @property-read \App\Models\Board $board
  * @property int $board_id
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -26,11 +28,16 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  */
 class Column extends Model
 {
-    use HasFactory, BelongsToThrough;
+    use HasFactory, BelongsToThrough, HasOrder;
 
     protected $fillable = [
         'name',
     ];
+
+    public function getOrderQuery($query)
+    {
+        return $query->where('board_id', $this->board_id);
+    }
 
     /*
     |-------------------------------------------------------------

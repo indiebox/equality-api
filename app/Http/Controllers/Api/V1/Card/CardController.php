@@ -41,7 +41,7 @@ class CardController extends Controller
     {
         $card->moveTo($request->after);
 
-        return new CardResource($card);
+        return response('', 204);
     }
 
     public function move(MoveCardRequest $request, Card $card, Column $column)

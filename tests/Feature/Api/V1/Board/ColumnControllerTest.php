@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use App\Rules\Api\MaxColumnsPerBoard;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -126,5 +127,76 @@ class ColumnControllerTest extends TestCase
             ->assertCreated()
             ->assertJson((new BoardColumnResource($column))->response()->getData(true));
         $this->assertDatabaseHas('columns', ['board_id' => $board->id, 'name' => $data['name']]);
+        $this->assertEquals(1, $column->order);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/columns', $data);
+
+        $column = Column::find($response->json('data.id'));
+
+        $response
+            ->assertCreated()
+            ->assertJson((new BoardColumnResource($column))->response()->getData(true));
+        $this->assertDatabaseHas('columns', ['board_id' => $board->id, 'name' => $data['name']]);
+        $this->assertEquals(2, $column->order);
+    }
+    public function test_can_store_after_card()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $columns = Column::factory(2)->board($board)
+            ->state(new Sequence(
+                ['order' => 1],
+                ['order' => 2],
+            ))->create();
+
+        $user = User::factory()->hasAttached($team)->create();
+        $data = [
+            'name' => 'Col 1',
+            'after_column' => $columns[0]->id,
+        ];
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/columns', $data);
+
+        $column = Column::find($response->json('data.id'));
+        $columns = $columns->fresh();
+
+        $response
+            ->assertCreated()
+            ->assertJson((new BoardColumnResource($column))->response()->getData(true));
+        $this->assertEquals(1, $columns[0]->order);
+        $this->assertEquals(2, $column->order);
+        $this->assertEquals(3, $columns[1]->order);
+    }
+    public function test_can_store_at_first_position()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $columns = Column::factory(2)->board($board)
+            ->state(new Sequence(
+                ['order' => 1],
+                ['order' => 2],
+            ))->create();
+
+        $user = User::factory()->hasAttached($team)->create();
+        $data = [
+            'name' => 'Col 1',
+            'after_column' => 0,
+        ];
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/boards/' . $board->id . '/columns', $data);
+
+        $column = Column::find($response->json('data.id'));
+        $columns = $columns->fresh();
+
+        $response
+            ->assertCreated()
+            ->assertJson((new BoardColumnResource($column))->response()->getData(true));
+        $this->assertEquals(1, $column->order);
+        $this->assertEquals(2, $columns[0]->order);
+        $this->assertEquals(3, $columns[1]->order);
     }
 }

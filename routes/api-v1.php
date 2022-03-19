@@ -193,6 +193,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', [Column\CardController::class, 'store'])->can('create', [CardModel::class, 'column']);
         });
 
+        Route::post('/{column}/order', [Column\ColumnController::class, 'order'])->can('update', 'column');
         Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');
         Route::patch('/{column}', [Column\ColumnController::class, 'update'])->can('update', 'column');
         Route::delete('/{column}', [Column\ColumnController::class, 'destroy'])->can('delete', 'column');

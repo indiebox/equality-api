@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1\Board;
 
+use App\Rules\Api\ColumnInSameBoard;
 use App\Rules\Api\MaxColumnsPerBoard;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -16,6 +17,8 @@ class StoreColumnRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'after_column' => ['nullable', 'integer', 'min:0', new ColumnInSameBoard($this, $this->route('board'))],
+
             'board' => [new MaxColumnsPerBoard($this->route('board'))],
         ];
     }
