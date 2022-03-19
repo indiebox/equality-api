@@ -38,6 +38,8 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
+        $team->loadRequested(['members_count', 'members']);
+
         return new TeamResource($team);
     }
 

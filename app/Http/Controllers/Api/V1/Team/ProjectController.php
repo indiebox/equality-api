@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Team\StoreProjectRequest;
 use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Models\Project;
 use App\Models\Team;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ProjectController extends Controller
 {
@@ -17,7 +18,12 @@ class ProjectController extends Controller
      */
     public function index(Team $team)
     {
-        return TeamProjectResource::collection($team->projects);
+        $projects = QueryBuilder::for($team->projects())
+            ->allowedFields(['leader.id', 'leader.name'])
+            ->allowedIncludes('leader')
+            ->get();
+
+        return TeamProjectResource::collection($projects);
     }
 
     /**
