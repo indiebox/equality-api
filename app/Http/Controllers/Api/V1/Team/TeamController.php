@@ -9,8 +9,8 @@ use App\Http\Requests\Api\V1\Team\UpdateTeamRequest;
 use App\Http\Resources\V1\Team\TeamMemberResource;
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Models\Team;
+use App\Services\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedSort;
-use Spatie\QueryBuilder\QueryBuilder;
 
 class TeamController extends Controller
 {
@@ -22,7 +22,7 @@ class TeamController extends Controller
     public function index()
     {
         $query = QueryBuilder::for(auth()->user()->teams()->select(['teams.id', 'name', 'logo']))
-            ->allowedFields(TeamResource::$allowedFields)
+            ->allowedFields(TeamResource::$allowedFields + [10 => 'members.name'])
             ->allowedSorts(AllowedSort::field('created_at', 'teams.created_at'))
             ->allowedIncludes('members')
             ->get();
@@ -38,7 +38,10 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
-        $team->loadRequested(['members_count', 'members']);
+        $team = QueryBuilder::for($team)
+            ->allowedFields(['members.name'])
+            ->allowedIncludes('members', 'projects')
+            ->get();
 
         return new TeamResource($team);
     }
