@@ -45,6 +45,7 @@ class JsonResource extends BaseResource
 
         if (
             $resourceName == null
+            && $this->resource != null
             && !($this->resource instanceof MissingValue)
         ) {
             $resourceName = $this->getModel()->getTable();
