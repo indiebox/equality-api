@@ -2,18 +2,10 @@
 
 namespace App\Services\QueryBuilder;
 
-use App\Services\QueryBuilder\Includes\IncludeCount;
-use App\Services\QueryBuilder\Includes\IncludeRelationship;
-use App\Services\QueryBuilder\Includes\LoadCount;
-use App\Services\QueryBuilder\Includes\LoadRelationship;
+use App\Services\QueryBuilder\Traits\AddsIncludesToQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use Spatie\QueryBuilder\AllowedInclude;
-use Spatie\QueryBuilder\Includes\IncludeInterface;
 use Spatie\QueryBuilder\QueryBuilder as BaseQueryBuilder;
 
 /**
@@ -21,15 +13,11 @@ use Spatie\QueryBuilder\QueryBuilder as BaseQueryBuilder;
  */
 class QueryBuilder extends BaseQueryBuilder
 {
+    use AddsIncludesToQuery {
+        allowedIncludes as traitAllowedIncludes;
+    }
+
     public $subjectIsModel = false;
-
-    public $loadRelations = [];
-
-    public $loadCount = [];
-
-    public $withRelations = [];
-
-    public $withCount = [];
 
     public $freshQuery = null;
 
@@ -41,18 +29,7 @@ class QueryBuilder extends BaseQueryBuilder
 
         $result = $this->__call('get', func_get_args());
 
-        if (count($this->withCount) > 0) {
-            $result->map(function ($model) {
-                foreach ($this->withCount as $key => $relation) {
-                    if ($model->relationLoaded($relation)) {
-                        $model->{$relation . config('query-builder.count_suffix')} = $model->{$relation}->count();
-                        unset($this->withCount[$key]);
-                    } else {
-                        // TODO: throw error?
-                    }
-                }
-            });
-        }
+        $this->calculateRelationsCount($result);
 
         return $result;
     }
@@ -98,137 +75,7 @@ class QueryBuilder extends BaseQueryBuilder
 
     public function allowedIncludes($includes): self
     {
-        $includes = is_array($includes) ? $includes : func_get_args();
-
-        $this->allowedIncludes = collect($includes)
-            ->reject(function ($include) {
-                return empty($include);
-            })
-            ->flatMap(function ($include): Collection {
-                if ($include instanceof Collection) {
-                    return $include;
-                }
-
-                if ($include instanceof IncludeInterface) {
-                    return collect([$include]);
-                }
-
-                if (Str::endsWith($include, config('query-builder.count_suffix'))) {
-                    if ($this->subjectIsModel) {
-                        return AllowedInclude::custom($include, new LoadCount($this), null);
-                    }
-
-                    return AllowedInclude::custom($include, new IncludeCount($this), null);
-                }
-
-                $internalName = $internalName ?? $include;
-                if ($this->subjectIsModel) {
-                    return LoadRelationship::getIndividualRelationshipPathsFromInclude($internalName)
-                        ->zip(LoadRelationship::getIndividualRelationshipPathsFromInclude($include))
-                        ->flatMap(function ($args): Collection {
-                            [$relationship, $alias] = $args;
-
-                            $includes = AllowedInclude::custom($alias, new LoadRelationship($this), $relationship);
-
-                            if (! Str::contains($relationship, '.')) {
-                                $suffix = config('query-builder.count_suffix');
-
-                                $includes = $includes->merge(
-                                    AllowedInclude::custom($alias . $suffix, new LoadCount($this), $relationship . $suffix),
-                                );
-                            }
-
-                            return $includes;
-                        });
-                } else {
-                    return LoadRelationship::getIndividualRelationshipPathsFromInclude($internalName)
-                        ->zip(LoadRelationship::getIndividualRelationshipPathsFromInclude($include))
-                        ->flatMap(function ($args): Collection {
-                            [$relationship, $alias] = $args;
-
-                            $includes = AllowedInclude::custom($alias, new IncludeRelationship($this), $relationship);
-
-                            if (! Str::contains($relationship, '.')) {
-                                $suffix = config('query-builder.count_suffix');
-
-                                $includes = $includes->merge(
-                                    AllowedInclude::custom($alias . $suffix, new IncludeCount($this), $relationship . $suffix),
-                                );
-                            }
-
-                            return $includes;
-                        });
-                }
-            })
-            ->unique(function (AllowedInclude $allowedInclude) {
-                return $allowedInclude->getName();
-            });
-
-        $this->ensureAllIncludesExist();
-
-        $this->addIncludesToQuery($this->request->includes());
-
-        return $this;
-    }
-
-    protected function addIncludesToQuery(Collection $includes)
-    {
-        parent::addIncludesToQuery($includes);
-
-        if ($this->subjectIsModel) {
-            $this->parseLoadRelations();
-        } else {
-            $this->parseIncludeRelations();
-        }
-    }
-
-    protected function parseIncludeRelations()
-    {
-        $query = $this->getEloquentBuilder();
-
-        if (count($this->withRelations) > 0) {
-            $query->with($this->withRelations);
-        }
-
-        $withCount = $this->withCount;
-        $addWith = [];
-        foreach ($withCount as $key => $relation) {
-            $relationLoaded = !is_null(
-                Arr::first($this->withRelations, fn($value, $key) => $value === $relation || $key === $relation)
-            );
-
-            if (!$relationLoaded) {
-                $addWith[$key] = $relation;
-                unset($withCount[$key]);
-            }
-        }
-
-        if (count($addWith) > 0) {
-            $query->withCount($addWith);
-        }
-    }
-
-    protected function parseLoadRelations()
-    {
-        if (count($this->loadRelations) > 0) {
-            $this->subject->load($this->loadRelations);
-        }
-
-        $loadCounts = $this->loadCount;
-        foreach ($loadCounts as $key => $relation) {
-            $relationLoaded = !is_null(
-                Arr::first($this->loadRelations, fn($value, $key) => $value === $relation || $key === $relation)
-            );
-
-            if ($relationLoaded) {
-                $this->subject->{$relation . config('query-builder.count_suffix')} = $this->subject->{$relation}->count();
-                unset($loadCounts[$key]);
-            }
-        }
-
-        if (count($loadCounts) > 0) {
-            $this->subject->loadCount($loadCounts);
-        }
+        return $this->traitAllowedIncludes($includes);
     }
 
     #endregion
