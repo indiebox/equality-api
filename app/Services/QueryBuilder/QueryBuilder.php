@@ -2,6 +2,8 @@
 
 namespace App\Services\QueryBuilder;
 
+use App\Services\QueryBuilder\Includes\IncludeCount;
+use App\Services\QueryBuilder\Includes\IncludeRelationship;
 use App\Services\QueryBuilder\Includes\LoadCount;
 use App\Services\QueryBuilder\Includes\LoadRelationship;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,15 +17,21 @@ use Spatie\QueryBuilder\Includes\IncludeInterface;
 use Spatie\QueryBuilder\QueryBuilder as BaseQueryBuilder;
 
 /**
- * @mixin EloquentBuilder
+ * @mixin \Illuminate\Database\Eloquent\Builder
  */
 class QueryBuilder extends BaseQueryBuilder
 {
     public $subjectIsModel = false;
 
+    public $loadRelations = [];
+
     public $loadCount = [];
 
-    public $loadRelations = [];
+    public $withRelations = [];
+
+    public $withCount = [];
+
+    public $freshQuery = null;
 
     public function get()
     {
@@ -31,7 +39,22 @@ class QueryBuilder extends BaseQueryBuilder
             return $this->subject;
         }
 
-        return $this->__call('get', func_get_args());
+        $result = $this->__call('get', func_get_args());
+
+        if (count($this->withCount) > 0) {
+            $result->map(function ($model) {
+                foreach ($this->withCount as $key => $relation) {
+                    if ($model->relationLoaded($relation)) {
+                        $model->{$relation . config('query-builder.count_suffix')} = $model->{$relation}->count();
+                        unset($this->withCount[$key]);
+                    } else {
+                        // TODO: throw error?
+                    }
+                }
+            });
+        }
+
+        return $result;
     }
 
     /**
@@ -54,7 +77,7 @@ class QueryBuilder extends BaseQueryBuilder
     public function getEloquentBuilder(): Builder
     {
         if ($this->subjectIsModel) {
-            return $this->subject->newQueryWithoutRelationships();
+            return $this->freshQuery ?? $this->freshQuery = $this->subject->newQueryWithoutRelationships();
         }
 
         return parent::getEloquentBuilder();
@@ -95,12 +118,11 @@ class QueryBuilder extends BaseQueryBuilder
                         return AllowedInclude::custom($include, new LoadCount($this), null);
                     }
 
-                    return AllowedInclude::count($include);
+                    return AllowedInclude::custom($include, new IncludeCount($this), null);
                 }
 
+                $internalName = $internalName ?? $include;
                 if ($this->subjectIsModel) {
-                    $internalName = $internalName ?? $include;
-
                     return LoadRelationship::getIndividualRelationshipPathsFromInclude($internalName)
                         ->zip(LoadRelationship::getIndividualRelationshipPathsFromInclude($include))
                         ->flatMap(function ($args): Collection {
@@ -118,9 +140,25 @@ class QueryBuilder extends BaseQueryBuilder
 
                             return $includes;
                         });
-                }
+                } else {
+                    return LoadRelationship::getIndividualRelationshipPathsFromInclude($internalName)
+                        ->zip(LoadRelationship::getIndividualRelationshipPathsFromInclude($include))
+                        ->flatMap(function ($args): Collection {
+                            [$relationship, $alias] = $args;
 
-                return AllowedInclude::relationship($include);
+                            $includes = AllowedInclude::custom($alias, new IncludeRelationship($this), $relationship);
+
+                            if (! Str::contains($relationship, '.')) {
+                                $suffix = config('query-builder.count_suffix');
+
+                                $includes = $includes->merge(
+                                    AllowedInclude::custom($alias . $suffix, new IncludeCount($this), $relationship . $suffix),
+                                );
+                            }
+
+                            return $includes;
+                        });
+                }
             })
             ->unique(function (AllowedInclude $allowedInclude) {
                 return $allowedInclude->getName();
@@ -137,11 +175,37 @@ class QueryBuilder extends BaseQueryBuilder
     {
         parent::addIncludesToQuery($includes);
 
-        if (!$this->subjectIsModel) {
-            return;
+        if ($this->subjectIsModel) {
+            $this->parseLoadRelations();
+        } else {
+            $this->parseIncludeRelations();
+        }
+    }
+
+    protected function parseIncludeRelations()
+    {
+        $query = $this->getEloquentBuilder();
+
+        if (count($this->withRelations) > 0) {
+            $query->with($this->withRelations);
         }
 
-        $this->parseLoadRelations();
+        $withCount = $this->withCount;
+        $addWith = [];
+        foreach ($withCount as $key => $relation) {
+            $relationLoaded = !is_null(
+                Arr::first($this->withRelations, fn($value, $key) => $value === $relation || $key === $relation)
+            );
+
+            if (!$relationLoaded) {
+                $addWith[$key] = $relation;
+                unset($withCount[$key]);
+            }
+        }
+
+        if (count($addWith) > 0) {
+            $query->withCount($addWith);
+        }
     }
 
     protected function parseLoadRelations()
@@ -152,7 +216,9 @@ class QueryBuilder extends BaseQueryBuilder
 
         $loadCounts = $this->loadCount;
         foreach ($loadCounts as $key => $relation) {
-            $relationLoaded = !is_null(Arr::first($this->loadRelations, fn($value, $key) => $value === $relation || $key === $relation));
+            $relationLoaded = !is_null(
+                Arr::first($this->loadRelations, fn($value, $key) => $value === $relation || $key === $relation)
+            );
 
             if ($relationLoaded) {
                 $this->subject->{$relation . config('query-builder.count_suffix')} = $this->subject->{$relation}->count();

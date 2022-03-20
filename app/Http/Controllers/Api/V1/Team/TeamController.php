@@ -23,7 +23,7 @@ class TeamController extends Controller
     {
         $query = QueryBuilder::for(auth()->user()->teams()->select(['teams.id', 'name', 'logo']))
             ->allowedFields(TeamResource::$allowedFields + [10 => 'members.name'])
-            ->allowedSorts(AllowedSort::field('created_at', 'teams.created_at'))
+            ->allowedSorts(AllowedSort::field('created_at', 'teams.created_at'), 'members_count')
             ->allowedIncludes('members')
             ->get();
 
