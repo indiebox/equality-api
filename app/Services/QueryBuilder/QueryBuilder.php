@@ -6,6 +6,7 @@ use App\Services\QueryBuilder\Traits\AddsIncludesToQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use LogicException;
 use Spatie\QueryBuilder\QueryBuilder as BaseQueryBuilder;
 
 /**
@@ -76,6 +77,32 @@ class QueryBuilder extends BaseQueryBuilder
     public function allowedIncludes($includes): self
     {
         return $this->traitAllowedIncludes($includes);
+    }
+
+    #endregion
+
+    #region SortsQuery trait
+
+    public function allowedSorts($sorts): self
+    {
+        if ($this->subjectIsModel) {
+            throw new LogicException("Method 'allowedSorts' cant be used with loaded model.");
+        }
+
+        return parent::allowedSorts($sorts);
+    }
+
+    #endregion
+
+    #region FiltersQuery trait
+
+    public function allowedFilters($filters): self
+    {
+        if ($this->subjectIsModel) {
+            throw new LogicException("Method 'allowedFilters' cant be used with loaded model.");
+        }
+
+        return parent::allowedFilters($filters);
     }
 
     #endregion
