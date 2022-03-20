@@ -28,11 +28,7 @@ class QueryBuilder extends BaseQueryBuilder
             return $this->subject;
         }
 
-        $result = $this->__call('get', func_get_args());
-
-        $this->calculateRelationsCount($result);
-
-        return $result;
+        return $this->__call('get', func_get_args());
     }
 
     /**

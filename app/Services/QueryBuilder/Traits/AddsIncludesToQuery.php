@@ -2,14 +2,14 @@
 
 namespace App\Services\QueryBuilder\Traits;
 
-use App\Services\QueryBuilder\Includes\IncludeCount;
-use App\Services\QueryBuilder\Includes\IncludeRelationship;
 use App\Services\QueryBuilder\Includes\LoadCount;
 use App\Services\QueryBuilder\Includes\LoadRelationship;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\Concerns\AddsIncludesToQuery as ConcernsAddsIncludesToQuery;
+use Spatie\QueryBuilder\Includes\IncludedCount;
+use Spatie\QueryBuilder\Includes\IncludedRelationship;
 use Spatie\QueryBuilder\Includes\IncludeInterface;
 
 trait AddsIncludesToQuery
@@ -21,10 +21,6 @@ trait AddsIncludesToQuery
     public $loadRelations = [];
 
     public $loadCount = [];
-
-    public $withRelations = [];
-
-    public $withCount = [];
 
     public function allowedIncludes($includes): self
     {
@@ -48,12 +44,13 @@ trait AddsIncludesToQuery
                         return AllowedInclude::custom($include, new LoadCount($this), null);
                     }
 
-                    return AllowedInclude::custom($include, new IncludeCount($this), null);
+                    return AllowedInclude::custom($include, new IncludedCount($this), null);
                 }
 
                 $internalName = $internalName ?? $include;
-                $relationshipClass = $this->subjectIsModel ? LoadRelationship::class : IncludeRelationship::class;
-                $countClass = $this->subjectIsModel ? LoadCount::class : IncludeCount::class;
+
+                $relationshipClass = $this->subjectIsModel ? LoadRelationship::class : IncludedRelationship::class;
+                $countClass = $this->subjectIsModel ? LoadCount::class : IncludedCount::class;
 
                 return $relationshipClass::getIndividualRelationshipPathsFromInclude($internalName)
                     ->zip($relationshipClass::getIndividualRelationshipPathsFromInclude($include))
@@ -84,58 +81,12 @@ trait AddsIncludesToQuery
         return $this;
     }
 
-    protected function calculateRelationsCount($collection)
-    {
-        if (count($this->withCount) > 0) {
-            $collection->map(function ($model) {
-                foreach ($this->withCount as $key => $relation) {
-                    if ($model->relationLoaded($relation)) {
-                        $model->{$relation . config('query-builder.count_suffix')} = $model->{$relation}->count();
-                    } else {
-                        // TODO: throw error?
-                    }
-                }
-            });
-        }
-    }
-
     protected function addIncludesToQuery(Collection $includes)
     {
         $this->parentAddIncludesToQuery($includes);
 
         if ($this->subjectIsModel) {
             $this->parseLoadRelations();
-        } else {
-            $this->parseWithRelations();
-        }
-    }
-
-    protected function parseWithRelations()
-    {
-        $query = $this->getEloquentBuilder();
-
-        if (count($this->withRelations) > 0) {
-            $query->with($this->withRelations);
-        }
-
-        $withCount = $this->withCount;
-        $addWithCount = [];
-
-        // We are checking whether a relation has been added, for which we need to calculate a count, to the request.
-        // If yes, we do not load the count with an additional query, but we will set it later after receiving
-        // the results, simply by counting the number of items in the loaded collection.
-        foreach ($withCount as $key => $relation) {
-            $relationLoaded = in_array($relation, $this->withRelations, true)
-                || array_key_exists($relation, $this->withRelations);
-
-            if (!$relationLoaded) {
-                $addWithCount[$key] = $relation;
-                unset($withCount[$key]);
-            }
-        }
-
-        if (count($addWithCount) > 0) {
-            $query->withCount($addWithCount);
         }
     }
 

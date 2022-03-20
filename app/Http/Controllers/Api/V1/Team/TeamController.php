@@ -10,6 +10,7 @@ use App\Http\Resources\V1\Team\TeamMemberResource;
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Models\Team;
 use App\Services\QueryBuilder\QueryBuilder;
+use App\Services\QueryBuilder\Sorts\SortRelationsCount;
 use Spatie\QueryBuilder\AllowedSort;
 
 class TeamController extends Controller
@@ -23,7 +24,7 @@ class TeamController extends Controller
     {
         $query = QueryBuilder::for(auth()->user()->teams()->select(['teams.id', 'name', 'logo']))
             ->allowedFields(TeamResource::$allowedFields + [10 => 'members.name', 11 => 'members.created_at'])
-            ->allowedSorts('created_at')
+            ->allowedSorts(['created_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
             ->allowedIncludes('members')
             ->get();
 
