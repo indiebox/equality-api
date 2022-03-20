@@ -6,7 +6,6 @@ use App\Services\QueryBuilder\Includes\IncludeCount;
 use App\Services\QueryBuilder\Includes\IncludeRelationship;
 use App\Services\QueryBuilder\Includes\LoadCount;
 use App\Services\QueryBuilder\Includes\LoadRelationship;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedInclude;
@@ -126,9 +125,8 @@ trait AddsIncludesToQuery
         // If yes, we do not load the count with an additional query, but we will set it later after receiving
         // the results, simply by counting the number of items in the loaded collection.
         foreach ($withCount as $key => $relation) {
-            $relationLoaded = !is_null(
-                Arr::first($this->withRelations, fn($value, $key) => $value === $relation || $key === $relation)
-            );
+            $relationLoaded = in_array($relation, $this->withRelations, true)
+                || array_key_exists($relation, $this->withRelations);
 
             if (!$relationLoaded) {
                 $addWithCount[$key] = $relation;
@@ -153,9 +151,8 @@ trait AddsIncludesToQuery
         // If yes, we do not load the count with an additional query, but we just count the number of items
         // in the loaded collection.
         foreach ($loadCounts as $key => $relation) {
-            $relationLoaded = !is_null(
-                Arr::first($this->loadRelations, fn($value, $key) => $value === $relation || $key === $relation)
-            );
+            $relationLoaded = in_array($relation, $this->loadRelations, true)
+                || array_key_exists($relation, $this->loadRelations);
 
             if ($relationLoaded) {
                 $this->subject->{$relation . config('query-builder.count_suffix')} = $this->subject->{$relation}->count();

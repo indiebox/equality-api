@@ -89,7 +89,7 @@ class JsonResource extends BaseResource
 
         $queryField = Arr::get(request()->query(), 'fields.' . $fieldPath);
         if ($queryField === null || !is_string($queryField)) {
-            if (Arr::first(static::$defaultFields, fn($value) => $value == $field) != null) {
+            if (in_array($field, static::$defaultFields, true)) {
                 if (func_num_args() == 1) {
                     return $this->resource->{$field};
                 }
@@ -187,6 +187,6 @@ class JsonResource extends BaseResource
 
     protected function isRequested($requestedValues, $value)
     {
-        return !is_null(Arr::first($requestedValues, fn($val) => $val == $value));
+        return in_array($value, $requestedValues, true);
     }
 }
