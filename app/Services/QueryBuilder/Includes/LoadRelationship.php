@@ -32,7 +32,7 @@ class LoadRelationship extends IncludedRelationship
 
                 return [
                     $fullRelationName => function ($query) use ($fields) {
-                        $query->select($fields);
+                        $query->select($query->qualifyColumns($fields));
                     },
                 ];
             })

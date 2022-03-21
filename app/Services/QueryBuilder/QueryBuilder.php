@@ -85,7 +85,7 @@ class QueryBuilder extends BaseQueryBuilder
 
     public function allowedIncludes($includes): self
     {
-        return $this->traitAllowedIncludes($includes);
+        return $this->traitAllowedIncludes(...func_get_args());
     }
 
     #endregion
@@ -98,7 +98,7 @@ class QueryBuilder extends BaseQueryBuilder
             throw new LogicException("Method 'allowedSorts' cant be used with loaded model.");
         }
 
-        return parent::allowedSorts($sorts);
+        return parent::allowedSorts(...func_get_args());
     }
 
     #endregion
@@ -117,7 +117,7 @@ class QueryBuilder extends BaseQueryBuilder
             return $this;
         }
 
-        return parent::allowedFilters($filters);
+        return parent::allowedFilters(...func_get_args());
     }
 
     #endregion
