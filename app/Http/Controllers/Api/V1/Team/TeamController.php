@@ -23,8 +23,7 @@ class TeamController extends Controller
     public function index()
     {
         $query = QueryBuilder::for(auth()->user()->teams()->select(['teams.id', 'name', 'logo']))
-            // ->with('members')
-            ->allowedFields(TeamResource::$allowedFields + [10 => 'members.name', 11 => 'members.created_at', 12 => 'projects.leader.name'], ['id', 'name', 'logo', 'members.id', 'members.name'])
+            ->allowedFields(TeamResource::$allowedFields + [10 => 'members.name', 11 => 'members.created_at', 12 => 'projects.leader.name', 13 => 'projects.name'], ['id', 'name', 'logo', 'members.id', 'members.name', 'projects.id', 'projects.leader.id'])
             ->allowedSorts(['created_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
             ->allowedIncludes('members', 'projects.leader')
             ->get();
@@ -45,7 +44,7 @@ class TeamController extends Controller
         $team = QueryBuilder::for($team)
             // ->load('members')
             // ->allowedFields(['members.name', 'members.joined_at', 'id', 'description', 'name'], ['id', 'name', 'logo', 'members.id'])
-            ->allowedFields(['projects.id', 'projects.name', 'projects.leader.id', 'projects.leader.name'], ['id', 'name', 'projects.id'])
+            ->allowedFields(['id', 'name', 'projects.id', 'projects.name', 'projects.leader.id', 'projects.leader.name'], ['id', 'name', 'projects.id', 'projects.leader.name'])
             ->allowedIncludes('members', 'projects.leader')
             ->get();
 

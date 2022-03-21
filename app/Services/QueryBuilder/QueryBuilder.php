@@ -34,7 +34,22 @@ class QueryBuilder extends BaseQueryBuilder
             $result = $this->__call('get', func_get_args());
         }
 
-        $modelFields = $this->request->fields();
+        $modelFields = $this->defaultFields->reduce(function ($result, $value) {
+            $value = explode(".", $value);
+
+            if (count($value) == 1 || ($value[0] == $this->getModel()->getTable() && count($value) == 2)) {
+                return $result;
+            } else {
+                $field = array_pop($value);
+                $restoredValue = implode(".", $value);
+
+                $result[$restoredValue] = $result[$restoredValue] ?? collect();
+                $result[$restoredValue]->add($field);
+
+                return $result;
+            }
+        }, collect())->merge($this->request->fields()->except($this->getModel()->getTable()));
+
         $models = is_iterable($result) ? $result : [$result];
 
         // Relation - relation from model(`projects`, `members`, etc.)
@@ -62,6 +77,10 @@ class QueryBuilder extends BaseQueryBuilder
         foreach ($models as $model) {
             foreach ($modelFields as $relation => $fields) {
                 $nestedRelation = explode(".", $relation);
+
+                if (!$model->relationLoaded($nestedRelation[0])) {
+                    continue;
+                }
 
                 $currentRelation = $model->{$nestedRelation[0]};
                 throughNestedRelation($currentRelation, $fields, $nestedRelation);

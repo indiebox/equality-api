@@ -32,10 +32,10 @@ trait AddsFieldsToQuery
             $modelFields = $this->defaultFields->filter(function ($value) use ($modelTableName) {
                 return $value == $modelTableName
                     || !str_contains($value, ".");
-            });
+            })->toArray();
         }
 
-        $prependedFields = $this->prependFieldsWithTableName($modelFields->toArray(), $modelTableName);
+        $prependedFields = $this->prependFieldsWithTableName($modelFields, $modelTableName);
 
         if ($this->subjectIsModel) {
             $this->makeHidden(collect(array_keys($this->getAttributes()))->diff($modelFields)->toArray());
