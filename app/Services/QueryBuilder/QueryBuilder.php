@@ -26,6 +26,10 @@ class QueryBuilder extends BaseQueryBuilder
 
     protected $freshQuery = null;
 
+    /**
+     * Gets results.
+     * @return mixed
+     */
     public function get()
     {
         if ($this->subjectIsModel) {
@@ -34,58 +38,7 @@ class QueryBuilder extends BaseQueryBuilder
             $result = $this->__call('get', func_get_args());
         }
 
-        $modelFields = $this->defaultFields->reduce(function ($result, $value) {
-            $value = explode(".", $value);
-
-            if (count($value) == 1 || ($value[0] == $this->getModel()->getTable() && count($value) == 2)) {
-                return $result;
-            } else {
-                $field = array_pop($value);
-                $restoredValue = implode(".", $value);
-
-                $result[$restoredValue] = $result[$restoredValue] ?? collect();
-                $result[$restoredValue]->add($field);
-
-                return $result;
-            }
-        }, collect())->merge($this->request->fields()->except($this->getModel()->getTable()));
-
-        $models = is_iterable($result) ? $result : [$result];
-
-        // Relation - relation from model(`projects`, `members`, etc.)
-        // Fields - field for this nested relation(`id`, `name`, etc.)
-        // NestedRelation - `projects.leader`, etc.
-        function throughNestedRelation($relation, $fields, $nestedRelation)
-        {
-            $next = next($nestedRelation);
-            $relation = is_iterable($relation) ? $relation : [$relation];
-
-            foreach ($relation as $item) {
-                if ($next === false) {
-                    $diff = collect(array_keys($item->getAttributes()))->diff($fields)->toArray();
-                    $item->makeHidden($diff);
-                } else {
-                    if (!$item->relationLoaded($next)) {
-                        break;
-                    }
-
-                    throughNestedRelation($item->{$next}, $fields, $nestedRelation);
-                }
-            }
-        }
-
-        foreach ($models as $model) {
-            foreach ($modelFields as $relation => $fields) {
-                $nestedRelation = explode(".", $relation);
-
-                if (!$model->relationLoaded($nestedRelation[0])) {
-                    continue;
-                }
-
-                $currentRelation = $model->{$nestedRelation[0]};
-                throughNestedRelation($currentRelation, $fields, $nestedRelation);
-            }
-        }
+        $this->applyFieldsToResult($result);
 
         return $result;
     }
@@ -129,6 +82,12 @@ class QueryBuilder extends BaseQueryBuilder
 
     #region AddsFieldsToQuery trait
 
+    /**
+     * This method should be called before `allowedIncludes`.
+     * @param array $fields Allowed fields.
+     * @param array $defaultFields Default fields, if no any requested.
+     * @return self
+     */
     public function allowedFields($fields, $defaultFields = []): self
     {
         return $this->traitAllowedFields($fields, $defaultFields);
@@ -150,7 +109,7 @@ class QueryBuilder extends BaseQueryBuilder
     public function allowedSorts($sorts): self
     {
         if ($this->subjectIsModel) {
-            throw new LogicException("Method 'allowedSorts' cant be used with loaded model.");
+            throw new LogicException("Method 'allowedSorts' can`t be used with loaded model.");
         }
 
         return parent::allowedSorts(...func_get_args());
@@ -163,7 +122,7 @@ class QueryBuilder extends BaseQueryBuilder
     public function allowedFilters($filters): self
     {
         if ($this->subjectIsModel) {
-            throw new LogicException("Method 'allowedFilters' cant be used with loaded model.");
+            throw new LogicException("Method 'allowedFilters' can`t be used with loaded model.");
         }
 
         if ($this->request->filters()->isEmpty()) {

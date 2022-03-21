@@ -16,15 +16,15 @@ class TeamProjectResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
-            'image' => image($this->image),
+            'id' => $this->visible('id'),
+            'name' => $this->visible('name'),
+            'description' => $this->visible('description'),
+            'image' => $this->visible('image', image($this->image)),
             // 'leader' => new UserResource($this->leader),
             'leader' => new UserResource($this->whenLoaded('leader')),
             'deleted_at' => $this->when($this->deleted_at != null, $this->deleted_at),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => $this->visible('created_at'),
+            'updated_at' => $this->visible('updated_at'),
         ];
     }
 }
