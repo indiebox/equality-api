@@ -16,11 +16,11 @@ class UserInviteResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'team' => new TeamResource($this->team),
-            'inviter' => new UserResource($this->inviter),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'id' => $this->visible('id'),
+            // 'team' => new TeamResource($this->team),
+            // 'inviter' => new UserResource($this->inviter),
+            'created_at' => $this->visible('created_at'),
+            'updated_at' => $this->visible('updated_at'),
         ];
     }
 }

@@ -27,6 +27,8 @@ class UserResource extends JsonResource
             'email_verified_at' => $this->visible('email_verified_at'),
             'created_at' => $this->visible('created_at'),
             'updated_at' => $this->visible('updated_at'),
+
+            'invites' => UserInviteResource::collection($this->whenLoaded('invites')),
         ];
     }
 }

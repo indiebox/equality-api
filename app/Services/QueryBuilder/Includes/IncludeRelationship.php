@@ -13,21 +13,7 @@ class IncludeRelationship extends IncludedRelationship
 
         $withs = $relatedTables
             ->mapWithKeys(function ($table, $key) use ($query, $relatedTables) {
-                $fullRelationName = $relatedTables->slice(0, $key + 1)->implode('.');
-
-                if ($this->getRequestedFieldsForRelatedTable) {
-                    $fields = ($this->getRequestedFieldsForRelatedTable)($fullRelationName);
-                }
-
-                if (empty($fields)) {
-                    return [$fullRelationName];
-                }
-
-                return [
-                    $fullRelationName => function ($query) use ($fields) {
-                        $query->select($query->qualifyColumns($fields));
-                    },
-                ];
+                return [$relatedTables->slice(0, $key + 1)->implode('.')];
             })
             ->toArray();
 

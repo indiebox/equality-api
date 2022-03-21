@@ -34,32 +34,39 @@ class QueryBuilder extends BaseQueryBuilder
             $result = $this->__call('get', func_get_args());
         }
 
-        #region Setup fields for defaults relations
         $modelFields = $this->request->fields();
-        $includeRelations = $this->request->includes();
         $models = is_iterable($result) ? $result : [$result];
 
-        foreach ($models as $model) {
-            $relations = collect($model->getRelations())->except($includeRelations);
+        // Relation - relation from model(`projects`, `members`, etc.)
+        // Fields - field for this nested relation(`id`, `name`, etc.)
+        // NestedRelation - `projects.leader`, etc.
+        function throughNestedRelation($relation, $fields, $nestedRelation)
+        {
+            $next = next($nestedRelation);
+            $relation = is_iterable($relation) ? $relation : [$relation];
 
-            foreach ($relations as $relationName => $relation) {
-                $fields = $modelFields->get($relationName);
+            foreach ($relation as $item) {
+                if ($next === false) {
+                    $diff = collect(array_keys($item->getAttributes()))->diff($fields)->toArray();
+                    $item->makeHidden($diff);
+                } else {
+                    if (!$item->relationLoaded($next)) {
+                        break;
+                    }
 
-                if (empty($fields)) {
-                    $fields = $this->defaultFields->filter(fn($value) => str_starts_with($value, $relationName))
-                    ->map(fn($value) => explode(".", $value, 2)[1])
-                    ->toArray();
-                }
-
-                $relation = is_iterable($relation) ? $relation : [$relation];
-
-                foreach ($relation as $relationItem) {
-                    $diff = collect(array_keys($relationItem->getAttributes()))->diff($fields)->toArray();
-                    $relationItem->makeHidden($diff);
+                    throughNestedRelation($item->{$next}, $fields, $nestedRelation);
                 }
             }
         }
-        #endregion
+
+        foreach ($models as $model) {
+            foreach ($modelFields as $relation => $fields) {
+                $nestedRelation = explode(".", $relation);
+
+                $currentRelation = $model->{$nestedRelation[0]};
+                throughNestedRelation($currentRelation, $fields, $nestedRelation);
+            }
+        }
 
         return $result;
     }

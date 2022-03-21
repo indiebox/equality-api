@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\V1\Team;
 
+use App\Http\Resources\V1\Project\ProjectResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TeamResource extends JsonResource
@@ -45,6 +46,8 @@ class TeamResource extends JsonResource
 
             'members' => TeamMemberResource::collection($this->whenLoaded('members')),
             'members_count' => $this->visible('members_count'),
+
+            'projects' => ProjectResource::collection($this->whenLoaded('projects')),
         ];
     }
 }
