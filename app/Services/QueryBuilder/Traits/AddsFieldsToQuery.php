@@ -2,8 +2,25 @@
 
 namespace App\Services\QueryBuilder\Traits;
 
+use Spatie\QueryBuilder\Concerns\AddsFieldsToQuery as ConcernsAddsFieldsToQuery;
+
 trait AddsFieldsToQuery
 {
+    use ConcernsAddsFieldsToQuery {
+        allowedFields as parentAllowedFields;
+    }
+
+    protected $defaultFields = [];
+
+    public function allowedFields($fields, $defaultFields = []): self
+    {
+        $this->defaultFields = $defaultFields;
+
+        $this->parentAllowedFields($fields);
+
+        return $this;
+    }
+
     protected function addRequestedModelFieldsToQuery()
     {
         $modelTableName = $this->getModel()->getTable();
@@ -11,7 +28,7 @@ trait AddsFieldsToQuery
         $modelFields = $this->request->fields()->get($modelTableName);
 
         if (empty($modelFields)) {
-            return;
+            $modelFields = $this->defaultFields;
         }
 
         $prependedFields = $this->prependFieldsWithTableName($modelFields, $modelTableName);

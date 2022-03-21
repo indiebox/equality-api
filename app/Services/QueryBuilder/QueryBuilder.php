@@ -18,11 +18,13 @@ class QueryBuilder extends BaseQueryBuilder
     use AddsIncludesToQuery {
         allowedIncludes as traitAllowedIncludes;
     }
-    use AddsFieldsToQuery;
+    use AddsFieldsToQuery {
+        allowedFields as traitAllowedFields;
+    }
 
     public $subjectIsModel = false;
 
-    public $freshQuery = null;
+    protected $freshQuery = null;
 
     public function get()
     {
@@ -69,6 +71,15 @@ class QueryBuilder extends BaseQueryBuilder
     {
         return new static($subject, $request);
     }
+
+    #region AddsFieldsToQuery trait
+
+    public function allowedFields($fields, $defaultFields = []): self
+    {
+        return $this->traitAllowedFields($fields, $defaultFields);
+    }
+
+    #endregion
 
     #region AddsIncludesToQuery trait
 
