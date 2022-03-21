@@ -40,7 +40,7 @@ class TeamController extends Controller
     public function show(Team $team)
     {
         $team = QueryBuilder::for($team)
-            ->allowedFields(['members.name', 'id', 'description', 'name'])
+            ->allowedFields(['members.name', 'members.joined_at', 'members.is_creator', 'id', 'description', 'name'])
             ->allowedIncludes('members', 'projects')
             ->get();
 

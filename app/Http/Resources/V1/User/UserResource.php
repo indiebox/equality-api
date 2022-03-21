@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\V1\User;
 
-use App\Http\Resources\JsonResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
 {
@@ -21,12 +21,12 @@ class UserResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->whenFieldRequested('id'),
-            'name' => $this->whenFieldRequested('name'),
-            'email' => $this->whenFieldRequested('email'),
-            'email_verified_at' => $this->whenFieldRequested('email_verified_at'),
-            'created_at' => $this->whenFieldRequested('created_at'),
-            'updated_at' => $this->whenFieldRequested('updated_at'),
+            'id' => $this->visible('id'),
+            'name' => $this->visible('name'),
+            'email' => $this->visible('email'),
+            'email_verified_at' => $this->visible('email_verified_at'),
+            'created_at' => $this->visible('created_at'),
+            'updated_at' => $this->visible('updated_at'),
         ];
     }
 }
