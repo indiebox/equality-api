@@ -70,6 +70,7 @@ class QueryBuilder extends BaseQueryBuilder
     }
 
     /**
+     * Make new `QueryBuilder` instance for the specified object.
      * @param EloquentBuilder|Relation|Model|string $subject
      * @param Request|null $request
      *
@@ -83,6 +84,7 @@ class QueryBuilder extends BaseQueryBuilder
     #region AddsFieldsToQuery trait
 
     /**
+     * Setup allowed and default fields.
      * This method should be called before `allowedIncludes`.
      * @param array $fields Allowed fields.
      * @param array $defaultFields Default fields, if no any requested.
@@ -97,6 +99,11 @@ class QueryBuilder extends BaseQueryBuilder
 
     #region AddsIncludesToQuery trait
 
+    /**
+     * Setup allowed includes.
+     * @param mixed $includes Allowed includes.
+     * @return self
+     */
     public function allowedIncludes($includes): self
     {
         return $this->traitAllowedIncludes(...func_get_args());
@@ -106,6 +113,11 @@ class QueryBuilder extends BaseQueryBuilder
 
     #region SortsQuery trait
 
+    /**
+     * Setup allowed sorts.
+     * @param array $sorts Allowed sorts.
+     * @return self
+     */
     public function allowedSorts($sorts): self
     {
         if ($this->subjectIsModel) {
@@ -119,6 +131,11 @@ class QueryBuilder extends BaseQueryBuilder
 
     #region FiltersQuery trait
 
+    /**
+     * Setup allowed filters.
+     * @param array $filters Allowed filters.
+     * @return self
+     */
     public function allowedFilters($filters): self
     {
         if ($this->subjectIsModel) {

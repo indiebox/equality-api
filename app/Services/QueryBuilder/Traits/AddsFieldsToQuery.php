@@ -10,6 +10,11 @@ trait AddsFieldsToQuery
         allowedFields as private parentAllowedFields;
     }
 
+    /**
+     * List of default fields that will be applied
+     * when no any requested.
+     * @var \Illuminate\Support\Collection
+     */
     protected $defaultFields;
 
     public function allowedFields($fields, $defaultFields = []): self
@@ -30,7 +35,6 @@ trait AddsFieldsToQuery
      */
     protected function applyFieldsToResult($result)
     {
-        $request = $this->request;
         $models = is_iterable($result) ? $result : [$result];
         $tableName = $this->getModel()->getTable();
 
@@ -54,39 +58,14 @@ trait AddsFieldsToQuery
             }, collect())
             ->merge($this->request->fields());
 
-        /**
-         * Apply fields to nested relations.
-         * @param mixed $relation Model realation (for example, `projects`, `teams`, etc.)
-         * @param array $fields Fields to apply (for example, `id`, `name`, etc.)
-         * @param array $nestedRelation Array of nested relation (like `[projects, leader] => projects.leader`, etc.).
-         */
-        function applyNested($relation, $fields, $nestedRelation, $request)
-        {
-            $next = next($nestedRelation);
-            $relation = is_iterable($relation) ? $relation : [$relation];
-
-            foreach ($relation as $item) {
-                if ($next === false) {
-                    $attributes = collect($item->getAttributes())->except($request->includes()->merge($fields))->keys()->toArray();
-
-                    $item->makeHidden($attributes);
-                } else {
-                    if (!$item->relationLoaded($next)) {
-                        break;
-                    }
-
-                    applyNested($item->{$next}, $fields, $nestedRelation, $request);
-                }
-            }
-        }
-
         foreach ($models as $model) {
             foreach ($modelFields as $relation => $fields) {
                 $nestedRelation = explode(".", $relation);
 
                 // Fields for current model itself (not nested).
                 if ($nestedRelation[0] == $tableName) {
-                    applyNested($model, $fields, [], $request);
+                    $this->applyFields($model, $fields, []);
+
                     continue;
                 }
 
@@ -95,7 +74,38 @@ trait AddsFieldsToQuery
                 }
 
                 // Fields for nested models.
-                applyNested($model->{$nestedRelation[0]}, $fields, $nestedRelation, $request);
+                $this->applyFields($model->{$nestedRelation[0]}, $fields, $nestedRelation);
+            }
+        }
+    }
+
+    /**
+     * Apply requested fields.
+     * @param mixed $relation Model relation (for example, `projects`, `teams`, etc.)
+     * @param array $fields Fields to apply (for example, `id`, `name`, etc.)
+     * @param array $nestedRelation Array of nested relation (like `[projects, leader] => projects.leader`, etc.).
+     */
+    private function applyFields($relation, $fields, $nestedRelation)
+    {
+        $next = next($nestedRelation);
+
+        $relation = is_iterable($relation) ? $relation : [$relation];
+        $attributes = collect($relation[0]->getAttributes())
+            ->except(
+                $this->request->includes()->merge($fields)
+            )
+            ->keys()
+            ->toArray();
+
+        foreach ($relation as $item) {
+            if ($next === false) {
+                $item->makeHidden($attributes);
+            } else {
+                if (!$item->relationLoaded($next)) {
+                    break;
+                }
+
+                $this->applyFields($item->{$next}, $fields, $nestedRelation);
             }
         }
     }
