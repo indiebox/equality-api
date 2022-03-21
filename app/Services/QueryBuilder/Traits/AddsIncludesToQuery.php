@@ -2,6 +2,7 @@
 
 namespace App\Services\QueryBuilder\Traits;
 
+use App\Services\QueryBuilder\Includes\IncludeRelationship;
 use App\Services\QueryBuilder\Includes\LoadCount;
 use App\Services\QueryBuilder\Includes\LoadRelationship;
 use Illuminate\Support\Collection;
@@ -9,7 +10,6 @@ use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\Concerns\AddsIncludesToQuery as ConcernsAddsIncludesToQuery;
 use Spatie\QueryBuilder\Includes\IncludedCount;
-use Spatie\QueryBuilder\Includes\IncludedRelationship;
 use Spatie\QueryBuilder\Includes\IncludeInterface;
 
 trait AddsIncludesToQuery
@@ -45,6 +45,7 @@ trait AddsIncludesToQuery
                     return collect([$include]);
                 }
 
+                // Count includes
                 if (Str::endsWith($include, config('query-builder.count_suffix'))) {
                     if ($this->subjectIsModel) {
                         return AllowedInclude::custom($include, new LoadCount($this), null);
@@ -53,9 +54,9 @@ trait AddsIncludesToQuery
                     return AllowedInclude::custom($include, new IncludedCount($this), null);
                 }
 
+                // Relations includes
                 $internalName = $internalName ?? $include;
-
-                $relationshipClass = $this->subjectIsModel ? LoadRelationship::class : IncludedRelationship::class;
+                $relationshipClass = $this->subjectIsModel ? LoadRelationship::class : IncludeRelationship::class;
                 $countClass = $this->subjectIsModel ? LoadCount::class : IncludedCount::class;
 
                 return $relationshipClass::getIndividualRelationshipPathsFromInclude($internalName)
