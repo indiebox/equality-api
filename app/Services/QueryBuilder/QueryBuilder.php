@@ -29,10 +29,39 @@ class QueryBuilder extends BaseQueryBuilder
     public function get()
     {
         if ($this->subjectIsModel) {
-            return $this->subject;
+            $result = $this->subject;
+        } else {
+            $result = $this->__call('get', func_get_args());
         }
 
-        return $this->__call('get', func_get_args());
+        #region Setup fields for defaults relations
+        $modelFields = $this->request->fields();
+        $includeRelations = $this->request->includes();
+        $models = is_iterable($result) ? $result : [$result];
+
+        foreach ($models as $model) {
+            $relations = collect($model->getRelations())->except($includeRelations);
+
+            foreach ($relations as $relationName => $relation) {
+                $fields = $modelFields->get($relationName);
+
+                if (empty($fields)) {
+                    $fields = $this->defaultFields->filter(fn($value) => str_starts_with($value, $relationName))
+                    ->map(fn($value) => explode(".", $value, 2)[1])
+                    ->toArray();
+                }
+
+                $relation = is_iterable($relation) ? $relation : [$relation];
+
+                foreach ($relation as $relationItem) {
+                    $diff = collect(array_keys($relationItem->getAttributes()))->diff($fields)->toArray();
+                    $relationItem->makeHidden($diff);
+                }
+            }
+        }
+        #endregion
+
+        return $result;
     }
 
     /**

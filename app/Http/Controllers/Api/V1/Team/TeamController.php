@@ -23,11 +23,11 @@ class TeamController extends Controller
     public function index()
     {
         $query = QueryBuilder::for(auth()->user()->teams()->select(['teams.id', 'name', 'logo']))
+            // ->with('members')
             ->allowedFields(TeamResource::$allowedFields + [10 => 'members.name', 11 => 'members.created_at'], ['id', 'name', 'logo', 'members.id', 'members.name'])
             ->allowedSorts(['created_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
             ->allowedIncludes('members')
             ->get();
-
         return TeamResource::collection($query);
     }
 
@@ -39,11 +39,15 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
+        // $start = microtime(true);
+
         $team = QueryBuilder::for($team)
+            // ->load('members')
             ->allowedFields(['members.name', 'members.joined_at', 'id', 'description', 'name'], ['id', 'name', 'logo', 'members.id'])
-            ->allowedIncludes('members')
+            ->allowedIncludes('members', 'projects.boards')
             ->get();
 
+        // logs()->debug(microtime(true) - $start);
         return new TeamResource($team);
     }
 
