@@ -24,6 +24,12 @@ trait AddsIncludesToQuery
 
     public function allowedIncludes($includes): self
     {
+        if ($this->request->includes()->isEmpty()) {
+            // We haven't got any requested includes. No need to parse allowed includes.
+
+            return $this;
+        }
+
         $includes = is_array($includes) ? $includes : func_get_args();
 
         $this->allowedIncludes = collect($includes)

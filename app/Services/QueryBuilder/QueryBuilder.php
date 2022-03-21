@@ -100,6 +100,12 @@ class QueryBuilder extends BaseQueryBuilder
             throw new LogicException("Method 'allowedFilters' cant be used with loaded model.");
         }
 
+        if ($this->request->filters()->isEmpty()) {
+            // We haven't got any requested filters. No need to parse allowed filters.
+
+            return $this;
+        }
+
         return parent::allowedFilters($filters);
     }
 
