@@ -2,6 +2,7 @@
 
 namespace App\Services\QueryBuilder;
 
+use App\Services\QueryBuilder\Traits\AddsFieldsToQuery;
 use App\Services\QueryBuilder\Traits\AddsIncludesToQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ class QueryBuilder extends BaseQueryBuilder
     use AddsIncludesToQuery {
         allowedIncludes as traitAllowedIncludes;
     }
+    use AddsFieldsToQuery;
 
     public $subjectIsModel = false;
 

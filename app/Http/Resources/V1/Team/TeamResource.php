@@ -35,9 +35,12 @@ class TeamResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->whenFieldRequested('id'),
-            'name' => $this->whenFieldRequested('name'),
-            'description' => $this->whenFieldRequested('description'),
+            'id' => $this->visible('id'),
+            'name' => $this->visible('name'),
+            'description' => $this->visible('description'),
+            // 'id' => $this->whenFieldRequested('id'),
+            // 'name' => $this->whenFieldRequested('name'),
+            // 'description' => $this->whenFieldRequested('description'),
             'url' => $this->whenFieldRequested('url'),
             'logo' => $this->whenFieldRequested('logo', image($this->logo)),
             // 'members' => TeamMemberResource::collection($this->whenLoaded('members')),
