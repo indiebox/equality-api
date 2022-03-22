@@ -17,8 +17,8 @@ class TeamInviteResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'inviter' => new UserResource($this->inviter),
-            'invited' => new UserResource($this->invited),
+            'inviter' => new UserResource($this->whenLoaded('inviter')),
+            'invited' => new UserResource($this->whenLoaded('invited')),
             'status' => $this->getStatus(),
             'accepted_at' => $this->accepted_at,
             'declined_at' => $this->declined_at,

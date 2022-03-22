@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Team\StoreInviteRequest;
 use App\Http\Resources\V1\Team\TeamInviteResource;
 use App\Models\Invite;
 use App\Models\Team;
+use App\Services\QueryBuilder\QueryBuilder;
 use Illuminate\Http\Request;
 
 class InviteController extends Controller
@@ -20,7 +21,10 @@ class InviteController extends Controller
      */
     public function index(Request $request, Team $team)
     {
-        $invites = $team->invites()->filterByStatus($request->query('filter', 'all'))->get();
+        // $invites = $team->invites()->filterByStatus($request->query('filter', 'all'))->get();
+        $invites = QueryBuilder::for($team->invites()->filterByStatus($request->query('filter', 'all')))
+            ->allowedFields(['inviter.id', 'invited.name'], ['inviter.name', 'invited.id'])
+            ->get();
 
         return TeamInviteResource::collection($invites);
     }
