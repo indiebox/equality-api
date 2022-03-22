@@ -18,21 +18,44 @@ trait AddsIncludesToQuery
         addIncludesToQuery as private parentAddIncludesToQuery;
     }
 
+    /**
+     * Keys of relations to load.
+     * @var array
+     */
     public $loadRelations = [];
 
+    /**
+     * Keys of relations to load count.
+     * @var array
+     */
     public $loadCount = [];
 
-    public function allowedIncludes($includes): self
+    public function allowedIncludes($includes, $defaultIncludes = []): self
     {
-        if ($this->request->includes()->isEmpty()) {
-            // We haven't got any requested includes. No need to parse allowed includes.
+        $hasRequestedIncludes = !$this->request->includes()->isEmpty();
+        if (!$hasRequestedIncludes && empty($defaultIncludes)) {
+            // If we haven't received any requested includes and default includes,
+            // we no need to parse allowed includes.
 
             return $this;
         }
 
-        $includes = is_array($includes) ? $includes : func_get_args();
+        $this->allowedIncludes = $this->parseIncludes(collect($includes)->push(...$defaultIncludes));
 
-        $this->allowedIncludes = collect($includes)
+        $this->ensureAllIncludesExist();
+
+        $includes = $hasRequestedIncludes
+            ? $this->request->includes()
+            : collect($defaultIncludes);
+
+        $this->addIncludesToQuery($includes);
+
+        return $this;
+    }
+
+    protected function parseIncludes($includes)
+    {
+        return $includes
             ->reject(function ($include) {
                 return empty($include);
             })
@@ -80,12 +103,6 @@ trait AddsIncludesToQuery
             ->unique(function (AllowedInclude $allowedInclude) {
                 return $allowedInclude->getName();
             });
-
-        $this->ensureAllIncludesExist();
-
-        $this->addIncludesToQuery($this->request->includes());
-
-        return $this;
     }
 
     protected function addIncludesToQuery(Collection $includes)

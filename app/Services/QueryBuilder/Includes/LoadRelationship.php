@@ -24,8 +24,8 @@ class LoadRelationship extends IncludedRelationship
             })
             ->toArray();
 
-        foreach ($loads as $key => $value) {
-            $this->builder->loadRelations[$key] = $value;
+        foreach ($loads as $value) {
+            $this->builder->loadRelations[] = $value;
         }
     }
 }

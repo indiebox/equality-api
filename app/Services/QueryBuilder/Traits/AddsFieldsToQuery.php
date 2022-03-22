@@ -31,9 +31,11 @@ trait AddsFieldsToQuery
         $fields = is_array($fields) ? $fields : func_get_args();
 
         $this->allowedFields = collect($fields)
+            ->push(...$defaultFields)
             ->map(function (string $fieldName) use ($defaultName) {
                 return $this->prependField($fieldName, $defaultName);
             });
+
         $this->defaultFields = collect($defaultFields);
 
         $this->ensureAllFieldsExist();

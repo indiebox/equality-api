@@ -41,8 +41,8 @@ class TeamController extends Controller
     {
         $team = QueryBuilder::for($team)
             // ->allowedFields(['members.name', 'members.joined_at', 'id', 'description', 'name'], ['id', 'name', 'logo', 'members.id'])
-            ->allowedFields(['id', 'name', 'members.name', 'projects.id', 'projects.name', 'projects.leader.id', 'projects.leader.name'], ['id', 'name', 'members.id', 'projects.id', 'projects.leader.name'])
-            ->allowedIncludes('members', 'projects.leader')
+            ->allowedFields(['members.name', 'projects.name', 'projects.leader.id'], ['id', 'name', 'members.id', 'projects.id', 'projects.leader.name'])
+            ->allowedIncludes(['projects.leader'])
             ->get();
 
         return new TeamResource($team);

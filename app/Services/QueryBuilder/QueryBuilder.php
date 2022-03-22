@@ -109,10 +109,13 @@ class QueryBuilder extends BaseQueryBuilder
 
     /**
      * Setup allowed and default fields.
+     *
      * This method should be called before `allowedIncludes`.
+     * Default fields will be automatically added to allowed fields.
+     *
      * @param array $fields Allowed fields.
      * @param array $defaultFields Default fields, if no any requested.
-     * @param string|null $defaultName The default name for parent model.
+     * @param string|null $defaultName The default name for model itself.
      * @return self
      */
     public function allowedFields($fields, $defaultFields = [], $defaultName = null): self
@@ -126,10 +129,14 @@ class QueryBuilder extends BaseQueryBuilder
 
     /**
      * Setup allowed includes.
-     * @param mixed $includes Allowed includes.
+     *
+     * Default includes will be automatically added to allowed includes.
+     *
+     * @param array $includes Allowed includes.
+     * @param array $defaultIncludes Default includes, if no any requested.
      * @return self
      */
-    public function allowedIncludes($includes): self
+    public function allowedIncludes($includes, $defaultIncludes = []): self
     {
         return $this->traitAllowedIncludes(...func_get_args());
     }
