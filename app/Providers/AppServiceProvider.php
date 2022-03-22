@@ -35,6 +35,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Setup default password rule.
+        Password::defaults(function () {
+            $rule = Password::min(6);
+
+            return $this->app->isProduction()
+                        ? $rule->mixedCase()->numbers()
+                        : $rule;
+        });
+
+        $this->registerQueryMacros();
+    }
+
+    protected function registerQueryMacros()
+    {
         Builder::macro('visible', function ($field, $value = null, $default = null) {
             $model = $this->getModel();
 
@@ -46,26 +60,42 @@ class AppServiceProvider extends ServiceProvider
                 return $default;
             }
 
-            if (in_array($field, $model->getHidden())) {
-                return $default;
+            if (is_array($field)) {
+                $result = collect();
+
+                foreach ($field as $key => $fieldValue) {
+                    $isKeyValuePairs = !is_numeric($key);
+                    $fieldName = $isKeyValuePairs ? $key : $fieldValue;
+
+                    if (
+                        in_array($fieldName, $model->getHidden())
+                        || !array_key_exists($fieldName, $model->getAttributes())
+                    ) {
+                        $fieldValue = $default;
+                    } else {
+                        $fieldValue = $isKeyValuePairs ? $fieldValue : $model->{$fieldValue};
+                    }
+
+                    $result->add([$fieldName => $fieldValue]);
+                }
+
+                if (func_num_args() > 1 && is_iterable($value)) {
+                    $result = $result->merge([$value]);
+                }
+
+                return $result->collapse()->toArray();
             }
 
-            if (!array_key_exists($field, $model->getAttributes())) {
+            if (
+                in_array($field, $model->getHidden())
+                || !array_key_exists($field, $model->getAttributes())
+            ) {
                 return $default;
             }
 
             return func_num_args() > 1
                 ? value($value)
                 : $model->{$field};
-        });
-
-        // Setup default password rule.
-        Password::defaults(function () {
-            $rule = Password::min(6);
-
-            return $this->app->isProduction()
-                        ? $rule->mixedCase()->numbers()
-                        : $rule;
         });
     }
 }

@@ -35,19 +35,29 @@ class TeamResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->visible('id'),
-            'name' => $this->visible('name'),
-            'description' => $this->visible('description'),
-            'url' => $this->visible('url'),
-            'logo' => $this->visible('logo', image($this->logo)),
-            'created_at' => $this->visible('created_at'),
-            'updated_at' => $this->visible('updated_at'),
+        // return [
+        //     'id' => $this->visible('id'),
+        //     'name' => $this->visible('name'),
+        //     'description' => $this->visible('description'),
+        //     'url' => $this->visible('url'),
+        //     'logo' => $this->visible('logo', image($this->logo)),
+        //     'created_at' => $this->visible('created_at'),
+        //     'updated_at' => $this->visible('updated_at'),
 
-            'members' => TeamMemberResource::collection($this->whenLoaded('members')),
-            'members_count' => $this->visible('members_count'),
+        //     'members' => TeamMemberResource::collection($this->whenLoaded('members')),
+        //     'members_count' => $this->visible('members_count'),
 
-            'projects' => ProjectResource::collection($this->whenLoaded('projects')),
-        ];
+        //     'projects' => ProjectResource::collection($this->whenLoaded('projects')),
+        // ];
+
+        return $this->visible(
+            [
+                'id', 'name', 'description', 'url', 'logo' => image($this->logo), 'created_at', 'updated_at',
+                'members_count',
+            ],
+            [
+                'members' => TeamMemberResource::collection($this->whenLoaded('members')),
+            ],
+        );
     }
 }
