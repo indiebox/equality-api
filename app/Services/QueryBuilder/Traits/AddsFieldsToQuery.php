@@ -56,7 +56,7 @@ trait AddsFieldsToQuery
     {
         $models = is_iterable($result) ? $result : [$result];
 
-        $modelFields = $this->defaultFields
+        $modelFields = collect($this->defaultFields)
             ->reduce(function ($result, $value) {
                 $value = explode(".", $value);
                 $key = null;
@@ -76,9 +76,9 @@ trait AddsFieldsToQuery
             }, collect())
             ->merge($this->request->fields());
 
-        $except = !$this->request->includes()->isEmpty()
-            ? $this->request->includes()
-            : $this->defaultIncludes;
+        $except = collect($this->allowedIncludes)->map(function ($allowedInclude) {
+            return $allowedInclude->getName();
+        });
 
         foreach ($models as $model) {
             foreach ($modelFields as $relation => $fields) {

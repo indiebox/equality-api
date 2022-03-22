@@ -32,10 +32,10 @@ class TeamResource extends JsonResource
         ])->map(fn($value) => $selfName . "." . $value);
 
         if (in_array("members", $relations) || array_key_exists("members", $relations)) {
-            $fields->push(...TeamMemberResource::allowedFields()->map(fn($value) => "members." . $value));
+            $fields->push(...collect(TeamMemberResource::allowedFields())->map(fn($value) => "members." . $value));
         }
 
-        return $fields;
+        return $fields->toArray();
     }
 
     public static function defaultFields($relations = [])

@@ -67,10 +67,7 @@ class AppServiceProvider extends ServiceProvider
                     $isKeyValuePairs = !is_numeric($key);
                     $fieldName = $isKeyValuePairs ? $key : $fieldValue;
 
-                    if (
-                        in_array($fieldName, $model->getHidden())
-                        || !array_key_exists($fieldName, $model->getAttributes())
-                    ) {
+                    if (in_array($fieldName, $model->getHidden())) {
                         $fieldValue = $default;
                     } else {
                         $fieldValue = $isKeyValuePairs ? $fieldValue : $model->{$fieldValue};
@@ -86,11 +83,7 @@ class AppServiceProvider extends ServiceProvider
                 return $result->collapse()->toArray();
             }
 
-            // Check if attribute is visible and exists in model.
-            if (
-                in_array($field, $model->getHidden())
-                || !array_key_exists($field, $model->getAttributes())
-            ) {
+            if (in_array($field, $model->getHidden())) {
                 return $default;
             }
 

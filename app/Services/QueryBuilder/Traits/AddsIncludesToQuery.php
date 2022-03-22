@@ -35,12 +35,6 @@ trait AddsIncludesToQuery
     public function allowedIncludes($includes, $defaultIncludes = []): self
     {
         $hasRequestedIncludes = !$this->request->includes()->isEmpty();
-        if (!$hasRequestedIncludes && empty($defaultIncludes)) {
-            // If we haven't received any requested includes and default includes,
-            // we no need to parse allowed includes.
-
-            return $this;
-        }
 
         $this->allowedIncludes = $this->parseIncludes(collect($includes)->push(...$defaultIncludes));
         $this->defaultIncludes = collect($defaultIncludes);

@@ -16,7 +16,7 @@ class TeamMemberResource extends JsonResource
             ...collect(UserResource::allowedFields())->map(fn($value) => 'members.' . $value)->toArray(),
         ];
 
-        return collect($fields);
+        return $fields;
     }
 
     public static function defaultFields()
