@@ -76,9 +76,14 @@ trait AddsFieldsToQuery
             }, collect())
             ->merge($this->request->fields());
 
+        $except = !$this->request->includes()->isEmpty()
+            ? $this->request->includes()
+            : $this->defaultIncludes;
+
         foreach ($models as $model) {
             foreach ($modelFields as $relation => $fields) {
                 $nestedRelation = explode(".", $relation);
+                $fields = collect($except)->merge($fields);
 
                 // Fields for current model itself (not nested).
                 if ($nestedRelation[0] == $this->defaultName) {
@@ -109,9 +114,7 @@ trait AddsFieldsToQuery
 
         $relation = is_iterable($relation) ? $relation : [$relation];
         $attributes = collect($relation[0]->getAttributes())
-            ->except(
-                $this->request->includes()->merge($fields)
-            )
+            ->except($fields)
             ->keys()
             ->toArray();
 

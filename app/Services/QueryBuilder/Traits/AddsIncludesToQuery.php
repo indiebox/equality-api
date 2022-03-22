@@ -30,6 +30,8 @@ trait AddsIncludesToQuery
      */
     public $loadCount = [];
 
+    protected $defaultIncludes;
+
     public function allowedIncludes($includes, $defaultIncludes = []): self
     {
         $hasRequestedIncludes = !$this->request->includes()->isEmpty();
@@ -41,12 +43,13 @@ trait AddsIncludesToQuery
         }
 
         $this->allowedIncludes = $this->parseIncludes(collect($includes)->push(...$defaultIncludes));
+        $this->defaultIncludes = collect($defaultIncludes);
 
         $this->ensureAllIncludesExist();
 
         $includes = $hasRequestedIncludes
             ? $this->request->includes()
-            : collect($defaultIncludes);
+            : $this->defaultIncludes;
 
         $this->addIncludesToQuery($includes);
 
@@ -74,7 +77,7 @@ trait AddsIncludesToQuery
                         return AllowedInclude::custom($include, new LoadCount($this), null);
                     }
 
-                    return AllowedInclude::custom($include, new IncludedCount($this), null);
+                    return AllowedInclude::custom($include, new IncludedCount(), null);
                 }
 
                 // Relations includes

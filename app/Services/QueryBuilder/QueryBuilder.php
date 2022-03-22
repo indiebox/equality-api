@@ -138,7 +138,7 @@ class QueryBuilder extends BaseQueryBuilder
      */
     public function allowedIncludes($includes, $defaultIncludes = []): self
     {
-        return $this->traitAllowedIncludes(...func_get_args());
+        return $this->traitAllowedIncludes($includes, $defaultIncludes);
     }
 
     #endregion
