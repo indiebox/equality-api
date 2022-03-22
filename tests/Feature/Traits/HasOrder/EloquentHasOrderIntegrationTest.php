@@ -4,10 +4,13 @@ namespace Tests\Feature\Traits\HasOrder;
 
 use App\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class EloquentHasOrderIntegrationTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected function setUp(): void
     {
         parent::setUp();
