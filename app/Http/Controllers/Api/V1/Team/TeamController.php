@@ -23,9 +23,9 @@ class TeamController extends Controller
     public function index()
     {
         $teams = QueryBuilder::for(auth()->user()->teams())
-            ->allowedFields(TeamResource::$allowedFields + [10 => 'members.name', 11 => 'members.created_at', 12 => 'projects.leader.name', 13 => 'projects.name'], ['id', 'name', 'logo', 'members.id', 'members.name', 'projects.id', 'projects.leader.id'])
+            ->allowedFields(TeamResource::allowedFields(), TeamResource::defaultFields())
             ->allowedSorts(['created_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
-            ->allowedIncludes(['members', 'projects.leader'], ['members_count'])
+            ->allowedIncludes(['members_count'])
             ->get();
 
         return TeamResource::collection($teams);
@@ -40,9 +40,8 @@ class TeamController extends Controller
     public function show(Team $team)
     {
         $team = QueryBuilder::for($team)
-            // ->allowedFields(['members.name', 'members.joined_at', 'id', 'description', 'name'], ['id', 'name', 'logo', 'members.id'])
-            ->allowedFields(['members.name', 'projects.name', 'projects.leader.id'], ['id', 'name', 'members.id', 'projects.id', 'projects.leader.name'])
-            ->allowedIncludes(['projects.leader'])
+            ->allowedFields(TeamResource::allowedFields(['members']), TeamResource::defaultFields(['members']))
+            ->allowedIncludes(['members'])
             ->get();
 
         return new TeamResource($team);
@@ -56,7 +55,7 @@ class TeamController extends Controller
     public function members(Team $team)
     {
         $members = QueryBuilder::for($team->members())
-            ->allowedFields(['id', 'name', 'joined_at'], ['name'], 'members')
+            ->allowedFields(TeamMemberResource::allowedFields(), TeamMemberResource::defaultFields(), 'members')
             ->get();
 
         return TeamMemberResource::collection($members);

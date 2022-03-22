@@ -6,11 +6,21 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
 {
-    public static $defaultFields = [
-        'id',
-        'name',
-        'email',
-    ];
+    public static function allowedFields($relations = [])
+    {
+        $fields = [
+            'email_verified_at', 'created_at', 'updated_at',
+        ];
+
+        return $fields;
+    }
+
+    public static function defaultFields()
+    {
+        return [
+            'id', 'name', 'email',
+        ];
+    }
 
     /**
      * Transform the resource into an array.
@@ -20,15 +30,8 @@ class UserResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->visible('id'),
-            'name' => $this->visible('name'),
-            'email' => $this->visible('email'),
-            'email_verified_at' => $this->visible('email_verified_at'),
-            'created_at' => $this->visible('created_at'),
-            'updated_at' => $this->visible('updated_at'),
-
-            'invites' => UserInviteResource::collection($this->whenLoaded('invites')),
-        ];
+        return $this->visible(
+            ['id', 'name', 'email', 'email_verified_at', 'created_at', 'updated_at'],
+        );
     }
 }

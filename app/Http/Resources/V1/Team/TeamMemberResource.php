@@ -9,6 +9,23 @@ use Illuminate\Support\Carbon;
 
 class TeamMemberResource extends JsonResource
 {
+    public static function allowedFields($relations = [])
+    {
+        $fields = [
+            'joined_at', 'is_creator',
+            ...collect(UserResource::allowedFields())->map(fn($value) => 'members.' . $value)->toArray(),
+        ];
+
+        return collect($fields);
+    }
+
+    public static function defaultFields()
+    {
+        return [
+            ...collect(UserResource::defaultFields())->map(fn($value) => 'members.' . $value)->toArray(),
+        ];
+    }
+
     /**
      * Transform the resource into an array.
      *

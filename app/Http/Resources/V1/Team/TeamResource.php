@@ -2,31 +2,10 @@
 
 namespace App\Http\Resources\V1\Team;
 
-use App\Http\Resources\V1\Project\ProjectResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TeamResource extends JsonResource
 {
-    public static $allowedFields = [
-        'id',
-        'name',
-        'description',
-        'url',
-        'logo',
-        'created_at',
-        'updated_at',
-
-        // 'members.name',
-        // 'members.joined_at',
-        // 'members.is_creator',
-    ];
-
-    public static $defaultFields = [
-        'id',
-        'name',
-        'logo',
-    ];
-
     /**
      * Transform the resource into an array.
      *
@@ -35,21 +14,6 @@ class TeamResource extends JsonResource
      */
     public function toArray($request)
     {
-        // return [
-        //     'id' => $this->visible('id'),
-        //     'name' => $this->visible('name'),
-        //     'description' => $this->visible('description'),
-        //     'url' => $this->visible('url'),
-        //     'logo' => $this->visible('logo', image($this->logo)),
-        //     'created_at' => $this->visible('created_at'),
-        //     'updated_at' => $this->visible('updated_at'),
-
-        //     'members' => TeamMemberResource::collection($this->whenLoaded('members')),
-        //     'members_count' => $this->visible('members_count'),
-
-        //     'projects' => ProjectResource::collection($this->whenLoaded('projects')),
-        // ];
-
         return $this->visible(
             [
                 'id', 'name', 'description', 'url', 'logo' => image($this->logo), 'created_at', 'updated_at',
@@ -59,5 +23,31 @@ class TeamResource extends JsonResource
                 'members' => TeamMemberResource::collection($this->whenLoaded('members')),
             ],
         );
+    }
+
+    public static function allowedFields($relations = [], $selfName = "teams")
+    {
+        $fields = collect([
+            'description', 'url', 'created_at', 'updated_at',
+        ])->map(fn($value) => $selfName . "." . $value);
+
+        if (in_array("members", $relations) || array_key_exists("members", $relations)) {
+            $fields->push(...TeamMemberResource::allowedFields()->map(fn($value) => "members." . $value));
+        }
+
+        return $fields;
+    }
+
+    public static function defaultFields($relations = [])
+    {
+        $fields =  [
+            'id', 'name', 'logo',
+        ];
+
+        if (in_array("members", $relations)) {
+            array_push($fields, ...TeamMemberResource::defaultFields());
+        }
+
+        return $fields;
     }
 }
