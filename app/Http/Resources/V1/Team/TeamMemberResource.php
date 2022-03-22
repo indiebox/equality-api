@@ -3,6 +3,7 @@
 namespace App\Http\Resources\V1\Team;
 
 use App\Http\Resources\V1\User\UserResource;
+use App\Services\QueryBuilder\QueryBuilder as Query;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 
@@ -17,8 +18,8 @@ class TeamMemberResource extends JsonResource
     public function toArray($request)
     {
         return array_merge((new UserResource($this))->toArray($request), [
-            'joined_at' => $this->visible('joined_at', fn() => Carbon::parse($this->pivot->joined_at)),
-            'is_creator' => $this->visible('is_creator', fn() => (bool)$this->pivot->is_creator),
+            'joined_at' => $this->when(Query::hasField('members.joined_at', true), fn() => Carbon::parse($this->pivot->joined_at)),
+            'is_creator' => $this->when(Query::hasField('members.is_creator'), fn() => (bool)$this->pivot->is_creator),
 
             // 'joined_at' => Carbon::parse($this->pivot->joined_at),
             // 'is_creator' => (bool)$this->pivot->is_creator,

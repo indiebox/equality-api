@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use LogicException;
 use Spatie\QueryBuilder\QueryBuilder as BaseQueryBuilder;
+use Spatie\QueryBuilder\QueryBuilderRequest;
 
 /**
  * @mixin \Illuminate\Database\Eloquent\Builder
@@ -27,6 +28,27 @@ class QueryBuilder extends BaseQueryBuilder
     protected $freshQuery = null;
 
     /**
+     * Check if the field is requested.
+     * @param string $field The field (ex. `users.id`)
+     * @param boolean $isDefault Include this field by default if there are no any requested fields.
+     * @return boolean Returns `true` if this field should be added to response.
+     */
+    public static function hasField($field, $isDefault = false)
+    {
+        $field = explode(".", $field);
+        $fieldName = array_pop($field);
+
+        $request = app(QueryBuilderRequest::class);
+        $requestedFields = $request->fields()->get(implode(".", $field)) ?? [];
+
+        if (empty($requestedFields) && $isDefault) {
+            $requestedFields = [$fieldName];
+        }
+
+        return in_array($fieldName, $requestedFields, true);
+    }
+
+    /**
      * Gets results.
      * @return mixed
      */
@@ -39,6 +61,8 @@ class QueryBuilder extends BaseQueryBuilder
         }
 
         $this->applyFieldsToResult($result);
+
+        $this->freshQuery = null;
 
         return $result;
     }
@@ -88,11 +112,12 @@ class QueryBuilder extends BaseQueryBuilder
      * This method should be called before `allowedIncludes`.
      * @param array $fields Allowed fields.
      * @param array $defaultFields Default fields, if no any requested.
+     * @param string|null $defaultName The default name for parent model.
      * @return self
      */
-    public function allowedFields($fields, $defaultFields = []): self
+    public function allowedFields($fields, $defaultFields = [], $defaultName = null): self
     {
-        return $this->traitAllowedFields($fields, $defaultFields);
+        return $this->traitAllowedFields($fields, $defaultFields, $defaultName);
     }
 
     #endregion

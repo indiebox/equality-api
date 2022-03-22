@@ -2,14 +2,11 @@
 
 namespace App\Services\QueryBuilder\Traits;
 
-use Spatie\QueryBuilder\Concerns\AddsFieldsToQuery as ConcernsAddsFieldsToQuery;
+use Illuminate\Support\Collection;
+use Spatie\QueryBuilder\Exceptions\AllowedFieldsMustBeCalledBeforeAllowedIncludes;
 
 trait AddsFieldsToQuery
 {
-    use ConcernsAddsFieldsToQuery {
-        allowedFields as private parentAllowedFields;
-    }
-
     /**
      * List of default fields that will be applied
      * when no any requested.
@@ -17,11 +14,31 @@ trait AddsFieldsToQuery
      */
     protected $defaultFields;
 
-    public function allowedFields($fields, $defaultFields = []): self
+    /**
+     * The default name for parent model.
+     * @var string|null
+     */
+    protected $defaultName;
+
+    public function allowedFields($fields, $defaultFields = [], $defaultName = null): self
     {
+        if ($this->allowedIncludes instanceof Collection) {
+            throw new AllowedFieldsMustBeCalledBeforeAllowedIncludes();
+        }
+
+        $this->defaultName = $defaultName ?? $this->getModel()->getTable();
+
+        $fields = is_array($fields) ? $fields : func_get_args();
+
+        $this->allowedFields = collect($fields)
+            ->map(function (string $fieldName) use ($defaultName) {
+                return $this->prependField($fieldName, $defaultName);
+            });
         $this->defaultFields = collect($defaultFields);
 
-        $this->parentAllowedFields($fields);
+        $this->ensureAllFieldsExist();
+
+        $this->addRequestedModelFieldsToQuery();
 
         return $this;
     }
@@ -36,15 +53,14 @@ trait AddsFieldsToQuery
     protected function applyFieldsToResult($result)
     {
         $models = is_iterable($result) ? $result : [$result];
-        $tableName = $this->getModel()->getTable();
 
         $modelFields = $this->defaultFields
-            ->reduce(function ($result, $value) use ($tableName) {
+            ->reduce(function ($result, $value) {
                 $value = explode(".", $value);
                 $key = null;
 
-                if (count($value) == 1 || ($value[0] == $tableName && count($value) == 2)) {
-                    $key = $tableName;
+                if (count($value) == 1 || ($value[0] == $this->defaultName && count($value) == 2)) {
+                    $key = $this->defaultName;
                     $field = end($value);
                 } else {
                     $field = array_pop($value);
@@ -63,7 +79,7 @@ trait AddsFieldsToQuery
                 $nestedRelation = explode(".", $relation);
 
                 // Fields for current model itself (not nested).
-                if ($nestedRelation[0] == $tableName) {
+                if ($nestedRelation[0] == $this->defaultName) {
                     $this->applyFields($model, $fields, []);
 
                     continue;

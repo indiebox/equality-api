@@ -57,7 +57,11 @@ class TeamController extends Controller
      */
     public function members(Team $team)
     {
-        return TeamMemberResource::collection($team->members);
+        $members = QueryBuilder::for($team->members())
+            ->allowedFields(['id', 'name', 'joined_at'], ['name'], 'members')
+            ->get();
+
+        return TeamMemberResource::collection($members);
     }
 
     /**

@@ -86,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
                 return $result->collapse()->toArray();
             }
 
+            // Check if attribute is visible and exists in model.
             if (
                 in_array($field, $model->getHidden())
                 || !array_key_exists($field, $model->getAttributes())
