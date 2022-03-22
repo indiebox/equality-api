@@ -4,7 +4,6 @@ namespace Tests\Feature\Services\QueryBuilder;
 
 use App\Services\QueryBuilder\QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\Exceptions\InvalidFieldQuery;
 use Tests\Feature\Services\QueryBuilder\Stubs\NestedModel;
@@ -14,8 +13,6 @@ use Tests\TestCase;
 
 class AddsFieldsToQueryTest extends TestCase
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();

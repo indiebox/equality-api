@@ -6,7 +6,6 @@ use App\Services\QueryBuilder\Exceptions\SortQueryException;
 use App\Services\QueryBuilder\QueryBuilder;
 use App\Services\QueryBuilder\Sorts\SortRelationsCount;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use LogicException;
 use Spatie\QueryBuilder\AllowedSort;
@@ -16,8 +15,6 @@ use Tests\TestCase;
 
 class QueryBuilderTest extends TestCase
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();
