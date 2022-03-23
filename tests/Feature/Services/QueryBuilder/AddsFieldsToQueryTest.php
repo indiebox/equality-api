@@ -18,11 +18,37 @@ class AddsFieldsToQueryTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected function setUpTraits()
+    protected function setupDatabase($schema)
     {
-        $this->createSchema();
+        parent::setupDatabase($schema);
 
-        return parent::setUpTraits();
+        if ($schema->hasTable('models')) {
+            return;
+        }
+
+        $schema->create('models', function ($table) {
+            $table->increments('id');
+            $table->string('name')->default('default name');
+            $table->string('description')->nullable();
+            $table->timestamp('timestamp')->nullable();
+            $table->timestamps();
+        });
+
+        $schema->create('related_models', function ($table) {
+            $table->increments('id');
+            $table->integer('model_id')->nullable();
+            $table->integer('nested_id')->nullable();
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+
+        $schema->create('nested_models', function ($table) {
+            $table->increments('id');
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
     }
 
     public static function tearDownAfterClass(): void
@@ -39,37 +65,6 @@ class AddsFieldsToQueryTest extends TestCase
         $b->dropIfExists('models');
         $b->dropIfExists('related_models');
         $b->dropIfExists('nested_models');
-    }
-
-    public function createSchema()
-    {
-        if ($this->schema()->hasTable('models')) {
-            return;
-        }
-
-        $this->schema()->create('models', function ($table) {
-            $table->increments('id');
-            $table->string('name')->default('default name');
-            $table->string('description')->nullable();
-            $table->timestamp('timestamp')->nullable();
-            $table->timestamps();
-        });
-
-        $this->schema()->create('related_models', function ($table) {
-            $table->increments('id');
-            $table->integer('model_id')->nullable();
-            $table->integer('nested_id')->nullable();
-            $table->string('name')->nullable();
-            $table->string('description')->nullable();
-            $table->timestamps();
-        });
-
-        $this->schema()->create('nested_models', function ($table) {
-            $table->increments('id');
-            $table->string('name')->nullable();
-            $table->string('description')->nullable();
-            $table->timestamps();
-        });
     }
 
     /*
@@ -346,15 +341,5 @@ class AddsFieldsToQueryTest extends TestCase
         $related->nested()->associate(NestedModel::create());
 
         $model->related()->save($related);
-    }
-
-    protected function schema()
-    {
-        return $this->connection()->getSchemaBuilder();
-    }
-
-    protected function connection()
-    {
-        return Model::getConnectionResolver()->connection();
     }
 }

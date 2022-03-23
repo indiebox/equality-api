@@ -13,22 +13,21 @@ class EloquentHasOrderIntegrationTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected function setUpTraits()
+    protected function setupDatabase($schema)
     {
-        $this->createSchema();
+        parent::setupDatabase($schema);
 
-        return parent::setUpTraits();
+        if ($schema->hasTable('models')) {
+            return;
+        }
+
+        $schema->create('models', function ($table) {
+            $table->increments('id');
+            $table->integer('group_id')->nullable();
+            $table->decimal('order', 6, 1)->nullable();
+            $table->timestamps();
+        });
     }
-
-    /**
-     * Tear down the database schema.
-     *
-     * @return void
-     */
-    // protected function tearDown(): void
-    // {
-    //     $this->schema()->drop('models');
-    // }
 
     public static function tearDownAfterClass(): void
     {
@@ -41,25 +40,6 @@ class EloquentHasOrderIntegrationTest extends TestCase
         $b = Model::getConnectionResolver()->connection()->getSchemaBuilder();
 
         $b->dropIfExists('models');
-    }
-
-    /**
-     * Setup the database schema.
-     *
-     * @return void
-     */
-    public function createSchema()
-    {
-        if ($this->schema()->hasTable('models')) {
-            return;
-        }
-
-        $this->schema()->create('models', function ($table) {
-            $table->increments('id');
-            $table->integer('group_id')->nullable();
-            $table->decimal('order', 6, 1)->nullable();
-            $table->timestamps();
-        });
     }
 
     /**
@@ -256,26 +236,6 @@ class EloquentHasOrderIntegrationTest extends TestCase
         foreach ($models as $model) {
             $model->refresh();
         }
-    }
-
-     /**
-     * Get a schema builder instance.
-     *
-     * @return \Illuminate\Database\Schema\Builder
-     */
-    protected function schema()
-    {
-        return $this->connection()->getSchemaBuilder();
-    }
-
-    /**
-     * Get a database connection instance.
-     *
-     * @return \Illuminate\Database\Connection
-     */
-    protected function connection()
-    {
-        return Model::getConnectionResolver()->connection();
     }
 }
 
