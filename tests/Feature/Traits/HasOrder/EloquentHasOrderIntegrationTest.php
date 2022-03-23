@@ -2,11 +2,9 @@
 
 namespace Tests\Feature\Traits\HasOrder;
 
-use App\Http\Kernel;
 use App\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\ParallelTesting;
 use Tests\TestCase;
 
 class EloquentHasOrderIntegrationTest extends TestCase
@@ -29,17 +27,9 @@ class EloquentHasOrderIntegrationTest extends TestCase
         });
     }
 
-    public static function tearDownAfterClass(): void
+    protected static function clearTestsData($schema)
     {
-        $app = require __DIR__ . '/../../../../bootstrap/app.php';
-        $app->make(Kernel::class)->bootstrap();
-
-        if (ParallelTesting::token()) {
-            config(['database.connections.mysql.database' => 'equality_test_test_' . ParallelTesting::token()]);
-        }
-        $b = Model::getConnectionResolver()->connection()->getSchemaBuilder();
-
-        $b->dropIfExists('models');
+        $schema->dropIfExists('models');
     }
 
     /**

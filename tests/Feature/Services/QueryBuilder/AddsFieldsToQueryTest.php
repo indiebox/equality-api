@@ -2,12 +2,9 @@
 
 namespace Tests\Feature\Services\QueryBuilder;
 
-use App\Http\Kernel;
 use App\Services\QueryBuilder\QueryBuilder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\ParallelTesting;
 use Spatie\QueryBuilder\Exceptions\InvalidFieldQuery;
 use Tests\Feature\Services\QueryBuilder\Stubs\NestedModel;
 use Tests\Feature\Services\QueryBuilder\Stubs\QueryableModel;
@@ -51,20 +48,11 @@ class AddsFieldsToQueryTest extends TestCase
         });
     }
 
-    public static function tearDownAfterClass(): void
+    protected static function clearTestsData($schema)
     {
-        $app = require __DIR__ . '/../../../../bootstrap/app.php';
-        $app->make(Kernel::class)->bootstrap();
-
-        if (ParallelTesting::token()) {
-            config(['database.connections.mysql.database' => 'equality_test_test_' . ParallelTesting::token()]);
-        }
-
-        $b = Model::getConnectionResolver()->connection()->getSchemaBuilder();
-
-        $b->dropIfExists('models');
-        $b->dropIfExists('related_models');
-        $b->dropIfExists('nested_models');
+        $schema->dropIfExists('models');
+        $schema->dropIfExists('related_models');
+        $schema->dropIfExists('nested_models');
     }
 
     /*
