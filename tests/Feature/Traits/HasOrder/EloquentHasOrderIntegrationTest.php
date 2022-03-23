@@ -2,20 +2,22 @@
 
 namespace Tests\Feature\Traits\HasOrder;
 
+use App\Http\Kernel;
 use App\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\ParallelTesting;
 use Tests\TestCase;
 
 class EloquentHasOrderIntegrationTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected function setUp(): void
+    protected function setUpTraits()
     {
-        parent::setUp();
-
         $this->createSchema();
+
+        return parent::setUpTraits();
     }
 
     /**
@@ -23,9 +25,22 @@ class EloquentHasOrderIntegrationTest extends TestCase
      *
      * @return void
      */
-    protected function tearDown(): void
+    // protected function tearDown(): void
+    // {
+    //     $this->schema()->drop('models');
+    // }
+
+    public static function tearDownAfterClass(): void
     {
-        $this->schema()->drop('models');
+        $app = require __DIR__ . '/../../../../bootstrap/app.php';
+        $app->make(Kernel::class)->bootstrap();
+
+        if (ParallelTesting::token()) {
+            config(['database.connections.mysql.database' => 'equality_test_test_' . ParallelTesting::token()]);
+        }
+        $b = Model::getConnectionResolver()->connection()->getSchemaBuilder();
+
+        $b->dropIfExists('models');
     }
 
     /**
@@ -35,6 +50,10 @@ class EloquentHasOrderIntegrationTest extends TestCase
      */
     public function createSchema()
     {
+        if ($this->schema()->hasTable('models')) {
+            return;
+        }
+
         $this->schema()->create('models', function ($table) {
             $table->increments('id');
             $table->integer('group_id')->nullable();

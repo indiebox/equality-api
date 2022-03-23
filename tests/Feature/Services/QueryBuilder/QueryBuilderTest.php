@@ -2,12 +2,14 @@
 
 namespace Tests\Feature\Services\QueryBuilder;
 
+use App\Http\Kernel;
 use App\Services\QueryBuilder\Exceptions\SortQueryException;
 use App\Services\QueryBuilder\QueryBuilder;
 use App\Services\QueryBuilder\Sorts\SortRelationsCount;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\ParallelTesting;
 use LogicException;
 use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilderRequest;
@@ -18,21 +20,33 @@ class QueryBuilderTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected function setUp(): void
+    protected function setUpTraits()
     {
-        parent::setUp();
-
         $this->createSchema();
+
+        return parent::setUpTraits();
     }
 
-    protected function tearDown(): void
+    public static function tearDownAfterClass(): void
     {
-        $this->schema()->drop('models');
-        $this->schema()->drop('related_models');
+        $app = require __DIR__ . '/../../../../bootstrap/app.php';
+        $app->make(Kernel::class)->bootstrap();
+
+        if (ParallelTesting::token()) {
+            config(['database.connections.mysql.database' => 'equality_test_test_' . ParallelTesting::token()]);
+        }
+        $b = Model::getConnectionResolver()->connection()->getSchemaBuilder();
+
+        $b->dropIfExists('models');
+        $b->dropIfExists('related_models');
     }
 
     public function createSchema()
     {
+        if ($this->schema()->hasTable('models')) {
+            return;
+        }
+
         $this->schema()->create('models', function ($table) {
             $table->increments('id');
             $table->string('name')->default('default name');

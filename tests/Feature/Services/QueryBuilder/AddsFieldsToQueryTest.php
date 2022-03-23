@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Services\QueryBuilder;
 
+use App\Http\Kernel;
 use App\Services\QueryBuilder\QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\ParallelTesting;
 use Spatie\QueryBuilder\Exceptions\InvalidFieldQuery;
 use Tests\Feature\Services\QueryBuilder\Stubs\NestedModel;
 use Tests\Feature\Services\QueryBuilder\Stubs\QueryableModel;
@@ -16,22 +18,35 @@ class AddsFieldsToQueryTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected function setUp(): void
+    protected function setUpTraits()
     {
-        parent::setUp();
-
         $this->createSchema();
+
+        return parent::setUpTraits();
     }
 
-    protected function tearDown(): void
+    public static function tearDownAfterClass(): void
     {
-        $this->schema()->drop('models');
-        $this->schema()->drop('related_models');
-        $this->schema()->drop('nested_models');
+        $app = require __DIR__ . '/../../../../bootstrap/app.php';
+        $app->make(Kernel::class)->bootstrap();
+
+        if (ParallelTesting::token()) {
+            config(['database.connections.mysql.database' => 'equality_test_test_' . ParallelTesting::token()]);
+        }
+
+        $b = Model::getConnectionResolver()->connection()->getSchemaBuilder();
+
+        $b->dropIfExists('models');
+        $b->dropIfExists('related_models');
+        $b->dropIfExists('nested_models');
     }
 
     public function createSchema()
     {
+        if ($this->schema()->hasTable('models')) {
+            return;
+        }
+
         $this->schema()->create('models', function ($table) {
             $table->increments('id');
             $table->string('name')->default('default name');
