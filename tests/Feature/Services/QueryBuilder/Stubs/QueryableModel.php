@@ -14,6 +14,11 @@ class QueryableModel extends Model
     {
         return $this->hasMany(RelatedModel::class, 'model_id');
     }
+
+    public function related2()
+    {
+        return $this->hasMany(RelatedModel::class, 'model2_id');
+    }
 }
 
 class RelatedModel extends Model
