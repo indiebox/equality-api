@@ -9,23 +9,6 @@ use Illuminate\Support\Carbon;
 
 class TeamMemberResource extends JsonResource
 {
-    public static function allowedFields($relations = [])
-    {
-        $fields = [
-            'joined_at', 'is_creator',
-            ...collect(UserResource::allowedFields())->map(fn($value) => 'members.' . $value)->toArray(),
-        ];
-
-        return $fields;
-    }
-
-    public static function defaultFields()
-    {
-        return [
-            ...collect(UserResource::defaultFields())->map(fn($value) => 'members.' . $value)->toArray(),
-        ];
-    }
-
     /**
      * Transform the resource into an array.
      *
@@ -41,5 +24,26 @@ class TeamMemberResource extends JsonResource
             // 'joined_at' => Carbon::parse($this->pivot->joined_at),
             // 'is_creator' => (bool)$this->pivot->is_creator,
         ]);
+    }
+
+    public static function allowedFields($selfName = "members")
+    {
+        $fields = collect([
+            'joined_at', 'is_creator',
+        ])
+        ->map(fn($value) => $selfName . "." . $value)
+        ->merge(UserResource::allowedFields($selfName));
+
+        return $fields;
+    }
+
+    public static function defaultFields($selfName = "members")
+    {
+        $fields =  collect([
+        ])
+        ->map(fn($value) => $selfName . "." . $value)
+        ->merge(UserResource::defaultFields($selfName));
+
+        return $fields;
     }
 }

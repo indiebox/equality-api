@@ -40,7 +40,10 @@ class TeamController extends Controller
     public function show(Team $team)
     {
         $team = QueryBuilder::for($team)
-            ->allowedFields(TeamResource::allowedFields(['members']), TeamResource::defaultFields(['members']))
+            ->allowedFields(
+                TeamResource::allowedFields()->merge(TeamMemberResource::allowedFields()),
+                TeamResource::defaultFields()->merge(TeamMemberResource::defaultFields())
+            )
             ->allowedIncludes(['members'])
             ->get();
 
@@ -55,7 +58,10 @@ class TeamController extends Controller
     public function members(Team $team)
     {
         $members = QueryBuilder::for($team->members())
-            ->allowedFields(TeamMemberResource::allowedFields(), TeamMemberResource::defaultFields(), 'members')
+            ->allowedFields(
+                TeamMemberResource::allowedFields(),
+                TeamMemberResource::defaultFields()
+            )
             ->get();
 
         return TeamMemberResource::collection($members);

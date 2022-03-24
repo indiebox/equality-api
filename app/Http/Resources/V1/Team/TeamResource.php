@@ -17,36 +17,30 @@ class TeamResource extends JsonResource
         return $this->visible(
             [
                 'id', 'name', 'description', 'url', 'logo' => image($this->logo), 'created_at', 'updated_at',
-                'members_count' => $this->when($this->members_count != null, $this->members_count),
             ],
             [
+                'members_count' => $this->when($this->members_count != null, $this->members_count),
                 'members' => TeamMemberResource::collection($this->whenLoaded('members')),
             ],
         );
     }
 
-    public static function allowedFields($relations = [], $selfName = "teams")
+    public static function allowedFields($selfName = "teams")
     {
         $fields = collect([
             'description', 'url', 'created_at', 'updated_at',
-        ])->map(fn($value) => $selfName . "." . $value);
+        ])
+        ->map(fn($value) => $selfName . "." . $value);
 
-        if (in_array("members", $relations) || array_key_exists("members", $relations)) {
-            $fields->push(...collect(TeamMemberResource::allowedFields())->map(fn($value) => "members." . $value));
-        }
-
-        return $fields->toArray();
+        return $fields;
     }
 
-    public static function defaultFields($relations = [])
+    public static function defaultFields($selfName = "teams")
     {
-        $fields =  [
+        $fields =  collect([
             'id', 'name', 'logo',
-        ];
-
-        if (in_array("members", $relations)) {
-            array_push($fields, ...TeamMemberResource::defaultFields());
-        }
+        ])
+        ->map(fn($value) => $selfName . "." . $value);
 
         return $fields;
     }
