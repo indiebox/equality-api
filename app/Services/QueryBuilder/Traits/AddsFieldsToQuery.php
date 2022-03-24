@@ -2,7 +2,9 @@
 
 namespace App\Services\QueryBuilder\Traits;
 
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 use Spatie\QueryBuilder\Exceptions\AllowedFieldsMustBeCalledBeforeAllowedIncludes;
 
 trait AddsFieldsToQuery
@@ -28,13 +30,9 @@ trait AddsFieldsToQuery
 
         $this->defaultName = $defaultName ?? $this->getModel()->getTable();
 
-        $this->allowedFields = collect($fields)
-            ->push(...$defaultFields)
-            ->map(function (string $fieldName) use ($defaultName) {
-                return $this->prependField($fieldName, $defaultName);
-            });
-
-        $this->defaultFields = collect($defaultFields);
+        $this->defaultFields = $this->parseFields($defaultFields, false);
+        $this->allowedFields = $this->parseFields($fields, true)
+            ->concat($this->defaultFields);
 
         $this->ensureAllFieldsExist();
 
@@ -100,6 +98,65 @@ trait AddsFieldsToQuery
         }
     }
 
+    protected function addRequestedModelFieldsToQuery()
+    {
+        // We dont need this method, because we apply fields after extraction
+        // results from database, so all foreign keys (and relations)
+        // will be loaded correctly.
+    }
+
+    /**
+     * Parse the given fields.
+     * @param array $fields The fields.
+     * @param bool $isAllowed Is allowed or default fields.
+     * @return \Illuminate\Support\Collection
+     */
+    private function parseFields($fields, $isAllowed)
+    {
+        return collect($fields)
+            ->map(function ($fieldName, $key) use ($isAllowed) {
+                if (is_string($key)) {
+                    $class = $key;
+                } else {
+                    $class = is_string($fieldName) && class_exists($fieldName)
+                        ? $fieldName
+                        : null;
+                }
+
+                if ($class) {
+                    if (in_array(ResourceWithFields::class, class_implements($class))) {
+                        $prepend = $class::defaultName() ?: '';
+                        if ($fieldName != $class) {
+                            $prepend = $fieldName . ".";
+                        }
+                        if ($prepend != "") {
+                            $prepend .= ".";
+                        }
+
+                        $fields = $isAllowed
+                            ? $class::allowedFields()
+                            : $class::defaultFields();
+
+                        $fields = collect($fields)
+                            ->map(function ($field, $key) use ($prepend) {
+                                if (is_string($key)) {
+                                    return $prepend . $key;
+                                }
+
+                                return $prepend . $field;
+                            });
+
+                        return $fields;
+                    } else {
+                        throw new InvalidArgumentException("Type of {$class} doesn`t implements ResourceWithFields interface.");
+                    }
+                }
+
+                return $this->prependField($fieldName, $this->defaultName);
+            })
+            ->flatten();
+    }
+
     /**
      * Apply requested fields.
      * @param mixed $relation Model relation (for example, `projects`, `teams`, etc.)
@@ -127,12 +184,5 @@ trait AddsFieldsToQuery
                 $this->applyFields($item->{$next}, $fields, $nestedRelation);
             }
         }
-    }
-
-    protected function addRequestedModelFieldsToQuery()
-    {
-        // We dont need this method, because we apply fields after extraction
-        // results from database, so all foreign keys (and relations)
-        // will be loaded correctly.
     }
 }

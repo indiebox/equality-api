@@ -3,11 +3,12 @@
 namespace App\Http\Resources\V1\Team;
 
 use App\Http\Resources\V1\User\UserResource;
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
 use App\Services\QueryBuilder\QueryBuilder as Query;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 
-class TeamMemberResource extends JsonResource
+class TeamMemberResource extends JsonResource implements ResourceWithFields
 {
     /**
      * Transform the resource into an array.
@@ -26,24 +27,24 @@ class TeamMemberResource extends JsonResource
         ]);
     }
 
-    public static function allowedFields($selfName = "members")
+    public static function defaultName(): string
     {
-        $fields = collect([
-            'joined_at', 'is_creator',
-        ])
-        ->map(fn($value) => $selfName . "." . $value)
-        ->merge(UserResource::allowedFields($selfName));
-
-        return $fields;
+        return "members";
     }
 
-    public static function defaultFields($selfName = "members")
+    public static function defaultFields(): array
     {
-        $fields =  collect([
-        ])
-        ->map(fn($value) => $selfName . "." . $value)
-        ->merge(UserResource::defaultFields($selfName));
+        return UserResource::defaultFields();
+    }
 
-        return $fields;
+    public static function allowedFields(): array
+    {
+        $base = collect(UserResource::allowedFields())
+            ->concat([
+                'joined_at', 'is_creator',
+            ])
+            ->toArray();
+
+        return $base;
     }
 }

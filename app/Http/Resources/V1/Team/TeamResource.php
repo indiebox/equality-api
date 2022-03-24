@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources\V1\Team;
 
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TeamResource extends JsonResource
+class TeamResource extends JsonResource implements ResourceWithFields
 {
     /**
      * Transform the resource into an array.
@@ -25,23 +26,22 @@ class TeamResource extends JsonResource
         );
     }
 
-    public static function allowedFields($selfName = "teams")
+    public static function defaultName(): string
     {
-        $fields = collect([
-            'description', 'url', 'created_at', 'updated_at',
-        ])
-        ->map(fn($value) => $selfName . "." . $value);
-
-        return $fields;
+        return "teams";
     }
 
-    public static function defaultFields($selfName = "teams")
+    public static function defaultFields(): array
     {
-        $fields =  collect([
+        return [
             'id', 'name', 'logo',
-        ])
-        ->map(fn($value) => $selfName . "." . $value);
+        ];
+    }
 
-        return $fields;
+    public static function allowedFields(): array
+    {
+        return [
+            'description' ,'url', 'created_at', 'updated_at',
+        ];
     }
 }

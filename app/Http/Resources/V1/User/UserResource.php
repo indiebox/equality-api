@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources\V1\User;
 
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class UserResource extends JsonResource implements ResourceWithFields
 {
     /**
      * Transform the resource into an array.
@@ -19,21 +20,22 @@ class UserResource extends JsonResource
         ]);
     }
 
-    public static function allowedFields($selfName = "users")
+    public static function defaultName(): string
     {
-        $fields = collect([
-            'email_verified_at', 'created_at', 'updated_at',
-        ]);
-
-        return $fields->map(fn($value) => $selfName . "." . $value);
+        return "users";
     }
 
-    public static function defaultFields($selfName = "users")
+    public static function allowedFields(): array
     {
-        $fields =  collect([
-            'id', 'name', 'email',
-        ]);
+        return [
+            'email_verified_at', 'created_at', 'updated_at',
+        ];
+    }
 
-        return $fields->map(fn($value) => $selfName . "." . $value);
+    public static function defaultFields(): array
+    {
+        return [
+            'id', 'name', 'email',
+        ];
     }
 }

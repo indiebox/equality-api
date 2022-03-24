@@ -23,7 +23,7 @@ class TeamController extends Controller
     public function index()
     {
         $teams = QueryBuilder::for(auth()->user()->teams())
-            ->allowedFields(TeamResource::allowedFields(), TeamResource::defaultFields())
+            ->allowedFields([TeamResource::class], [TeamResource::class])
             ->allowedSorts(['created_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
             ->allowedIncludes(['members_count'])
             ->get();
@@ -41,8 +41,14 @@ class TeamController extends Controller
     {
         $team = QueryBuilder::for($team)
             ->allowedFields(
-                TeamResource::allowedFields()->merge(TeamMemberResource::allowedFields()),
-                TeamResource::defaultFields()->merge(TeamMemberResource::defaultFields())
+                [
+                    TeamResource::class,
+                    TeamMemberResource::class,
+                ],
+                [
+                    TeamResource::class,
+                    TeamMemberResource::class,
+                ],
             )
             ->allowedIncludes(['members'])
             ->get();
@@ -59,8 +65,9 @@ class TeamController extends Controller
     {
         $members = QueryBuilder::for($team->members())
             ->allowedFields(
-                TeamMemberResource::allowedFields(),
-                TeamMemberResource::defaultFields()
+                [TeamMemberResource::class],
+                [TeamMemberResource::class],
+                'members'
             )
             ->get();
 
