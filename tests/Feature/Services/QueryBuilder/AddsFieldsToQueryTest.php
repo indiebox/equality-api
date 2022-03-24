@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Services\QueryBuilder;
 
+use App\Services\QueryBuilder\Contracts\ResourceWithFields as ContractsResourceWithFields;
 use App\Services\QueryBuilder\QueryBuilder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 use Spatie\QueryBuilder\Exceptions\InvalidFieldQuery;
 use Tests\Feature\Services\QueryBuilder\Stubs\NestedModel;
 use Tests\Feature\Services\QueryBuilder\Stubs\QueryableModel;
@@ -280,6 +282,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['id', 'name'], ['id'], 'alias');
     }
 
+    // Relations
     public function test_related_allowed_fields_not_applied_without_request()
     {
         $model = $this->createModelWithRelation();
@@ -409,6 +412,7 @@ class AddsFieldsToQueryTest extends TestCase
         ], $result->related->first()->getHidden());
     }
 
+    // Nested relations
     public function test_nested_allowed_fields_not_applied_without_request()
     {
         $model = $this->createModelWithNested();
@@ -527,6 +531,371 @@ class AddsFieldsToQueryTest extends TestCase
         ], $result->related->first()->nested->getHidden());
     }
 
+    // Pass objects that implements ResourceWithFields
+    public function test_cant_use_object_that_not_implement_contract()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        QueryBuilder::for(QueryableModel::query())
+            ->allowedFields([
+                get_class(new class {
+                }),
+            ]);
+    }
+    public function test_can_set_alias_for_object()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['alias' => 'id,name']))
+            ->allowedFields([ResourceWithFields::class => 'alias'], [], 'alias');
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->first()->getHidden());
+
+        $result = QueryBuilder::for($model, $this->withFields(['alias' => 'id,name']))
+            ->allowedFields([ResourceWithFields::class => 'alias'], [], 'alias');
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->getHidden());
+    }
+    public function test_can_use_default_alias_for_object()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['related' => 'id,name']))
+            ->allowedFields([NestedResourceWithFields::class], [], 'related');
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->first()->getHidden());
+
+        $result = QueryBuilder::for($model, $this->withFields(['related' => 'id,name']))
+            ->allowedFields([NestedResourceWithFields::class], [], 'related');
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->getHidden());
+    }
+    public function test_alias_for_object_overrides_default()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['override' => 'id,name']))
+            ->allowedFields([NestedResourceWithFields::class => 'override'], [], 'override');
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->first()->getHidden());
+
+        $result = QueryBuilder::for($model, $this->withFields(['override' => 'id,name']))
+            ->allowedFields([NestedResourceWithFields::class => 'override'], [], 'override');
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->getHidden());
+    }
+    public function test_can_return_assoc_array_in_object()
+    {
+        $model = $this->createModel();
+
+        $class = get_class(new class implements ContractsResourceWithFields {
+            public static function defaultName(): string
+            {
+                return "related";
+            }
+
+            public static function defaultFields(): array
+            {
+                return [
+                    'id' => 'test',
+                ];
+            }
+
+            public static function allowedFields(): array
+            {
+                return [
+                    'id',
+                    'name' => 'test',
+                    'desc',
+                ];
+            }
+        });
+
+        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['related' => 'id,name']))
+            ->allowedFields([$class], [], 'related');
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->first()->getHidden());
+
+        $result = QueryBuilder::for($model, $this->withFields(['related' => 'id,name']))
+            ->allowedFields([$class], [], 'related');
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->getHidden());
+    }
+    public function test_can_use_multiple_objects()
+    {
+        $this->expectExceptionMessage("Requested field(s) `override.non-existing` are not allowed. "
+            . "Allowed field(s) are `models.id, models.name, nested.id, nested.name, nested.desc, models.id, nested.id`.");
+
+        QueryBuilder::for(QueryableModel::query(), $this->withFields(['override' => 'non-existing']))
+            ->allowedFields([
+                ResourceWithFields::class,
+                NestedResourceWithFields::class => 'nested',
+            ], [
+                ResourceWithFields::class,
+                NestedResourceWithFields::class => 'nested',
+            ]);
+    }
+    public function test_can_use_multiple_objects_for_model()
+    {
+        $model = $this->createModel();
+
+        $this->expectExceptionMessage("Requested field(s) `override.non-existing` are not allowed. "
+            . "Allowed field(s) are `override.id, override.name, nested.id, nested.name, nested.desc, override.id, nested.id`.");
+
+        QueryBuilder::for($model, $this->withFields(['override' => 'non-existing']))
+            ->allowedFields([
+                ResourceWithFields::class,
+                NestedResourceWithFields::class => 'nested',
+            ], [
+                ResourceWithFields::class,
+                NestedResourceWithFields::class => 'nested',
+            ], 'override');
+    }
+    public function test_allowed_fields_not_applied_without_request_using_object()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::query())
+            ->allowedFields([ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertEquals([], $result->first()->getHidden());
+
+        $result = QueryBuilder::for($model)
+            ->allowedFields([ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([], $result->first()->getHidden());
+    }
+    public function test_allowed_fields_applied_using_object()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['models' => 'id,name']))
+            ->allowedFields([ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->first()->getHidden());
+
+        $this->assertEquals([], $model->getHidden());
+
+        $result = QueryBuilder::for($model, $this->withFields(['models' => 'id,name']))
+            ->allowedFields([ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->getHidden());
+    }
+    public function test_can_set_default_fields_using_object()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::query())
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'name',
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->first()->getHidden());
+
+        $this->assertEquals([], $model->getHidden());
+
+        $result = QueryBuilder::for($model)
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'name',
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->getHidden());
+    }
+    public function test_requested_fields_overrides_defaults_using_object()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['models' => 'name']))
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'id',
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->first()->getHidden());
+
+        $this->assertEquals([], $model->getHidden());
+
+        $result = QueryBuilder::for($model, $this->withFields(['models' => 'name']))
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'id',
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->getHidden());
+    }
+    public function test_includes_fields_exists_in_result_unsing_object()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::withCount('related'), $this->withFields(['models' => 'name']))
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
+            ->allowedIncludes(['related_count']);
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'id',
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->first()->getHidden());
+
+        $result = QueryBuilder::for(QueryableModel::withCount('related'), $this->withFields(['models' => 'name']))
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertEquals([
+            'id',
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+            'related_count',
+        ], $result->first()->getHidden());
+
+        // Eager loading
+        $this->assertEquals([], $model->getHidden());
+
+        $model->loadCount('related');
+        $result = QueryBuilder::for($model, $this->withFields(['models' => 'name']))
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
+            ->allowedIncludes(['related_count']);
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'id',
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+        ], $result->getHidden());
+
+        $model = $model->fresh();
+        $model->loadCount('related');
+        $result = QueryBuilder::for($model, $this->withFields(['models' => 'name']))
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class]);
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals([
+            'id',
+            'description',
+            'timestamp',
+            'created_at',
+            'updated_at',
+            'related_count',
+        ], $result->getHidden());
+    }
+
     /*
      * Helpers
      */
@@ -559,5 +928,41 @@ class AddsFieldsToQueryTest extends TestCase
         $model->related()->save($related);
 
         return $model;
+    }
+}
+
+class ResourceWithFields implements ContractsResourceWithFields
+{
+    public static function defaultName(): string
+    {
+        return "";
+    }
+
+    public static function defaultFields(): array
+    {
+        return ['id'];
+    }
+
+    public static function allowedFields(): array
+    {
+        return ['id', 'name'];
+    }
+}
+
+class NestedResourceWithFields implements ContractsResourceWithFields
+{
+    public static function defaultName(): string
+    {
+        return "related";
+    }
+
+    public static function defaultFields(): array
+    {
+        return ['id'];
+    }
+
+    public static function allowedFields(): array
+    {
+        return ['id', 'name', 'desc'];
     }
 }

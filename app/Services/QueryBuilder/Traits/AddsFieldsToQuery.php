@@ -127,7 +127,7 @@ trait AddsFieldsToQuery
                     if (in_array(ResourceWithFields::class, class_implements($class))) {
                         $prepend = $class::defaultName() ?: '';
                         if ($fieldName != $class) {
-                            $prepend = $fieldName . ".";
+                            $prepend = $fieldName;
                         }
                         if ($prepend != "") {
                             $prepend .= ".";
@@ -140,10 +140,10 @@ trait AddsFieldsToQuery
                         $fields = collect($fields)
                             ->map(function ($field, $key) use ($prepend) {
                                 if (is_string($key)) {
-                                    return $prepend . $key;
+                                    return $this->prependField($prepend . $key);
                                 }
 
-                                return $prepend . $field;
+                                return $this->prependField($prepend . $field, $this->defaultName);
                             });
 
                         return $fields;
