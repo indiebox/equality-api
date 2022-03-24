@@ -46,6 +46,17 @@ class EloquentBuilderMacrosTest extends TestCase
             'other' => null,
             'merged' => 'bar',
         ], $model->visible(['name', 'desc', 'title' => 'val', 'other'], ['merged' => 'bar']));
+
+        // Merged parameters are not checked for visibility
+        $model->makeHidden(['merged']);
+
+        $this->assertEquals([
+            'name' => 1,
+            'desc' => 2,
+            'title' => 'val',
+            'other' => null,
+            'merged' => 'bar',
+        ], $model->visible(['name', 'desc', 'title' => 'val', 'other'], ['merged' => 'bar']));
     }
 }
 
