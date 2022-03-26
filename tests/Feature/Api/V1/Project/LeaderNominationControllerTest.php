@@ -49,7 +49,7 @@ class LeaderNominationControllerTest extends TestCase
             ->create();
         Sanctum::actingAs($user1);
 
-        $response = $this->getJson('/api/v1/projects/' . $project->id . '/leader-nominations?include=nominated,voters,voters_count');
+        $response = $this->getJson("/api/v1/projects/{$project->id}/leader-nominations?include=nominated,voters,voters_count");
 
         $response
             ->assertOk()

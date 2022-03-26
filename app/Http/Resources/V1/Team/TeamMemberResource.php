@@ -27,9 +27,6 @@ class TeamMemberResource extends JsonResource implements ResourceWithFields
                 Query::hasField('members.is_creator'),
                 fn() => (bool)$this->pivot->is_creator
             ),
-
-            // 'joined_at' => Carbon::parse($this->pivot->joined_at),
-            // 'is_creator' => (bool)$this->pivot->is_creator,
         ]);
     }
 
