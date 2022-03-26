@@ -27,12 +27,10 @@ class InviteController extends Controller
             ->allowedFilters(AllowedFilter::scope('status', 'filterByStatus')->default('all'))
             ->allowedFields([
                 TeamInviteResource::class,
-                UserResource::class => 'inviter',
-                UserResource::class => 'invited',
+                UserResource::class => ['inviter', 'invited'],
             ], [
                 TeamInviteResource::class,
-                UserResource::class => 'inviter',
-                UserResource::class => 'invited',
+                UserResource::class => ['inviter', 'invited'],
             ])
             ->allowedIncludes(['inviter', 'invited'], ['inviter', 'invited'])
             ->get();

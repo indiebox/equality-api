@@ -3,6 +3,7 @@
 namespace App\Services\QueryBuilder\Traits;
 
 use App\Services\QueryBuilder\Contracts\ResourceWithFields;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Spatie\QueryBuilder\Exceptions\AllowedFieldsMustBeCalledBeforeAllowedIncludes;
@@ -125,28 +126,35 @@ trait AddsFieldsToQuery
 
                 if ($class) {
                     if (in_array(ResourceWithFields::class, class_implements($class))) {
-                        $prepend = $class::defaultName() ?: '';
+                        $prepends = $class::defaultName() ?: '';
                         if ($fieldName != $class) {
-                            $prepend = $fieldName;
+                            $prepends = $fieldName;
                         }
-                        if ($prepend != "") {
-                            $prepend .= ".";
+                        $prepends = Arr::wrap($prepends);
+
+                        $resultFields = collect();
+                        foreach ($prepends as $prepend) {
+                            if ($prepend != "") {
+                                $prepend .= ".";
+                            }
+
+                            $fields = $isAllowed
+                                ? $class::allowedFields()
+                                : $class::defaultFields();
+
+                            $fields = collect($fields)
+                                ->map(function ($field, $key) use ($prepend) {
+                                    if (is_string($key)) {
+                                        return $this->prependField($prepend . $key);
+                                    }
+
+                                    return $this->prependField($prepend . $field, $this->defaultName);
+                                });
+
+                            $resultFields = $resultFields->concat($fields);
                         }
 
-                        $fields = $isAllowed
-                            ? $class::allowedFields()
-                            : $class::defaultFields();
-
-                        $fields = collect($fields)
-                            ->map(function ($field, $key) use ($prepend) {
-                                if (is_string($key)) {
-                                    return $this->prependField($prepend . $key);
-                                }
-
-                                return $this->prependField($prepend . $field, $this->defaultName);
-                            });
-
-                        return $fields;
+                        return $resultFields->toArray();
                     } else {
                         throw new InvalidArgumentException("Type of {$class} doesn`t implements ResourceWithFields interface.");
                     }

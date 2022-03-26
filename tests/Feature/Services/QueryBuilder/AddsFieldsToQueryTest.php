@@ -613,6 +613,24 @@ class AddsFieldsToQueryTest extends TestCase
             'updated_at',
         ], $result->getHidden());
     }
+    public function test_can_set_multiple_aliases_for_object()
+    {
+        $this->expectExceptionMessage("Requested field(s) `alias.id, alias.name` are not allowed."
+        . " Allowed field(s) are `alias1.id, alias1.name, alias2.id, alias2.name`.");
+
+        QueryBuilder::for(QueryableModel::query(), $this->withFields(['alias' => 'id,name']))
+            ->allowedFields([ResourceWithFields::class => ['alias1', 'alias2']], []);
+    }
+    public function test_can_set_multiple_aliases_for_object_for_model()
+    {
+        $model = $this->createModel();
+
+        $this->expectExceptionMessage("Requested field(s) `alias.id, alias.name` are not allowed."
+        . " Allowed field(s) are `alias1.id, alias1.name, alias2.id, alias2.name`.");
+
+        QueryBuilder::for($model, $this->withFields(['alias' => 'id,name']))
+            ->allowedFields([ResourceWithFields::class => ['alias1', 'alias2']], []);
+    }
     public function test_can_use_default_alias_for_object()
     {
         $model = $this->createModel();
