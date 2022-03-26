@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\User;
 
-use App\Http\Resources\V1\User\UserInviteResource;
 use App\Models\Invite;
 use App\Models\Team;
 use App\Models\User;
@@ -43,7 +42,8 @@ class InviteControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(UserInviteResource::collection($invites)->response()->getData(true));
+            ->assertJsonCount($invites->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'team', 'inviter']]]);
     }
 
     public function test_cant_accept_not_pending_invite()

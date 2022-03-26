@@ -7,6 +7,8 @@ use App\Services\QueryBuilder\Traits\AddsIncludesToQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use LogicException;
 use Spatie\QueryBuilder\QueryBuilder as BaseQueryBuilder;
 use Spatie\QueryBuilder\QueryBuilderRequest;
@@ -46,6 +48,29 @@ class QueryBuilder extends BaseQueryBuilder
         }
 
         return in_array($fieldName, $requestedFields, true);
+    }
+
+    /**
+     * Check if the include is requested.
+     * @param string $include The include (ex. `teams`)
+     * @param boolean $canBeNested If `true`, includes like `teams.nested` will return true for `nested` check.
+     * @param boolean $isDefault This is the default include.
+     * @return boolean Returns `true` if this include should be added to response.
+     */
+    public static function hasInclude($include, $inlcudeNested = true, $isDefault = false)
+    {
+        $request = app(QueryBuilderRequest::class);
+        $requestedFields = $request->includes()->toArray();
+
+        if (empty($requestedFields) && $isDefault) {
+            $requestedFields = [$include];
+        }
+
+        return !is_null(Arr::first($requestedFields, function ($value) use ($include, $inlcudeNested) {
+            return $inlcudeNested
+                ? $value === $include || Str::contains($value, [".{$include}", "{$include}."])
+                : $value === $include;
+        }));
     }
 
     /**

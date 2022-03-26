@@ -114,7 +114,7 @@ trait AddsIncludesToQuery
     protected function parseLoadRelations()
     {
         if (count($this->loadRelations) > 0) {
-            $this->subject->load($this->loadRelations);
+            $this->subject->loadMissing($this->loadRelations);
         }
 
         $loadCounts = $this->loadCount;

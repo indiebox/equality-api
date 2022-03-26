@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Team\StoreProjectRequest;
 use App\Http\Resources\V1\Team\TeamProjectResource;
+use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
 use App\Models\Team;
 use App\Services\QueryBuilder\QueryBuilder;
@@ -19,7 +20,10 @@ class ProjectController extends Controller
     public function index(Team $team)
     {
         $projects = QueryBuilder::for($team->projects())
-            ->allowedFields(['projects.id', 'leader.id', 'leader.name'])
+            ->allowedFields(
+                [TeamProjectResource::class, UserResource::class => 'leader'],
+                [TeamProjectResource::class, UserResource::class => 'leader']
+            )
             ->allowedIncludes('leader')
             ->get();
 
@@ -34,7 +38,14 @@ class ProjectController extends Controller
      */
     public function indexTrashed(Team $team)
     {
-        return TeamProjectResource::collection($team->projects()->onlyTrashed()->get());
+        $projects = QueryBuilder::for($team->projects()->onlyTrashed())
+            ->allowedFields(
+                [TeamProjectResource::class],
+                [TeamProjectResource::class]
+            )
+            ->get();
+
+        return TeamProjectResource::collection($projects);
     }
 
     /**

@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\V1\Team;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Team\StoreInviteRequest;
 use App\Http\Resources\V1\Team\TeamInviteResource;
+use App\Http\Resources\V1\User\UserResource;
 use App\Models\Invite;
 use App\Models\Team;
 use App\Services\QueryBuilder\QueryBuilder;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
 
 class InviteController extends Controller
 {
@@ -21,9 +23,18 @@ class InviteController extends Controller
      */
     public function index(Request $request, Team $team)
     {
-        // $invites = $team->invites()->filterByStatus($request->query('filter', 'all'))->get();
-        $invites = QueryBuilder::for($team->invites()->filterByStatus($request->query('filter', 'all')))
-            ->allowedFields(['inviter.id', 'invited.name'], ['inviter.name', 'invited.id'])
+        $invites = QueryBuilder::for($team->invites())
+            ->allowedFilters(AllowedFilter::scope('status', 'filterByStatus')->default('all'))
+            ->allowedFields([
+                TeamInviteResource::class,
+                UserResource::class => 'inviter',
+                UserResource::class => 'invited',
+            ], [
+                TeamInviteResource::class,
+                UserResource::class => 'inviter',
+                UserResource::class => 'invited',
+            ])
+            ->allowedIncludes(['inviter', 'invited'], ['inviter', 'invited'])
             ->get();
 
         return TeamInviteResource::collection($invites);

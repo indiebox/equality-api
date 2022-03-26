@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Project\UpdateProjectRequest;
 use App\Http\Resources\V1\Project\ProjectResource;
 use App\Http\Resources\V1\Team\TeamProjectResource;
+use App\Http\Resources\V1\Team\TeamResource;
 use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class ProjectController extends Controller
 {
@@ -19,12 +21,33 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        return new ProjectResource($project);
+        if (!QueryBuilder::hasInclude('team')) {
+            $project->unsetRelation('team');
+        }
+
+        $project = QueryBuilder::for($project)
+            ->allowedFields([
+                TeamProjectResource::class => 'project',
+                UserResource::class => 'leader',
+                TeamResource::class => 'team',
+            ], [
+                TeamProjectResource::class => 'project',
+                UserResource::class => 'leader',
+                TeamResource::class => 'team',
+            ], 'project')
+            ->allowedIncludes(['leader', 'team'])
+            ->get();
+
+        return new TeamProjectResource($project);
     }
 
     public function leader(Project $project)
     {
-        return new UserResource($project->leader);
+        $leader = QueryBuilder::for($project->leader)
+            ->allowedFields([UserResource::class => 'leader'], [UserResource::class => 'leader'], 'leader')
+            ->get();
+
+        return new UserResource($leader);
     }
 
     /**

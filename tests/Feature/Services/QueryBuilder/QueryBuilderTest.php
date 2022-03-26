@@ -76,6 +76,39 @@ class QueryBuilderTest extends TestCase
         $this->assertTrue(QueryBuilder::hasField('models1.id', true));
         $this->assertTrue(QueryBuilder::hasField('models1.deep.id', true));
     }
+    public function test_has_include_method()
+    {
+        app()->instance(
+            QueryBuilderRequest::class,
+            new QueryBuilderRequest(['include' => ['relation', 'models.deep']])
+        );
+
+        $this->assertTrue(QueryBuilder::hasInclude('relation'));
+        $this->assertTrue(QueryBuilder::hasInclude('relation', false));
+        $this->assertTrue(QueryBuilder::hasInclude('models.deep'));
+        $this->assertTrue(QueryBuilder::hasInclude('models.deep', false));
+        $this->assertTrue(QueryBuilder::hasInclude('models'));
+        $this->assertTrue(QueryBuilder::hasInclude('deep'));
+        $this->assertFalse(QueryBuilder::hasInclude('models', false));
+        $this->assertFalse(QueryBuilder::hasInclude('deep', false));
+
+        $this->assertFalse(QueryBuilder::hasInclude('nested', true, true));
+        $this->assertFalse(QueryBuilder::hasInclude('nested.deep'));
+
+        app()->instance(QueryBuilderRequest::class, new QueryBuilderRequest());
+
+        $this->assertFalse(QueryBuilder::hasInclude('relation'));
+        $this->assertFalse(QueryBuilder::hasInclude('relation', false));
+        $this->assertFalse(QueryBuilder::hasInclude('models.deep'));
+        $this->assertFalse(QueryBuilder::hasInclude('models.deep', false));
+        $this->assertFalse(QueryBuilder::hasInclude('models'));
+        $this->assertFalse(QueryBuilder::hasInclude('deep'));
+        $this->assertFalse(QueryBuilder::hasInclude('models', false));
+        $this->assertFalse(QueryBuilder::hasInclude('deep', false));
+
+        $this->assertTrue(QueryBuilder::hasInclude('nested', true, true));
+        $this->assertFalse(QueryBuilder::hasInclude('nested.deep'));
+    }
 
     public function test_can_get_models_from_query()
     {
@@ -207,13 +240,17 @@ class QueryBuilderTest extends TestCase
             new QueryBuilderRequest(['include' => 'related_count', 'sort' => 'related_count'])
         );
 
-        $result = QueryBuilder::for(QueryableModel::query(), new Request(['include' => 'related_count', 'sort' => 'related_count']))
-            ->allowedSorts([AllowedSort::custom('related_count', new SortRelationsCount('related'))])
-            ->allowedIncludes(['related_count'])
-            ->toSql();
+        $result = QueryBuilder::for(
+            QueryableModel::query(),
+            new Request(['include' => 'related_count', 'sort' => 'related_count'])
+        )
+        ->allowedSorts([AllowedSort::custom('related_count', new SortRelationsCount('related'))])
+        ->allowedIncludes(['related_count'])
+        ->toSql();
 
         $this->assertSame(
-            "select `models`.*, (select count(*) from `related_models` where `models`.`id` = `related_models`.`model_id`) as `related_count` from `models` order by `related_count` asc",
+            "select `models`.*, (select count(*) from `related_models` where `models`.`id` = `related_models`.`model_id`)"
+            . " as `related_count` from `models` order by `related_count` asc",
             $result
         );
     }

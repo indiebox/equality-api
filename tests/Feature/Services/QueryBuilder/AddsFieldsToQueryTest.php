@@ -283,6 +283,27 @@ class AddsFieldsToQueryTest extends TestCase
     }
 
     // Relations
+    public function test_related_allowed_fields_not_applied_on_nullable_relation()
+    {
+        $model = $this->createModel();
+
+        $result = QueryBuilder::for(QueryableModel::with('related'))
+            ->allowedFields(['related.id', 'related.name'], ['related.id']);
+
+        $result = $result->get();
+
+        $this->assertEquals(0, $result->first()->related->count());
+
+        $this->assertEquals([], $model->getHidden());
+
+        $result = QueryBuilder::for($model)
+            ->allowedFields(['related.id', 'related.name'], ['related.id']);
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertEquals(0, $result->first()->related->count());
+    }
     public function test_related_allowed_fields_not_applied_without_request()
     {
         $model = $this->createModelWithRelation();
@@ -413,6 +434,27 @@ class AddsFieldsToQueryTest extends TestCase
     }
 
     // Nested relations
+    public function test_nested_allowed_fields_not_applied_on_nullable_relation()
+    {
+        $model = $this->createModelWithRelation();
+
+        $result = QueryBuilder::for(QueryableModel::with('related.nested'))
+            ->allowedFields([], ['related.nested.id']);
+
+        $result = $result->get();
+
+        $this->assertNull($result->first()->related[0]->nested);
+
+        $this->assertEquals([], $model->getHidden());
+
+        $result = QueryBuilder::for($model)
+            ->allowedFields([], ['related.nested.id']);
+
+        $result = $result->get();
+
+        $this->assertSame($model, $result);
+        $this->assertNull($result->first()->related[0]->nested);
+    }
     public function test_nested_allowed_fields_not_applied_without_request()
     {
         $model = $this->createModelWithNested();

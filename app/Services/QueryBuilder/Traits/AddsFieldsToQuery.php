@@ -168,6 +168,10 @@ trait AddsFieldsToQuery
         $next = next($nestedRelation);
 
         $relation = is_iterable($relation) ? $relation : [$relation];
+        if (count($relation) == 0 || $relation[0] == null) {
+            return;
+        }
+
         $attributes = collect($relation[0]->getAttributes())
             ->except($fields)
             ->keys()

@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\V1\Team\TeamResource;
 use App\Http\Resources\V1\User\UserInviteResource;
+use App\Http\Resources\V1\User\UserResource;
 use App\Models\Invite;
+use App\Services\QueryBuilder\QueryBuilder;
 use Illuminate\Http\Request;
 
 class InviteController extends Controller
@@ -16,7 +19,20 @@ class InviteController extends Controller
      */
     public function index(Request $request)
     {
-        return UserInviteResource::collection(auth()->user()->invites);
+        $invites = QueryBuilder::for(auth()->user()->invites())
+            ->allowedFields([
+                UserInviteResource::class,
+                TeamResource::class => 'team',
+                UserResource::class => 'inviter',
+            ], [
+                UserInviteResource::class,
+                TeamResource::class => 'team',
+                UserResource::class => 'inviter',
+            ])
+            ->allowedIncludes(['team', 'inviter'], ['team', 'inviter'])
+            ->get();
+
+        return UserInviteResource::collection($invites);
     }
 
     /**

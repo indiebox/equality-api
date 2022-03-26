@@ -19,8 +19,14 @@ class TeamMemberResource extends JsonResource implements ResourceWithFields
     public function toArray($request)
     {
         return array_merge((new UserResource($this))->toArray($request), [
-            'joined_at' => $this->when(Query::hasField('members.joined_at', true), fn() => Carbon::parse($this->pivot->joined_at)),
-            'is_creator' => $this->when(Query::hasField('members.is_creator'), fn() => (bool)$this->pivot->is_creator),
+            'joined_at' => $this->when(
+                Query::hasField('members.joined_at', true),
+                fn() => Carbon::parse($this->pivot->joined_at)
+            ),
+            'is_creator' => $this->when(
+                Query::hasField('members.is_creator'),
+                fn() => (bool)$this->pivot->is_creator
+            ),
 
             // 'joined_at' => Carbon::parse($this->pivot->joined_at),
             // 'is_creator' => (bool)$this->pivot->is_creator,

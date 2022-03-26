@@ -42,28 +42,35 @@ class InviteControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(TeamInviteResource::collection($invites)->response()->getData(true));
+            ->assertJsonCount($invites->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'status', 'inviter', 'invited']]]);
 
         // Filter pending.
-        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter=pending');
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=pending');
 
         $response
             ->assertOk()
-            ->assertJson(TeamInviteResource::collection([$invites[0]])->response()->getData(true));
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $invites[0]->id)
+            ->assertJsonStructure(['data' => [['id', 'status', 'inviter', 'invited']]]);
 
         // Filter accepted.
-        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter=accepted');
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=accepted');
 
         $response
             ->assertOk()
-            ->assertJson(TeamInviteResource::collection([$invites[1]])->response()->getData(true));
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $invites[1]->id)
+            ->assertJsonStructure(['data' => [['id', 'status', 'inviter', 'invited']]]);
 
         // Filter declined.
-        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter=declined');
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=declined');
 
         $response
             ->assertOk()
-            ->assertJson(TeamInviteResource::collection([$invites[2]])->response()->getData(true));
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $invites[2]->id)
+            ->assertJsonStructure(['data' => [['id', 'status', 'inviter', 'invited']]]);
     }
 
     public function test_cant_invite_in_not_your_team()

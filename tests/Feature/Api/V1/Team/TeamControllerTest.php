@@ -26,12 +26,14 @@ class TeamControllerTest extends TestCase
     }
     public function test_can_view_any()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->hasAttached(Team::factory())->create();
         Sanctum::actingAs($user);
 
         $response = $this->getJson('/api/v1/teams');
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['data' => [['id', 'name', 'logo']]]);
     }
 
     public function test_cant_view_without_permissions()
@@ -52,7 +54,9 @@ class TeamControllerTest extends TestCase
 
         $response = $this->getJson('/api/v1/teams/' . $teamId);
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
     }
 
     public function test_cant_view_members_without_permissions()
@@ -73,7 +77,9 @@ class TeamControllerTest extends TestCase
 
         $response = $this->getJson('/api/v1/teams/' . $teamId . '/members');
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['data' => [['id', 'name', 'email', 'joined_at']]]);
     }
 
     public function test_can_store()

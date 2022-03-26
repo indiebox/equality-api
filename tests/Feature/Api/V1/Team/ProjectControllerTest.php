@@ -37,7 +37,10 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(TeamProjectResource::collection($projects)->response()->getData(true));
+            ->assertJsonCount($projects->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name', 'image']]])
+            ->assertJsonPath('data.0.id', $projects->first()->id)
+            ->assertJsonPath('data.1.id', $projects->get(1)->id);
     }
     public function test_cant_view_trashed_in_not_your_team()
     {
@@ -62,7 +65,10 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(TeamProjectResource::collection($projects)->response()->getData(true));
+            ->assertJsonCount($projects->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name', 'image']]])
+            ->assertJsonPath('data.0.id', $projects->first()->id)
+            ->assertJsonPath('data.1.id', $projects->get(1)->id);
     }
 
     public function test_cant_store_in_not_your_team()
