@@ -13,7 +13,7 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @property int $id
  * @property string $name
  * @property string|null $description
- * @property int|null $order
+ * @property double|null $order
  * @property-read \App\Models\Board $column
  * @property int $column_id
  * @property \Illuminate\Support\Carbon|null $created_at

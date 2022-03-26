@@ -32,7 +32,7 @@ class ColumnController extends Controller
     {
         $column = new Column($request->validated());
         $column->board()->associate($board);
-        $column->save();
+        $column->moveTo($request->after_column);
 
         return (new BoardColumnResource($column))->response()->setStatusCode(201);
     }

@@ -150,13 +150,12 @@ class CardControllerTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['after' => 'The selected after is invalid.']);
     }
-    public function test_can_change_order_to_up()
+    public function test_can_change_order()
     {
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
         $column = Column::factory()->board($board)->create();
-
         $cards = Card::factory(3)->column($column)
             ->state(new Sequence(
                 ['order' => 1],
@@ -168,185 +167,41 @@ class CardControllerTest extends TestCase
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
+        // Move to up dirrection
         $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[1]->id]);
 
         $card->refresh();
         $cards = $cards->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $cards[1]->order);
         $this->assertEquals(3, $card->order);
         $this->assertEquals(4, $cards[2]->order);
 
+        // First position
         $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => 0]);
 
         $card->refresh();
         $cards = $cards->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $card->order);
         $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);
         $this->assertEquals(4, $cards[2]->order);
 
-        $response = $this->postJson('/api/v1/cards/' . $cards[1]->id . '/order', ['after' => 0]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($cards[1]))->response()->getData(true));
-        $this->assertEquals(1, $cards[1]->order);
-        $this->assertEquals(2, $card->order);
-        $this->assertEquals(3, $cards[0]->order);
-        $this->assertEquals(4, $cards[2]->order);
-
-        $response = $this->postJson('/api/v1/cards/' . $cards[2]->id . '/order', ['after' => $card->id]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($cards[2]))->response()->getData(true));
-        $this->assertEquals(1, $cards[1]->order);
-        $this->assertEquals(2, $card->order);
-        $this->assertEquals(3, $cards[2]->order);
-        $this->assertEquals(4, $cards[0]->order);
-    }
-    public function test_can_change_order_to_bottom()
-    {
-        $team = Team::factory()->create();
-        $project = Project::factory()->team($team)->create();
-        $board = Board::factory()->project($project)->create();
-        $column = Column::factory()->board($board)->create();
-
-        $card = Card::factory()->column($column)->order(1)->create();
-        $cards = Card::factory(3)->column($column)
-            ->state(new Sequence(
-                ['order' => 2],
-                ['order' => 3],
-                ['order' => 4],
-            ))->create();
-
-        $user = User::factory()->hasAttached($team)->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[1]->id]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
-        $this->assertEquals(1, $cards[0]->order);
-        $this->assertEquals(2, $cards[1]->order);
-        $this->assertEquals(3, $card->order);
-        $this->assertEquals(4, $cards[2]->order);
-
+        // Move to bottom direction
         $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[2]->id]);
 
         $card->refresh();
         $cards = $cards->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $cards[1]->order);
         $this->assertEquals(3, $cards[2]->order);
         $this->assertEquals(4, $card->order);
-
-        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[0]->id]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
-        $this->assertEquals(1, $cards[0]->order);
-        $this->assertEquals(2, $card->order);
-        $this->assertEquals(3, $cards[1]->order);
-        $this->assertEquals(4, $cards[2]->order);
-
-        $response = $this->postJson('/api/v1/cards/' . $cards[0]->id . '/order', ['after' => $cards[2]->id]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($cards[0]))->response()->getData(true));
-        $this->assertEquals(1, $card->order);
-        $this->assertEquals(2, $cards[1]->order);
-        $this->assertEquals(3, $cards[2]->order);
-        $this->assertEquals(4, $cards[0]->order);
-    }
-    public function test_order_not_recalculated_with_inconsistent_order_on_ordering_to_up()
-    {
-        $team = Team::factory()->create();
-        $project = Project::factory()->team($team)->create();
-        $board = Board::factory()->project($project)->create();
-        $column = Column::factory()->board($board)->create();
-
-        $cards = Card::factory(2)->column($column)
-        ->state(new Sequence(
-            ['order' => 1],
-            ['order' => 3],
-        ))->create();
-        $card = Card::factory()->column($column)->order(4)->create();
-
-        $user = User::factory()->hasAttached($team)->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[0]->id]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
-        $this->assertEquals(1, $cards[0]->order);
-        $this->assertEquals(2, $card->order);
-        $this->assertEquals(3, $cards[1]->order);
-    }
-    public function test_order_not_recalculated_with_inconsistent_order_on_ordering_to_bottom()
-    {
-        $team = Team::factory()->create();
-        $project = Project::factory()->team($team)->create();
-        $board = Board::factory()->project($project)->create();
-        $column = Column::factory()->board($board)->create();
-
-        $card = Card::factory()->column($column)->order(1)->create();
-        $cards = Card::factory(2)->column($column)
-        ->state(new Sequence(
-            ['order' => 2],
-            ['order' => 4],
-        ))->create();
-
-        $user = User::factory()->hasAttached($team)->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[0]->id]);
-
-        $card->refresh();
-        $cards = $cards->fresh();
-
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
-        $this->assertEquals(1, $cards[0]->order);
-        $this->assertEquals(2, $card->order);
-        $this->assertEquals(3, $cards[1]->order);
     }
 
     public function test_cant_move_without_permissions()
