@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Project;
 
-use App\Http\Resources\V1\Team\TeamMemberResource;
 use App\Models\LeaderNomination;
 use App\Models\Project;
 use App\Models\Team;
@@ -50,31 +49,35 @@ class LeaderNominationControllerTest extends TestCase
             ->create();
         Sanctum::actingAs($user1);
 
-        $response = $this->getJson('/api/v1/projects/' . $project->id . '/leader-nominations');
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/leader-nominations?include=nominated,voters,voters_count');
 
         $response
             ->assertOk()
             ->assertJson(function (AssertableJson $json) use ($user1, $user2, $user3) {
-                TeamMemberResource::withoutWrapping();
+                $json->hasAll([
+                    'data.0.nominated.id',
+                    'data.0.nominated.name',
+                    'data.0.nominated.email',
+                    'data.0.nominated.joined_at',
+                ]);
 
                 $json->whereAll([
                     'data.0.is_leader' => true,
-                    'data.0.nominated' => (new TeamMemberResource($user1))->response()->getData(true),
+                    'data.0.nominated.id' => $user1->id,
                     'data.0.voters_count' => 2,
-                    'data.0.voters' => TeamMemberResource::collection([$user1, $user2])->response()->getData(true),
+                    'data.0.voters.0.id' => $user1->id,
+                    'data.0.voters.1.id' => $user2->id,
                 ])->whereAll([
                     'data.1.is_leader' => false,
-                    'data.1.nominated' => (new TeamMemberResource($user3))->response()->getData(true),
+                    'data.1.nominated.id' => $user3->id,
                     'data.1.voters_count' => 1,
-                    'data.1.voters' => TeamMemberResource::collection([$user3])->response()->getData(true),
+                    'data.1.voters.0.id' => $user3->id,
                 ])->whereAll([
                     'data.2.is_leader' => false,
-                    'data.2.nominated' => (new TeamMemberResource($user2))->response()->getData(true),
+                    'data.2.nominated.id' => $user2->id,
                     'data.2.voters_count' => 0,
                     'data.2.voters' => [],
                 ])->interacted();
-
-                TeamMemberResource::wrap('data');
             });
     }
     public function test_can_view_with_empty_nominations()
@@ -90,26 +93,19 @@ class LeaderNominationControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJson(function (AssertableJson $json) use ($user1, $user2, $user3) {
-                TeamMemberResource::withoutWrapping();
-
                 $json->whereAll([
                     'data.0.is_leader' => false,
-                    'data.0.nominated' => (new TeamMemberResource($user1))->response()->getData(true),
-                    'data.0.voters_count' => 0,
+                    'data.0.nominated.id' => $user1->id,
                     'data.0.voters' => [],
                 ])->whereAll([
                     'data.1.is_leader' => false,
-                    'data.1.nominated' => (new TeamMemberResource($user2))->response()->getData(true),
-                    'data.1.voters_count' => 0,
+                    'data.1.nominated.id' => $user2->id,
                     'data.1.voters' => [],
                 ])->whereAll([
                     'data.2.is_leader' => false,
-                    'data.2.nominated' => (new TeamMemberResource($user3))->response()->getData(true),
-                    'data.2.voters_count' => 0,
+                    'data.2.nominated.id' => $user3->id,
                     'data.2.voters' => [],
                 ])->interacted();
-
-                TeamMemberResource::wrap('data');
             });
     }
 
@@ -151,16 +147,11 @@ class LeaderNominationControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJson(function (AssertableJson $json) use ($user, $nominated) {
-                TeamMemberResource::withoutWrapping();
-
                 $json->whereAll([
                     'data.0.is_leader' => true,
-                    'data.0.nominated' => (new TeamMemberResource($nominated))->response()->getData(true),
-                    'data.0.voters_count' => 1,
-                    'data.0.voters' => TeamMemberResource::collection([$user])->response()->getData(true),
+                    'data.0.nominated.id' => $nominated->id,
+                    'data.0.voters.0.id' => $user->id,
                 ])->interacted();
-
-                TeamMemberResource::wrap('data');
             });
         $this->assertDatabaseCount('leader_nominations', 1);
 
@@ -172,16 +163,11 @@ class LeaderNominationControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJson(function (AssertableJson $json) use ($user, $nominated) {
-                TeamMemberResource::withoutWrapping();
-
                 $json->whereAll([
                     'data.0.is_leader' => true,
-                    'data.0.nominated' => (new TeamMemberResource($nominated))->response()->getData(true),
-                    'data.0.voters_count' => 1,
-                    'data.0.voters' => TeamMemberResource::collection([$user])->response()->getData(true),
+                    'data.0.nominated.id' => $nominated->id,
+                    'data.0.voters.0.id' => $user->id,
                 ])->interacted();
-
-                TeamMemberResource::wrap('data');
             });
         $this->assertDatabaseCount('leader_nominations', 1);
 
@@ -192,16 +178,12 @@ class LeaderNominationControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJson(function (AssertableJson $json) use ($user, $nominated) {
-                TeamMemberResource::withoutWrapping();
-
                 $json->whereAll([
                     'data.0.is_leader' => true,
-                    'data.0.nominated' => (new TeamMemberResource($nominated))->response()->getData(true),
-                    'data.0.voters_count' => 2,
-                    'data.0.voters' => TeamMemberResource::collection([$user, $nominated])->response()->getData(true),
+                    'data.0.nominated.id' => $nominated->id,
+                    'data.0.voters.0.id' => $user->id,
+                    'data.0.voters.1.id' => $nominated->id,
                 ])->interacted();
-
-                TeamMemberResource::wrap('data');
             });
         $this->assertDatabaseCount('leader_nominations', 2);
     }

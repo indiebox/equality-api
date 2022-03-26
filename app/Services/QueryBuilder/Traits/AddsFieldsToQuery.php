@@ -29,7 +29,11 @@ trait AddsFieldsToQuery
             throw new AllowedFieldsMustBeCalledBeforeAllowedIncludes();
         }
 
-        $this->defaultName = $defaultName ?? $this->getModel()->getTable();
+        if ($this->subjectIsCollection && $this->subject->count() == 0) {
+            return $this;
+        }
+
+        $this->defaultName = $defaultName ?? $this->getDefaultName();
 
         $this->defaultFields = $this->parseFields($defaultFields, false);
         $this->allowedFields = $this->parseFields($fields, true)
@@ -51,6 +55,10 @@ trait AddsFieldsToQuery
      */
     protected function applyFieldsToResult($result)
     {
+        if ($this->subjectIsCollection && $result->count() == 0) {
+            return;
+        }
+
         $models = is_iterable($result) ? $result : [$result];
 
         $modelFields = collect($this->defaultFields)
@@ -104,6 +112,13 @@ trait AddsFieldsToQuery
         // We dont need this method, because we apply fields after extraction
         // results from database, so all foreign keys (and relations)
         // will be loaded correctly.
+    }
+
+    protected function getDefaultName()
+    {
+        return $this->subjectIsCollection
+            ? $this->subject->first()->getTable()
+            : $this->getModel()->getTable();
     }
 
     /**

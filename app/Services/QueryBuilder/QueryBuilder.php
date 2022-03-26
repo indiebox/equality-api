@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use LogicException;
 use Spatie\QueryBuilder\QueryBuilder as BaseQueryBuilder;
@@ -26,6 +27,8 @@ class QueryBuilder extends BaseQueryBuilder
     }
 
     public $subjectIsModel = false;
+
+    public $subjectIsCollection = false;
 
     protected $freshQuery = null;
 
@@ -53,11 +56,11 @@ class QueryBuilder extends BaseQueryBuilder
     /**
      * Check if the include is requested.
      * @param string $include The include (ex. `teams`)
-     * @param boolean $canBeNested If `true`, includes like `teams.nested` will return true for `nested` check.
      * @param boolean $isDefault This is the default include.
+     * @param boolean $canBeNested If `true`, requested include like `teams.nested` will return true for `nested` check.
      * @return boolean Returns `true` if this include should be added to response.
      */
-    public static function hasInclude($include, $inlcudeNested = true, $isDefault = false)
+    public static function hasInclude($include, $isDefault = false, $inlcudeNested = true)
     {
         $request = app(QueryBuilderRequest::class);
         $requestedFields = $request->includes()->toArray();
@@ -71,51 +74,6 @@ class QueryBuilder extends BaseQueryBuilder
                 ? $value === $include || Str::contains($value, [".{$include}", "{$include}."])
                 : $value === $include;
         }));
-    }
-
-    /**
-     * Gets results.
-     * @return mixed
-     */
-    public function get()
-    {
-        if ($this->subjectIsModel) {
-            $result = $this->subject;
-        } else {
-            $result = $this->__call('get', func_get_args());
-        }
-
-        $this->applyFieldsToResult($result);
-
-        $this->freshQuery = null;
-
-        return $result;
-    }
-
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation|\Illuminate\Database\Eloquent\Model $subject
-     *
-     * @return $this
-     */
-    protected function initializeSubject($subject): self
-    {
-        if ($subject instanceof Model) {
-            $this->subjectIsModel = true;
-            $this->subject = $subject;
-
-            return $this;
-        }
-
-        return parent::initializeSubject($subject);
-    }
-
-    public function getEloquentBuilder(): Builder
-    {
-        if ($this->subjectIsModel) {
-            return $this->freshQuery ?? $this->freshQuery = $this->subject->newQueryWithoutRelationships();
-        }
-
-        return parent::getEloquentBuilder();
     }
 
     /**
@@ -163,6 +121,10 @@ class QueryBuilder extends BaseQueryBuilder
      */
     public function allowedIncludes($includes, $defaultIncludes = []): self
     {
+        if ($this->subjectIsCollection) {
+            throw new LogicException("Method 'allowedIncludes' can`t be used with collection.");
+        }
+
         return $this->traitAllowedIncludes($includes, $defaultIncludes);
     }
 
@@ -177,8 +139,8 @@ class QueryBuilder extends BaseQueryBuilder
      */
     public function allowedSorts($sorts): self
     {
-        if ($this->subjectIsModel) {
-            throw new LogicException("Method 'allowedSorts' can`t be used with loaded model.");
+        if ($this->subjectIsModel || $this->subjectIsCollection) {
+            throw new LogicException("Method 'allowedSorts' can`t be used with loaded model(s).");
         }
 
         return parent::allowedSorts(...func_get_args());
@@ -195,8 +157,8 @@ class QueryBuilder extends BaseQueryBuilder
      */
     public function allowedFilters($filters): self
     {
-        if ($this->subjectIsModel) {
-            throw new LogicException("Method 'allowedFilters' can`t be used with loaded model.");
+        if ($this->subjectIsModel || $this->subjectIsCollection) {
+            throw new LogicException("Method 'allowedFilters' can`t be used with loaded model(s).");
         }
 
         if ($this->request->filters()->isEmpty()) {
@@ -209,4 +171,56 @@ class QueryBuilder extends BaseQueryBuilder
     }
 
     #endregion
+
+    /**
+     * Gets results.
+     * @return mixed
+     */
+    public function get()
+    {
+        if ($this->subjectIsModel || $this->subjectIsCollection) {
+            $result = $this->subject;
+        } else {
+            $result = $this->__call('get', func_get_args());
+        }
+
+        $this->applyFieldsToResult($result);
+
+        $this->freshQuery = null;
+
+        return $result;
+    }
+
+    public function getEloquentBuilder(): Builder
+    {
+        if ($this->subjectIsModel) {
+            return $this->freshQuery ?? $this->freshQuery = $this->subject->newQueryWithoutRelationships();
+        }
+
+        return parent::getEloquentBuilder();
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation|\Illuminate\Database\Eloquent\Model $subject
+     *
+     * @return $this
+     */
+    protected function initializeSubject($subject): self
+    {
+        if ($subject instanceof Model) {
+            $this->subjectIsModel = true;
+            $this->subject = $subject;
+
+            return $this;
+        }
+
+        if ($subject instanceof Collection) {
+            $this->subjectIsCollection = true;
+            $this->subject = $subject;
+
+            return $this;
+        }
+
+        return parent::initializeSubject($subject);
+    }
 }

@@ -84,13 +84,13 @@ class QueryBuilderTest extends TestCase
         );
 
         $this->assertTrue(QueryBuilder::hasInclude('relation'));
-        $this->assertTrue(QueryBuilder::hasInclude('relation', false));
+        $this->assertTrue(QueryBuilder::hasInclude('relation', false, false));
         $this->assertTrue(QueryBuilder::hasInclude('models.deep'));
-        $this->assertTrue(QueryBuilder::hasInclude('models.deep', false));
+        $this->assertTrue(QueryBuilder::hasInclude('models.deep', false, false));
         $this->assertTrue(QueryBuilder::hasInclude('models'));
         $this->assertTrue(QueryBuilder::hasInclude('deep'));
-        $this->assertFalse(QueryBuilder::hasInclude('models', false));
-        $this->assertFalse(QueryBuilder::hasInclude('deep', false));
+        $this->assertFalse(QueryBuilder::hasInclude('models', false, false));
+        $this->assertFalse(QueryBuilder::hasInclude('deep', false, false));
 
         $this->assertFalse(QueryBuilder::hasInclude('nested', true, true));
         $this->assertFalse(QueryBuilder::hasInclude('nested.deep'));
@@ -98,13 +98,13 @@ class QueryBuilderTest extends TestCase
         app()->instance(QueryBuilderRequest::class, new QueryBuilderRequest());
 
         $this->assertFalse(QueryBuilder::hasInclude('relation'));
-        $this->assertFalse(QueryBuilder::hasInclude('relation', false));
+        $this->assertFalse(QueryBuilder::hasInclude('relation', false, false));
         $this->assertFalse(QueryBuilder::hasInclude('models.deep'));
-        $this->assertFalse(QueryBuilder::hasInclude('models.deep', false));
+        $this->assertFalse(QueryBuilder::hasInclude('models.deep', false, false));
         $this->assertFalse(QueryBuilder::hasInclude('models'));
         $this->assertFalse(QueryBuilder::hasInclude('deep'));
-        $this->assertFalse(QueryBuilder::hasInclude('models', false));
-        $this->assertFalse(QueryBuilder::hasInclude('deep', false));
+        $this->assertFalse(QueryBuilder::hasInclude('models', false, false));
+        $this->assertFalse(QueryBuilder::hasInclude('deep', false, false));
 
         $this->assertTrue(QueryBuilder::hasInclude('nested', true, true));
         $this->assertFalse(QueryBuilder::hasInclude('nested.deep'));
@@ -129,9 +129,26 @@ class QueryBuilderTest extends TestCase
         $this->assertSame($model, $result);
     }
 
+    public function test_can_get_collection_itself()
+    {
+        $model = collect($this->createModel());
+
+        $result = QueryBuilder::for($model)->get();
+
+        $this->assertSame($model, $result);
+    }
+
     public function test_cant_use_sorts_at_existing_model()
     {
         $model = $this->createModel();
+
+        $this->expectException(LogicException::class);
+
+        $result = QueryBuilder::for($model)->allowedSorts([])->get();
+    }
+    public function test_cant_use_sorts_at_collection()
+    {
+        $model = collect($this->createModel());
 
         $this->expectException(LogicException::class);
 
@@ -145,80 +162,21 @@ class QueryBuilderTest extends TestCase
 
         $result = QueryBuilder::for($model)->allowedFilters([])->get();
     }
-
-    public function test_can_set_allowed_fields()
+    public function test_cant_use_filters_at_collection()
     {
-        $this->createModel();
+        $model = collect($this->createModel());
 
-        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['models' => 'id,name']))
-            ->allowedFields(['id', 'name']);
+        $this->expectException(LogicException::class);
 
-        $this->assertEquals("select * from `models`", $result->toSql());
-
-        $result = $result->get();
-
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $result = QueryBuilder::for($model)->allowedFilters([])->get();
     }
-    public function test_can_set_default_fields()
+    public function test_cant_use_includes_at_collection()
     {
-        $this->createModel();
+        $model = collect($this->createModel());
 
-        $result = QueryBuilder::for(QueryableModel::query())
-            ->allowedFields(['id', 'name'], ['id']);
+        $this->expectException(LogicException::class);
 
-        $this->assertEquals("select * from `models`", $result->toSql());
-
-        $result = $result->get();
-
-        $this->assertEquals([
-            'name',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
-    }
-    public function test_requested_fields_overrides_default()
-    {
-        $this->createModel();
-
-        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['models' => 'name']))
-            ->allowedFields(['id', 'name'], ['id']);
-
-        $this->assertEquals("select * from `models`", $result->toSql());
-
-        $result = $result->get();
-
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
-    }
-    public function test_can_set_alias_for_current_fields()
-    {
-        $this->createModel();
-
-        $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['alias' => 'id,name']))
-            ->allowedFields(['id', 'name'], ['id'], 'alias');
-
-        $this->assertEquals("select * from `models`", $result->toSql());
-
-        $result = $result->get();
-
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $result = QueryBuilder::for($model)->allowedIncludes([])->get();
     }
 
     /*
