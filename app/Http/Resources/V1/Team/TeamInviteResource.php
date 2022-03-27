@@ -18,10 +18,10 @@ class TeamInviteResource extends JsonResource implements ResourceWithFields
     {
         return $this->visible([
             'id', 'accepted_at', 'declined_at', 'created_at', 'updated_at',
+            'status' => $this->getStatus(),
         ], [
             'inviter' => new UserResource($this->whenLoaded('inviter')),
             'invited' => new UserResource($this->whenLoaded('invited')),
-            'status' => $this->getStatus(),
         ]);
     }
 
@@ -32,11 +32,11 @@ class TeamInviteResource extends JsonResource implements ResourceWithFields
 
     public static function defaultFields(): array
     {
-        return ['id'];
+        return ['id', 'status'];
     }
 
     public static function allowedFields(): array
     {
-        return ['status', 'accepted_at', 'declined_at', 'created_at', 'updated_at'];
+        return ['accepted_at', 'declined_at', 'created_at', 'updated_at'];
     }
 }
