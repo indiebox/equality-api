@@ -47,7 +47,8 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+            ->assertJsonPath('data.id', $card->id)
+            ->assertJsonStructure(['data' => ['id', 'name']]);
     }
 
     public function test_cant_update_without_permissions()

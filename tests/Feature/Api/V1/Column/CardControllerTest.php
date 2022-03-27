@@ -50,9 +50,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(
-                ColumnCardResource::collection([$cards[1], $cards[2], $cards[0]])->response()->getData(true)
-            );
+            ->assertJsonCount($cards->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name']]])
+            ->assertJsonPath('data.0.id', $cards->get(1)->id)
+            ->assertJsonPath('data.1.id', $cards->get(2)->id)
+            ->assertJsonPath('data.2.id', $cards->get(0)->id);
     }
 
     public function test_cant_store_in_not_your_team()

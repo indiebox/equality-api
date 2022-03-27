@@ -8,6 +8,7 @@ use App\Http\Resources\V1\Card\CardResource;
 use App\Http\Resources\V1\Column\ColumnCardResource;
 use App\Models\Card;
 use App\Models\Column;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class CardController extends Controller
 {
@@ -19,7 +20,9 @@ class CardController extends Controller
      */
     public function index(Column $column)
     {
-        $cards = $column->cards()->orderByPosition()->get();
+        $cards = QueryBuilder::for($column->cards()->orderByPosition())
+            ->allowedFields([ColumnCardResource::class], [ColumnCardResource::class])
+            ->get();
 
         return ColumnCardResource::collection($cards);
     }
