@@ -3,7 +3,6 @@
 namespace Tests\Feature\Api\V1\Project;
 
 use App\Http\Resources\V1\Project\ProjectResource;
-use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
@@ -124,7 +123,7 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new TeamProjectResource($project))->response()->getData(true));
+            ->assertJson((new ProjectResource($project))->response()->getData(true));
         $this->assertTrue($project->trashed());
     }
 

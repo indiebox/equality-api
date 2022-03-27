@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Team;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Team\StoreProjectRequest;
-use App\Http\Resources\V1\Team\TeamProjectResource;
+use App\Http\Resources\V1\Project\ProjectResource;
 use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
 use App\Models\Team;
@@ -21,13 +21,13 @@ class ProjectController extends Controller
     {
         $projects = QueryBuilder::for($team->projects())
             ->allowedFields(
-                [TeamProjectResource::class, UserResource::class => 'leader'],
-                [TeamProjectResource::class, UserResource::class => 'leader']
+                [ProjectResource::class, UserResource::class => 'leader'],
+                [ProjectResource::class, UserResource::class => 'leader']
             )
             ->allowedIncludes('leader')
             ->get();
 
-        return TeamProjectResource::collection($projects);
+        return ProjectResource::collection($projects);
     }
 
     /**
@@ -40,12 +40,12 @@ class ProjectController extends Controller
     {
         $projects = QueryBuilder::for($team->projects()->onlyTrashed())
             ->allowedFields(
-                [TeamProjectResource::class],
-                [TeamProjectResource::class]
+                [ProjectResource::class],
+                [ProjectResource::class]
             )
             ->get();
 
-        return TeamProjectResource::collection($projects);
+        return ProjectResource::collection($projects);
     }
 
     /**
@@ -66,6 +66,6 @@ class ProjectController extends Controller
             'nominated_id' => auth()->id(),
         ]);
 
-        return (new TeamProjectResource($project))->response()->setStatusCode(201);
+        return (new ProjectResource($project))->response()->setStatusCode(201);
     }
 }

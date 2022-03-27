@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Project;
 
-use App\Http\Resources\V1\Project\ProjectBoardResource;
+use App\Http\Resources\V1\Board\BoardResource;
 use App\Models\Board;
 use App\Models\Project;
 use App\Models\Team;
@@ -150,7 +150,7 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new ProjectBoardResource($board))->response()->getData(true));
+            ->assertJson((new BoardResource($board))->response()->getData(true));
         $this->assertDatabaseHas('boards', ['project_id' => $project->id, 'name' => $data['name']]);
     }
 }

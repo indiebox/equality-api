@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Project\UpdateProjectRequest;
 use App\Http\Resources\V1\Project\ProjectResource;
-use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
@@ -27,18 +26,18 @@ class ProjectController extends Controller
 
         $project = QueryBuilder::for($project)
             ->allowedFields([
-                TeamProjectResource::class => 'project',
+                ProjectResource::class,
                 UserResource::class => 'leader',
                 TeamResource::class => 'team',
             ], [
-                TeamProjectResource::class => 'project',
+                ProjectResource::class,
                 UserResource::class => 'leader',
                 TeamResource::class => 'team',
-            ], 'project')
+            ])
             ->allowedIncludes(['leader', 'team'])
             ->get();
 
-        return new TeamProjectResource($project);
+        return new ProjectResource($project);
     }
 
     public function leader(Project $project)
@@ -74,7 +73,7 @@ class ProjectController extends Controller
     {
         $project->delete();
 
-        return new TeamProjectResource($project);
+        return new ProjectResource($project);
     }
 
     public function restore(Project $project)

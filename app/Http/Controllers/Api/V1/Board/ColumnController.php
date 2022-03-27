@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Board;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Board\StoreColumnRequest;
-use App\Http\Resources\V1\Board\BoardColumnResource;
+use App\Http\Resources\V1\Column\ColumnResource;
 use App\Models\Board;
 use App\Models\Column;
 use App\Services\QueryBuilder\QueryBuilder;
@@ -20,10 +20,10 @@ class ColumnController extends Controller
     public function index(Board $board)
     {
         $columns = QueryBuilder::for($board->columns())
-            ->allowedFields([BoardColumnResource::class], [BoardColumnResource::class])
+            ->allowedFields([ColumnResource::class], [ColumnResource::class])
             ->get();
 
-        return BoardColumnResource::collection($columns);
+        return ColumnResource::collection($columns);
     }
 
     /**
@@ -39,6 +39,6 @@ class ColumnController extends Controller
         $column->board()->associate($board);
         $column->moveTo($request->after_column);
 
-        return (new BoardColumnResource($column))->response()->setStatusCode(201);
+        return (new ColumnResource($column))->response()->setStatusCode(201);
     }
 }

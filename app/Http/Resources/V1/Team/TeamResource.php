@@ -15,15 +15,12 @@ class TeamResource extends JsonResource implements ResourceWithFields
      */
     public function toArray($request)
     {
-        return $this->visible(
-            [
-                'id', 'name', 'description', 'url', 'logo' => image($this->logo), 'created_at', 'updated_at',
-            ],
-            [
-                'members' => TeamMemberResource::collection($this->whenLoaded('members')),
-                'members_count' => $this->when($this->members_count != null, $this->members_count),
-            ],
-        );
+        return $this->visible([
+            'id', 'name', 'description', 'url', 'logo' => image($this->logo), 'created_at', 'updated_at',
+        ], [
+            'members' => TeamMemberResource::collection($this->whenLoaded('members')),
+            'members_count' => $this->when($this->members_count != null, $this->members_count),
+        ]);
     }
 
     public static function defaultName(): string
