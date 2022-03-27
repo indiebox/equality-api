@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Board\StoreColumnRequest;
 use App\Http\Resources\V1\Board\BoardColumnResource;
 use App\Models\Board;
 use App\Models\Column;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class ColumnController extends Controller
 {
@@ -18,7 +19,11 @@ class ColumnController extends Controller
      */
     public function index(Board $board)
     {
-        return BoardColumnResource::collection($board->columns);
+        $columns = QueryBuilder::for($board->columns())
+            ->allowedFields([BoardColumnResource::class], [BoardColumnResource::class])
+            ->get();
+
+        return BoardColumnResource::collection($columns);
     }
 
     /**

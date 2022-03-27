@@ -43,7 +43,10 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
+            ->assertJsonCount($columns->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name']]])
+            ->assertJsonPath('data.0.id', $columns->first()->id)
+            ->assertJsonPath('data.1.id', $columns->get(1)->id);
     }
     public function test_can_view_any_in_closed_board()
     {
@@ -58,7 +61,10 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
+            ->assertJsonCount($columns->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name']]])
+            ->assertJsonPath('data.0.id', $columns->first()->id)
+            ->assertJsonPath('data.1.id', $columns->get(1)->id);
     }
     public function test_can_view_any_in_trashed_board()
     {
@@ -73,7 +79,10 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
+            ->assertJsonCount($columns->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name']]])
+            ->assertJsonPath('data.0.id', $columns->first()->id)
+            ->assertJsonPath('data.1.id', $columns->get(1)->id);
     }
 
     public function test_cant_store_in_not_your_team()

@@ -42,7 +42,8 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+            ->assertJsonPath('data.id', $column->id)
+            ->assertJsonStructure(['data' => ['id', 'name']]);
     }
 
     public function test_cant_update_without_permissions()
