@@ -39,7 +39,8 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonPath('data.id', $board->id)
+            ->assertJsonStructure(['data' => ['id', 'name']]);
     }
     public function test_can_view_closed()
     {
@@ -53,7 +54,8 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonPath('data.id', $board->id)
+            ->assertJsonStructure(['data' => ['id', 'name', 'closed_at']]);
     }
     public function test_can_view_trashed()
     {
@@ -67,7 +69,8 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonPath('data.id', $board->id)
+            ->assertJsonStructure(['data' => ['id', 'name', 'deleted_at']]);
     }
 
     public function test_cant_update_without_permissions()

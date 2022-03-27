@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Project\StoreBoardRequest;
 use App\Http\Resources\V1\Project\ProjectBoardResource;
 use App\Models\Board;
 use App\Models\Project;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class BoardController extends Controller
 {
@@ -18,7 +19,11 @@ class BoardController extends Controller
      */
     public function index(Project $project)
     {
-        return ProjectBoardResource::collection($project->boards);
+        $boards = QueryBuilder::for($project->boards())
+            ->allowedFields([ProjectBoardResource::class], [ProjectBoardResource::class])
+            ->get();
+
+        return ProjectBoardResource::collection($boards);
     }
 
     /**
@@ -29,7 +34,11 @@ class BoardController extends Controller
      */
     public function indexClosed(Project $project)
     {
-        return ProjectBoardResource::collection($project->boards()->onlyClosed()->get());
+        $boards = QueryBuilder::for($project->boards()->onlyClosed())
+            ->allowedFields([ProjectBoardResource::class], [ProjectBoardResource::class])
+            ->get();
+
+        return ProjectBoardResource::collection($boards);
     }
 
     /**
@@ -40,7 +49,11 @@ class BoardController extends Controller
      */
     public function indexTrashed(Project $project)
     {
-        return ProjectBoardResource::collection($project->boards()->onlyTrashed()->get());
+        $boards = QueryBuilder::for($project->boards()->onlyTrashed())
+            ->allowedFields([ProjectBoardResource::class], [ProjectBoardResource::class])
+            ->get();
+
+        return ProjectBoardResource::collection($boards);
     }
 
     /**

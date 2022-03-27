@@ -8,6 +8,7 @@ use App\Http\Requests\Api\V1\Board\RestoreBoardRequest;
 use App\Http\Requests\Api\V1\Board\UpdateBoardRequest;
 use App\Http\Resources\V1\Board\BoardResource;
 use App\Models\Board;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class BoardController extends Controller
 {
@@ -19,6 +20,10 @@ class BoardController extends Controller
      */
     public function show(Board $board)
     {
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->get();
+
         return new BoardResource($board);
     }
 

@@ -41,7 +41,10 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(ProjectBoardResource::collection($boards)->response()->getData(true));
+            ->assertJsonCount($boards->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name']]])
+            ->assertJsonPath('data.0.id', $boards->first()->id)
+            ->assertJsonPath('data.1.id', $boards->get(1)->id);
     }
 
     public function test_cant_view_closed_in_not_your_team()
@@ -68,7 +71,10 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(ProjectBoardResource::collection($closedBoards)->response()->getData(true));
+            ->assertJsonCount($closedBoards->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name', 'closed_at']]])
+            ->assertJsonPath('data.0.id', $closedBoards->first()->id)
+            ->assertJsonPath('data.1.id', $closedBoards->get(1)->id);
     }
 
     public function test_cant_view_trashed_in_not_your_team()
@@ -95,7 +101,10 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(ProjectBoardResource::collection($trashedBoards)->response()->getData(true));
+            ->assertJsonCount($trashedBoards->count(), 'data')
+            ->assertJsonStructure(['data' => [['id', 'name', 'deleted_at']]])
+            ->assertJsonPath('data.0.id', $trashedBoards->first()->id)
+            ->assertJsonPath('data.1.id', $trashedBoards->get(1)->id);
     }
 
     public function test_cant_store_in_not_your_team()
