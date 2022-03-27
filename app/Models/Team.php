@@ -96,6 +96,7 @@ class Team extends Model
 
     public function projectsLeaderNominations()
     {
-        return $this->hasManyThrough(LeaderNomination::class, Project::class);
+        return $this->hasManyThrough(LeaderNomination::class, Project::class)
+            ->withTrashedParents();
     }
 }
