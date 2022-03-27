@@ -52,6 +52,7 @@ class Card extends Model
 
     public function team()
     {
-        return $this->belongsToThrough(Team::class, [Project::class, Board::class, Column::class]);
+        return $this->belongsToThrough(Team::class, [Project::class, Board::class, Column::class])
+            ->withTrashedParents();
     }
 }

@@ -63,6 +63,7 @@ class Board extends Model
 
     public function team()
     {
-        return $this->belongsToThrough(Team::class, Project::class);
+        return $this->belongsToThrough(Team::class, Project::class)
+            ->withTrashedParents();
     }
 }
