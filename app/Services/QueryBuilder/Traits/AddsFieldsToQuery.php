@@ -81,14 +81,9 @@ trait AddsFieldsToQuery
             }, collect())
             ->merge($this->request->fields());
 
-        // $includes = collect($this->allowedIncludes)->map(function ($allowedInclude) {
-        //     return $allowedInclude->getName();
-        // });
-
         foreach ($models as $model) {
             foreach ($requestedFields as $relation => $fields) {
                 $nestedRelation = explode(".", $relation);
-                // $fields = collect($includes)->merge($fields);
                 $hideFields = $this->allowedFields
                     ->filter(fn($value) => str_starts_with($value, $relation))
                     ->map(fn($value) => last(explode(".", $value)))
