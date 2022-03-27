@@ -57,6 +57,7 @@ class Column extends Model
 
     public function team()
     {
-        return $this->belongsToThrough(Team::class, [Project::class, Board::class]);
+        return $this->belongsToThrough(Team::class, [Project::class, Board::class])
+            ->withTrashedParents();
     }
 }

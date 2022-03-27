@@ -10,7 +10,7 @@ class EloquentBuilderMacrosTest extends TestCase
 {
     public function test_visible_macro()
     {
-        $model = new EloquentModel(['name' => 1, 'desc' => 2, 'title' => 3]);
+        $model = new EloquentBuilderMacroTestModel(['name' => 1, 'desc' => 2, 'title' => 3]);
 
         // Visible attributes.
         $this->assertEquals(1, $model->visible('name'));
@@ -60,7 +60,7 @@ class EloquentBuilderMacrosTest extends TestCase
     }
 }
 
-class EloquentModel extends Model
+class EloquentBuilderMacroTestModel extends Model
 {
     protected $fillable = ['name', 'desc', 'title'];
 
