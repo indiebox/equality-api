@@ -41,7 +41,7 @@ class TeamResource extends JsonResource implements ResourceWithFields
     public static function allowedFields(): array
     {
         return [
-            'description' ,'url', 'created_at', 'updated_at',
+            'description', 'url', 'created_at', 'updated_at',
         ];
     }
 }

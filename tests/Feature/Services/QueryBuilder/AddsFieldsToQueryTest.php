@@ -98,7 +98,7 @@ class AddsFieldsToQueryTest extends TestCase
         $model = $this->createModel();
 
         $result = QueryBuilder::for(QueryableModel::query(), $this->withFields(['models' => 'id,name']))
-            ->allowedFields(['id', 'name'])
+            ->allowedFields(['id', 'name', 'description', 'timestamp', 'created_at', 'updated_at'])
             ->get();
 
         $this->assertEquals([
@@ -111,7 +111,7 @@ class AddsFieldsToQueryTest extends TestCase
         $this->assertEquals([], $model->getHidden());
 
         $result = QueryBuilder::for($model, $this->withFields(['models' => 'id,name']))
-            ->allowedFields(['id', 'name'])
+            ->allowedFields(['id', 'name', 'description', 'timestamp', 'created_at', 'updated_at'])
             ->get();
 
         $this->assertSame($model, $result);
@@ -124,7 +124,7 @@ class AddsFieldsToQueryTest extends TestCase
 
         $models = collect([$this->createModel(), $this->createModel()]);
         $result = QueryBuilder::for($models, $this->withFields(['models' => 'id,name']))
-            ->allowedFields(['id', 'name'])
+            ->allowedFields(['id', 'name', 'description', 'timestamp', 'created_at', 'updated_at'])
             ->get();
 
         $this->assertEquals([
@@ -148,13 +148,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['id', 'name'], ['id'])
             ->get();
 
-        $this->assertEquals([
-            'name',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals(['name'], $result->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -163,33 +157,15 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'name',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals(['name'], $result->getHidden());
 
         $models = collect([$this->createModel(), $this->createModel()]);
         $result = QueryBuilder::for($models)
             ->allowedFields(['id', 'name'], ['id'])
             ->get();
 
-        $this->assertEquals([
-            'name',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
-        $this->assertEquals([
-            'name',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->get(1)->getHidden());
+        $this->assertEquals(['name'], $result->get(0)->getHidden());
+        $this->assertEquals(['name'], $result->get(1)->getHidden());
     }
     public function test_requested_fields_overrides_defaults()
     {
@@ -199,13 +175,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['id', 'name'], ['id'])
             ->get();
 
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals(['id'], $result->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -214,97 +184,15 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals(['id'], $result->getHidden());
 
         $models = collect([$this->createModel(), $this->createModel()]);
         $result = QueryBuilder::for($models, $this->withFields(['models' => 'name']))
             ->allowedFields(['id', 'name'], ['id'])
             ->get();
 
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->get(1)->getHidden());
-    }
-    public function test_includes_fields_exists_in_result()
-    {
-        $model = $this->createModel();
-
-        $result = QueryBuilder::for(QueryableModel::withCount('related'), $this->withFields(['models' => 'name']))
-            ->allowedFields(['id', 'name'], ['id'])
-            ->allowedIncludes(['related_count'])
-            ->get();
-
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
-
-        $result = QueryBuilder::for(QueryableModel::withCount('related'), $this->withFields(['models' => 'name']))
-            ->allowedFields(['id', 'name'], ['id'])
-            ->get();
-
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-            'related_count',
-        ], $result->first()->getHidden());
-
-        // Eager loading
-        $this->assertEquals([], $model->getHidden());
-
-        $model->loadCount('related');
-        $result = QueryBuilder::for($model, $this->withFields(['models' => 'name']))
-            ->allowedFields(['id', 'name'], ['id'])
-            ->allowedIncludes(['related_count'])
-            ->get();
-
-        $this->assertSame($model, $result);
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
-
-        $model = $model->fresh();
-        $model->loadCount('related');
-        $result = QueryBuilder::for($model, $this->withFields(['models' => 'name']))
-            ->allowedFields(['id', 'name'], ['id'])
-            ->get();
-
-        $this->assertSame($model, $result);
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-            'related_count',
-        ], $result->getHidden());
+        $this->assertEquals(['id'], $result->get(0)->getHidden());
+        $this->assertEquals(['id'], $result->get(1)->getHidden());
     }
 
     public function test_can_set_alias_for_parent_model()
@@ -315,12 +203,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['id', 'name'], ['id'], 'alias')
             ->get();
 
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals([], $result->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -329,12 +212,17 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals([], $result->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([$this->createModel(), $this->createModel()]),
+            $this->withFields(['alias' => 'id,name'])
+        )
+        ->allowedFields(['id', 'name'], ['id'], 'alias')
+        ->get();
+
+        $this->assertEquals([], $result->get(0)->getHidden());
+        $this->assertEquals([], $result->get(1)->getHidden());
 
         $this->expectException(InvalidFieldQuery::class);
 
@@ -353,14 +241,22 @@ class AddsFieldsToQueryTest extends TestCase
 
         $this->assertEquals(0, $result->first()->related->count());
 
-        $this->assertEquals([], $model->getHidden());
-
+        $model->load('related');
         $result = QueryBuilder::for($model)
             ->allowedFields(['related.id', 'related.name'], ['related.id'])
             ->get();
 
         $this->assertSame($model, $result);
         $this->assertEquals(0, $result->first()->related->count());
+
+        $result = QueryBuilder::for(
+            collect([$this->createModel()->load('related'), $this->createModel()->load('related')])
+        )
+        ->allowedFields(['related.id', 'related.name'], ['related.id'])
+        ->get();
+
+        $this->assertEquals(0, $result->get(0)->related->count());
+        $this->assertEquals(0, $result->get(1)->related->count());
     }
     public function test_related_allowed_fields_not_applied_without_request()
     {
@@ -370,17 +266,27 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['related.id', 'related.name'])
             ->get();
 
-        $this->assertEquals([
-        ], $result->first()->related->first()->getHidden());
+        $this->assertEquals([], $result->first()->related->first()->getHidden());
 
-        $this->assertEquals([], $model->getHidden());
-
+        $model->load('related');
         $result = QueryBuilder::for($model)
             ->allowedFields(['related.id', 'related.name'])
             ->get();
 
         $this->assertSame($model, $result);
         $this->assertEquals([], $result->related->first()->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithRelation()->load('related'),
+                $this->createModelWithRelation()->load('related'),
+            ])
+        )
+        ->allowedFields(['related.id', 'related.name'])
+        ->get();
+
+        $this->assertEquals([], $result->get(0)->related->first()->getHidden());
+        $this->assertEquals([], $result->get(1)->related->first()->getHidden());
     }
     public function test_related_allowed_fields_applied()
     {
@@ -390,13 +296,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['related.id', 'related.name'])
             ->get();
 
-        $this->assertEquals([
-            'model_id',
-            'nested_id',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->first()->related->first()->getHidden());
+        $this->assertEquals([], $result->first()->related->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -406,13 +306,20 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'model_id',
-            'nested_id',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->related->first()->getHidden());
+        $this->assertEquals([], $result->related->first()->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithRelation()->load('related'),
+                $this->createModelWithRelation()->load('related'),
+            ]),
+            $this->withFields(['related' => 'id,name'])
+        )
+        ->allowedFields(['related.id', 'related.name'])
+        ->get();
+
+        $this->assertEquals([], $result->get(0)->related->first()->getHidden());
+        $this->assertEquals([], $result->get(1)->related->first()->getHidden());
     }
     public function test_related_can_set_default_fields()
     {
@@ -422,14 +329,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['related.id', 'related.name'], ['related.id'])
             ->get();
 
-        $this->assertEquals([
-            'model_id',
-            'nested_id',
-            'name',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->first()->related->first()->getHidden());
+        $this->assertEquals(['name'], $result->first()->related->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -439,14 +339,19 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'model_id',
-            'nested_id',
-            'name',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->related->first()->getHidden());
+        $this->assertEquals(['name'], $result->related->first()->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithRelation()->load('related'),
+                $this->createModelWithRelation()->load('related'),
+            ])
+        )
+        ->allowedFields(['related.id', 'related.name'], ['related.id'])
+        ->get();
+
+        $this->assertEquals(['name'], $result->get(0)->related->first()->getHidden());
+        $this->assertEquals(['name'], $result->get(1)->related->first()->getHidden());
     }
     public function test_related_requested_fields_overrides_defaults()
     {
@@ -456,14 +361,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['related.id', 'related.name'], ['related.id'])
             ->get();
 
-        $this->assertEquals([
-            'id',
-            'model_id',
-            'nested_id',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->first()->related->first()->getHidden());
+        $this->assertEquals(['id'], $result->first()->related->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -473,14 +371,20 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'id',
-            'model_id',
-            'nested_id',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->related->first()->getHidden());
+        $this->assertEquals(['id'], $result->related->first()->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithRelation()->load('related'),
+                $this->createModelWithRelation()->load('related'),
+            ]),
+            $this->withFields(['related' => 'name'])
+        )
+        ->allowedFields(['related.id', 'related.name'], ['related.id'])
+        ->get();
+
+        $this->assertEquals(['id'], $result->get(0)->related->first()->getHidden());
+        $this->assertEquals(['id'], $result->get(1)->related->first()->getHidden());
     }
 
     // Nested relations
@@ -494,14 +398,25 @@ class AddsFieldsToQueryTest extends TestCase
 
         $this->assertNull($result->first()->related[0]->nested);
 
-        $this->assertEquals([], $model->getHidden());
-
+        $model->load('related.nested');
         $result = QueryBuilder::for($model)
             ->allowedFields([], ['related.nested.id'])
             ->get();
 
         $this->assertSame($model, $result);
         $this->assertNull($result->first()->related[0]->nested);
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithRelation()->load('related.nested'),
+                $this->createModelWithRelation()->load('related.nested'),
+            ])
+        )
+        ->allowedFields([], ['related.nested.id'])
+        ->get();
+
+        $this->assertNull($result->get(0)->related[0]->nested);
+        $this->assertNull($result->get(1)->related[0]->nested);
     }
     public function test_nested_allowed_fields_not_applied_without_request()
     {
@@ -511,10 +426,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['related.nested.id', 'related.nested.name'])
             ->get();
 
-        $this->assertEquals([
-        ], $result->first()->related->first()->nested->getHidden());
-
-        $this->assertEquals([], $model->getHidden());
+        $this->assertEquals([], $result->first()->related->first()->nested->getHidden());
 
         $model->load('related.nested');
         $result = QueryBuilder::for($model)
@@ -523,6 +435,18 @@ class AddsFieldsToQueryTest extends TestCase
 
         $this->assertSame($model, $result);
         $this->assertEquals([], $result->related->first()->nested->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithNested()->load('related.nested'),
+                $this->createModelWithNested()->load('related.nested'),
+            ])
+        )
+        ->allowedFields(['related.nested.id', 'related.nested.name'])
+        ->get();
+
+        $this->assertEquals([], $result->get(0)->related[0]->nested->getHidden());
+        $this->assertEquals([], $result->get(1)->related[0]->nested->getHidden());
     }
     public function test_nested_allowed_fields_applied()
     {
@@ -532,11 +456,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['related.nested.id', 'related.nested.name'])
             ->get();
 
-        $this->assertEquals([
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->first()->related->first()->nested->getHidden());
+        $this->assertEquals([], $result->first()->related->first()->nested->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -546,11 +466,20 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->related->first()->nested->getHidden());
+        $this->assertEquals([], $result->related->first()->nested->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithNested()->load('related.nested'),
+                $this->createModelWithNested()->load('related.nested'),
+            ]),
+            $this->withFields(['related.nested' => 'id,name'])
+        )
+        ->allowedFields(['related.nested.id', 'related.nested.name'])
+        ->get();
+
+        $this->assertEquals([], $result->get(0)->related[0]->nested->getHidden());
+        $this->assertEquals([], $result->get(1)->related[0]->nested->getHidden());
     }
     public function test_nested_can_set_default_fields()
     {
@@ -560,12 +489,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['related.nested.id', 'related.nested.name'], ['related.nested.id'])
             ->get();
 
-        $this->assertEquals([
-            'name',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->first()->related->first()->nested->getHidden());
+        $this->assertEquals(['name'], $result->first()->related->first()->nested->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -575,12 +499,19 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'name',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->related->first()->nested->getHidden());
+        $this->assertEquals(['name'], $result->related->first()->nested->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithNested()->load('related.nested'),
+                $this->createModelWithNested()->load('related.nested'),
+            ])
+        )
+        ->allowedFields(['related.nested.id', 'related.nested.name'], ['related.nested.id'])
+        ->get();
+
+        $this->assertEquals(['name'], $result->get(0)->related[0]->nested->getHidden());
+        $this->assertEquals(['name'], $result->get(1)->related[0]->nested->getHidden());
     }
     public function test_nested_requested_fields_overrides_defaults()
     {
@@ -590,12 +521,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields(['related.nested.id', 'related.nested.name'], ['related.nested.id'])
             ->get();
 
-        $this->assertEquals([
-            'id',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->first()->related->first()->nested->getHidden());
+        $this->assertEquals(['id'], $result->first()->related->first()->nested->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -605,12 +531,20 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'id',
-            'description',
-            'created_at',
-            'updated_at',
-        ], $result->related->first()->nested->getHidden());
+        $this->assertEquals(['id'], $result->related->first()->nested->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModelWithNested()->load('related.nested'),
+                $this->createModelWithNested()->load('related.nested'),
+            ]),
+            $this->withFields(['related.nested' => 'name'])
+        )
+        ->allowedFields(['related.nested.id', 'related.nested.name'], ['related.nested.id'])
+        ->get();
+
+        $this->assertEquals(['id'], $result->get(0)->related[0]->nested->getHidden());
+        $this->assertEquals(['id'], $result->get(1)->related[0]->nested->getHidden());
     }
 
     // Pass objects that implements ResourceWithFields
@@ -632,24 +566,27 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields([ResourceWithFields::class => 'alias'], [], 'alias')
             ->get();
 
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals([], $result->first()->getHidden());
 
         $result = QueryBuilder::for($model, $this->withFields(['alias' => 'id,name']))
             ->allowedFields([ResourceWithFields::class => 'alias'], [], 'alias')
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals([], $result->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModel(),
+                $this->createModel(),
+            ]),
+            $this->withFields(['alias' => 'id,name'])
+        )
+        ->allowedFields([ResourceWithFields::class => 'alias'], [], 'alias')
+        ->get();
+
+        $this->assertEquals([], $result->get(0)->getHidden());
+        $this->assertEquals([], $result->get(1)->getHidden());
     }
     public function test_can_set_multiple_aliases_for_object()
     {
@@ -677,24 +614,27 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields([NestedResourceWithFields::class], [], 'related')
             ->get();
 
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals(['desc'], $result->first()->getHidden());
 
         $result = QueryBuilder::for($model, $this->withFields(['related' => 'id,name']))
             ->allowedFields([NestedResourceWithFields::class], [], 'related')
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals(['desc'], $result->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModel(),
+                $this->createModel(),
+            ]),
+            $this->withFields(['related' => 'id,name'])
+        )
+        ->allowedFields([NestedResourceWithFields::class], [], 'related')
+        ->get();
+
+        $this->assertEquals(['desc'], $result->get(0)->getHidden());
+        $this->assertEquals(['desc'], $result->get(1)->getHidden());
     }
     public function test_alias_for_object_overrides_default()
     {
@@ -704,24 +644,27 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields([NestedResourceWithFields::class => 'override'], [], 'override')
             ->get();
 
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals(['desc'], $result->first()->getHidden());
 
         $result = QueryBuilder::for($model, $this->withFields(['override' => 'id,name']))
             ->allowedFields([NestedResourceWithFields::class => 'override'], [], 'override')
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals(['desc'], $result->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([
+                $this->createModel(),
+                $this->createModel(),
+            ]),
+            $this->withFields(['override' => 'id,name'])
+        )
+        ->allowedFields([NestedResourceWithFields::class => 'override'], [], 'override')
+        ->get();
+
+        $this->assertEquals(['desc'], $result->get(0)->getHidden());
+        $this->assertEquals(['desc'], $result->get(1)->getHidden());
     }
     public function test_can_return_assoc_array_in_object()
     {
@@ -754,24 +697,24 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields([$class], [], 'related')
             ->get();
 
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals(['desc'], $result->first()->getHidden());
 
         $result = QueryBuilder::for($model, $this->withFields(['related' => 'id,name']))
             ->allowedFields([$class], [], 'related')
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals(['desc'], $result->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([$this->createModel(), $this->createModel()]),
+            $this->withFields(['related' => 'id,name'])
+        )
+        ->allowedFields([$class], [], 'related')
+        ->get();
+
+        $this->assertEquals(['desc'], $result->get(0)->getHidden());
+        $this->assertEquals(['desc'], $result->get(1)->getHidden());
     }
     public function test_can_use_multiple_objects()
     {
@@ -819,6 +762,15 @@ class AddsFieldsToQueryTest extends TestCase
 
         $this->assertSame($model, $result);
         $this->assertEquals([], $result->first()->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([$this->createModel(), $this->createModel()])
+        )
+        ->allowedFields([ResourceWithFields::class])
+        ->get();
+
+        $this->assertEquals([], $result->get(0)->getHidden());
+        $this->assertEquals([], $result->get(1)->getHidden());
     }
     public function test_allowed_fields_applied_using_object()
     {
@@ -828,12 +780,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields([ResourceWithFields::class])
             ->get();
 
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals([], $result->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -842,12 +789,17 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals([], $result->getHidden());
+
+        $result = QueryBuilder::for(
+            collect([$this->createModel(), $this->createModel()]),
+            $this->withFields(['models' => 'id,name'])
+        )
+        ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
+        ->get();
+
+        $this->assertEquals([], $result->get(0)->getHidden());
+        $this->assertEquals([], $result->get(1)->getHidden());
     }
     public function test_can_set_default_fields_using_object()
     {
@@ -857,13 +809,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
             ->get();
 
-        $this->assertEquals([
-            'name',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals(['name'], $result->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -872,13 +818,14 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'name',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
+        $this->assertEquals(['name'], $result->getHidden());
+
+        $result = QueryBuilder::for(collect([$this->createModel(), $this->createModel()]))
+            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
+            ->get();
+
+        $this->assertEquals(['name'], $result->get(0)->getHidden());
+        $this->assertEquals(['name'], $result->get(1)->getHidden());
     }
     public function test_requested_fields_overrides_defaults_using_object()
     {
@@ -888,13 +835,7 @@ class AddsFieldsToQueryTest extends TestCase
             ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
             ->get();
 
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
+        $this->assertEquals(['id'], $result->first()->getHidden());
 
         $this->assertEquals([], $model->getHidden());
 
@@ -903,77 +844,17 @@ class AddsFieldsToQueryTest extends TestCase
             ->get();
 
         $this->assertSame($model, $result);
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
-    }
-    public function test_includes_fields_exists_in_result_unsing_object()
-    {
-        $model = $this->createModel();
+        $this->assertEquals(['id'], $result->getHidden());
 
-        $result = QueryBuilder::for(QueryableModel::withCount('related'), $this->withFields(['models' => 'name']))
-            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
-            ->allowedIncludes(['related_count'])
-            ->get();
+        $result = QueryBuilder::for(
+            collect([$this->createModel(), $this->createModel()]),
+            $this->withFields(['models' => 'name'])
+        )
+        ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
+        ->get();
 
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->first()->getHidden());
-
-        $result = QueryBuilder::for(QueryableModel::withCount('related'), $this->withFields(['models' => 'name']))
-            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
-            ->get();
-
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-            'related_count',
-        ], $result->first()->getHidden());
-
-        // Eager loading
-        $this->assertEquals([], $model->getHidden());
-
-        $model->loadCount('related');
-        $result = QueryBuilder::for($model, $this->withFields(['models' => 'name']))
-            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
-            ->allowedIncludes(['related_count'])
-            ->get();
-
-        $this->assertSame($model, $result);
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-        ], $result->getHidden());
-
-        $model = $model->fresh();
-        $model->loadCount('related');
-        $result = QueryBuilder::for($model, $this->withFields(['models' => 'name']))
-            ->allowedFields([ResourceWithFields::class], [ResourceWithFields::class])
-            ->get();
-
-        $this->assertSame($model, $result);
-        $this->assertEquals([
-            'id',
-            'description',
-            'timestamp',
-            'created_at',
-            'updated_at',
-            'related_count',
-        ], $result->getHidden());
+        $this->assertEquals(['id'], $result->get(0)->getHidden());
+        $this->assertEquals(['id'], $result->get(1)->getHidden());
     }
 
     /*

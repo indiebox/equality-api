@@ -61,7 +61,7 @@ trait AddsFieldsToQuery
 
         $models = is_iterable($result) ? $result : [$result];
 
-        $modelFields = collect($this->defaultFields)
+        $requestedFields = collect($this->defaultFields)
             ->reduce(function ($result, $value) {
                 $value = explode(".", $value);
                 $key = null;
@@ -81,18 +81,25 @@ trait AddsFieldsToQuery
             }, collect())
             ->merge($this->request->fields());
 
-        $except = collect($this->allowedIncludes)->map(function ($allowedInclude) {
-            return $allowedInclude->getName();
-        });
+        // $includes = collect($this->allowedIncludes)->map(function ($allowedInclude) {
+        //     return $allowedInclude->getName();
+        // });
 
         foreach ($models as $model) {
-            foreach ($modelFields as $relation => $fields) {
+            foreach ($requestedFields as $relation => $fields) {
                 $nestedRelation = explode(".", $relation);
-                $fields = collect($except)->merge($fields);
+                // $fields = collect($includes)->merge($fields);
+                $hideFields = $this->allowedFields
+                    ->filter(fn($value) => str_starts_with($value, $relation))
+                    ->map(fn($value) => last(explode(".", $value)))
+                    ->diff($fields)
+                    ->values()
+                    ->unique()
+                    ->toArray();
 
                 // Fields for current model itself (not nested).
                 if ($nestedRelation[0] == $this->defaultName) {
-                    $this->applyFields($model, $fields, []);
+                    $this->hideFields($model, $hideFields, []);
 
                     continue;
                 }
@@ -102,7 +109,7 @@ trait AddsFieldsToQuery
                 }
 
                 // Fields for nested models.
-                $this->applyFields($model->{$nestedRelation[0]}, $fields, $nestedRelation);
+                $this->hideFields($model->{$nestedRelation[0]}, $hideFields, $nestedRelation);
             }
         }
     }
@@ -160,7 +167,7 @@ trait AddsFieldsToQuery
                             $fields = collect($fields)
                                 ->map(function ($field, $key) use ($prepend) {
                                     if (is_string($key)) {
-                                        return $this->prependField($prepend . $key);
+                                        return $this->prependField($prepend . $key, $this->defaultName);
                                     }
 
                                     return $this->prependField($prepend . $field, $this->defaultName);
@@ -186,7 +193,7 @@ trait AddsFieldsToQuery
      * @param array $fields Fields to apply (for example, `id`, `name`, etc.)
      * @param array $nestedRelation Array of nested relation (like `[projects, leader] => projects.leader`, etc.).
      */
-    private function applyFields($relation, $fields, $nestedRelation)
+    private function hideFields($relation, $fields, $nestedRelation)
     {
         $next = next($nestedRelation);
 
@@ -195,20 +202,15 @@ trait AddsFieldsToQuery
             return;
         }
 
-        $attributes = collect($relation[0]->getAttributes())
-            ->except($fields)
-            ->keys()
-            ->toArray();
-
         foreach ($relation as $item) {
             if ($next === false) {
-                $item->makeHidden($attributes);
+                $item->makeHidden($fields);
             } else {
                 if (!$item->relationLoaded($next)) {
                     break;
                 }
 
-                $this->applyFields($item->{$next}, $fields, $nestedRelation);
+                $this->hideFields($item->{$next}, $fields, $nestedRelation);
             }
         }
     }
