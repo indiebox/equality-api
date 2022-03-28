@@ -15,7 +15,7 @@ class OpenBoardRequest extends FormRequest
     public function rules()
     {
         return [
-            'project' => [new MaxBoardsPerProject($this->route('closed:board')->project)],
+            'project' => [new MaxBoardsPerProject($this->route('closed:board')->project()->withoutGlobalScopes()->first())],
         ];
     }
 }

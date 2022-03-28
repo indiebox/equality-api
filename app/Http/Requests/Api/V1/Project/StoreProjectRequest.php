@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Api\V1\Team;
+namespace App\Http\Requests\Api\V1\Project;
 
 use Illuminate\Foundation\Http\FormRequest;
 

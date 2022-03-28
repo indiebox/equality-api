@@ -15,7 +15,7 @@ class RestoreBoardRequest extends FormRequest
     public function rules()
     {
         return [
-            'project' => [new MaxBoardsPerProject($this->route('trashed:board')->project)],
+            'project' => [new MaxBoardsPerProject($this->route('trashed:board')->project()->withoutGlobalScopes()->first())],
         ];
     }
 }
