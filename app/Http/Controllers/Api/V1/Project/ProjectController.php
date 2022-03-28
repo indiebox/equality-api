@@ -20,10 +20,6 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        if (!QueryBuilder::hasInclude('team')) {
-            $project->unsetRelation('team');
-        }
-
         $project = QueryBuilder::for($project)
             ->allowedFields([
                 ProjectResource::class,
@@ -60,6 +56,10 @@ class ProjectController extends Controller
     {
         $project->update($request->validated());
 
+        $project = QueryBuilder::for($project)
+            ->unsetRelations()
+            ->get();
+
         return new ProjectResource($project);
     }
 
@@ -73,12 +73,20 @@ class ProjectController extends Controller
     {
         $project->delete();
 
+        $project = QueryBuilder::for($project)
+            ->unsetRelations()
+            ->get();
+
         return new ProjectResource($project);
     }
 
     public function restore(Project $project)
     {
         $project->restore();
+
+        $project = QueryBuilder::for($project)
+            ->unsetRelations()
+            ->get();
 
         return new ProjectResource($project);
     }

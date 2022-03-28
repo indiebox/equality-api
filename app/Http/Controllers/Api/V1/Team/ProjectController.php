@@ -66,6 +66,10 @@ class ProjectController extends Controller
             'nominated_id' => auth()->id(),
         ]);
 
+        $project = QueryBuilder::for($project)
+            ->unsetRelations()
+            ->get();
+
         return (new ProjectResource($project))->response()->setStatusCode(201);
     }
 }

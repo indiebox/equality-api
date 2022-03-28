@@ -23,6 +23,17 @@ trait AddsFieldsToQuery
      */
     protected $defaultName;
 
+    /**
+     * Setup allowed and default fields.
+     *
+     * This method should be called before `allowedIncludes`.
+     * Default fields will be automatically added to allowed fields.
+     *
+     * @param array $fields Allowed fields.
+     * @param array $defaultFields Default fields, if no any requested.
+     * @param string|null $defaultName The default name for model itself.
+     * @return self
+     */
     public function allowedFields($fields, $defaultFields = [], $defaultName = null): self
     {
         if ($this->allowedIncludes instanceof Collection) {

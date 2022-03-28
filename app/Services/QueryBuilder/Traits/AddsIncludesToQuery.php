@@ -5,8 +5,10 @@ namespace App\Services\QueryBuilder\Traits;
 use App\Services\QueryBuilder\Includes\IncludeRelationship;
 use App\Services\QueryBuilder\Includes\LoadCount;
 use App\Services\QueryBuilder\Includes\LoadRelationship;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use LogicException;
 use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\Concerns\AddsIncludesToQuery as ConcernsAddsIncludesToQuery;
 use Spatie\QueryBuilder\Includes\IncludedCount;
@@ -32,7 +34,19 @@ trait AddsIncludesToQuery
 
     protected $defaultIncludes;
 
-    public function allowedIncludes($includes, $defaultIncludes = []): self
+    protected $unsetRelations = [];
+
+    /**
+     * Setup allowed includes.
+     *
+     * Default includes will be automatically added to allowed includes.
+     *
+     * @param array $includes Allowed includes.
+     * @param array $defaultIncludes Default includes, if no any requested.
+     * @param bool $unsetRelations Unset all relations that are not requested.
+     * @return self
+     */
+    public function allowedIncludes($includes, $defaultIncludes = [], $unsetRelations = true): self
     {
         $hasRequestedIncludes = !$this->request->includes()->isEmpty();
 
@@ -46,6 +60,38 @@ trait AddsIncludesToQuery
             : $this->defaultIncludes;
 
         $this->addIncludesToQuery($includes);
+
+        if ($unsetRelations && $this->subjectIsModel) {
+            $this->unsetRelations();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Unset all top-level relations that are not requested.
+     * This method does not unset nested relations.
+     *
+     * @param array $except Relations that need to keep.
+     * @return \App\Services\QueryBuilder\QueryBuilder
+     */
+    public function unsetRelations($except = [])
+    {
+        if (!$this->subjectIsModel) {
+            throw new LogicException("Method 'unsetRelations' can be used only with single loaded model.");
+        }
+
+        $subjects = is_iterable($this->subject) ? $this->subject : [$this->subject];
+
+        $keepRelations = collect($except)
+            ->merge($this->request->includes()->map(fn($value) => explode(".", $value, 2)[0]))
+            ->merge(collect($this->defaultIncludes)->map(fn($value) => explode(".", $value, 2)[0]))
+            ->unique()
+            ->toArray();
+
+        foreach ($subjects as $subject) {
+            $subject->setRelations(Arr::only($subject->getRelations(), $keepRelations));
+        }
 
         return $this;
     }

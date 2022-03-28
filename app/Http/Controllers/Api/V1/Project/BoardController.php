@@ -69,6 +69,10 @@ class BoardController extends Controller
         $board->project()->associate($project);
         $board->save();
 
+        $board = QueryBuilder::for($board)
+            ->unsetRelations()
+            ->get();
+
         return (new BoardResource($board))->response()->setStatusCode(201);
     }
 }

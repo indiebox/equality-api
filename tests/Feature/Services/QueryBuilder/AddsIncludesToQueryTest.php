@@ -5,6 +5,7 @@ namespace Tests\Feature\Services\QueryBuilder;
 use App\Services\QueryBuilder\QueryBuilder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
+use LogicException;
 use Tests\Feature\Services\QueryBuilder\Stubs\NestedModel;
 use Tests\Feature\Services\QueryBuilder\Stubs\QueryableModel;
 use Tests\Feature\Services\QueryBuilder\Stubs\RelatedModel;
@@ -266,6 +267,72 @@ class AddsIncludesToQueryTest extends TestCase
         $this->assertTrue($result->related2->first()->relationLoaded('nested'));
         $this->assertFalse($result->relationLoaded('related'));
         $this->assertFalse($result->related->first()->relationLoaded('nested'));
+    }
+
+    public function test_can_unset_not_requested_relations_for_model()
+    {
+        $model = $this->createModelWithRelation();
+        $model->load('related');
+
+        $this->assertTrue($model->relationLoaded('related'));
+
+        $result = QueryBuilder::for($model)
+            ->unsetRelations()
+            ->get();
+
+        $this->assertSame($model, $result);
+        $this->assertFalse($result->relationLoaded('related'));
+
+        $model->load('related');
+        $this->assertTrue($model->relationLoaded('related'));
+
+        $result = QueryBuilder::for($model)
+            ->unsetRelations(['related'])
+            ->get();
+
+        $this->assertTrue($result->relationLoaded('related'));
+    }
+    public function test_can_unset_not_requested_relations_for_model_using_allowed_includes()
+    {
+        $model = $this->createModelWithRelation();
+        $model->load('related');
+
+        $this->assertTrue($model->relationLoaded('related'));
+
+        $result = QueryBuilder::for($model)
+            ->allowedIncludes([], [])
+            ->get();
+
+        $this->assertSame($model, $result);
+        $this->assertFalse($result->relationLoaded('related'));
+
+        $model->load('related');
+        $this->assertTrue($model->relationLoaded('related'));
+
+        $result = QueryBuilder::for($model)
+            ->allowedIncludes([], [], false)
+            ->get();
+
+        $this->assertTrue($result->relationLoaded('related'));
+    }
+    public function test_cant_unset_not_requested_relations_for_collection()
+    {
+        $this->expectException(LogicException::class);
+
+        QueryBuilder::for(collect([
+            $this->createModelWithRelation()->load('related'),
+            $this->createModelWithRelation()->load('related'),
+        ]))
+        ->unsetRelations()
+        ->get();
+    }
+    public function test_cant_unset_not_requested_relations_for_not_model()
+    {
+        $this->expectException(LogicException::class);
+
+        QueryBuilder::for(QueryableModel::query())
+            ->unsetRelations()
+            ->get();
     }
 
     /*

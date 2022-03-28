@@ -53,6 +53,10 @@ class InviteController extends Controller
         $invite->invited()->associate($request->invited);
         $invite->save();
 
+        $invite = QueryBuilder::for($invite)
+            ->unsetRelations()
+            ->get();
+
         return (new TeamInviteResource($invite))->response()->setStatusCode(201);
     }
 

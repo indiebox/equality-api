@@ -117,15 +117,16 @@ class QueryBuilder extends BaseQueryBuilder
      *
      * @param array $includes Allowed includes.
      * @param array $defaultIncludes Default includes, if no any requested.
+     * @param bool $unsetRelations Unset all relations that are not requested.
      * @return self
      */
-    public function allowedIncludes($includes, $defaultIncludes = []): self
+    public function allowedIncludes($includes, $defaultIncludes = [], $unsetRelations = true): self
     {
         if ($this->subjectIsCollection) {
             throw new LogicException("Method 'allowedIncludes' can`t be used with collection.");
         }
 
-        return $this->traitAllowedIncludes($includes, $defaultIncludes);
+        return $this->traitAllowedIncludes($includes, $defaultIncludes, $unsetRelations);
     }
 
     #endregion
