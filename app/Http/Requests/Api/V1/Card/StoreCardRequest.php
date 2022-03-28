@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Api\V1\Column;
+namespace App\Http\Requests\Api\V1\Card;
 
 use App\Rules\Api\CardInSameColumn;
 use App\Rules\Api\MaxCardsPerColumn;

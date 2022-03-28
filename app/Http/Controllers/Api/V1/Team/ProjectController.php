@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Team;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\Team\StoreProjectRequest;
+use App\Http\Requests\Api\V1\Project\StoreProjectRequest;
 use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Models\Project;
 use App\Models\Team;

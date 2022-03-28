@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Column;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\Column\StoreCardRequest;
+use App\Http\Requests\Api\V1\Card\StoreCardRequest;
 use App\Http\Resources\V1\Card\CardResource;
 use App\Http\Resources\V1\Column\ColumnCardResource;
 use App\Models\Card;
@@ -27,7 +27,7 @@ class CardController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\Api\V1\Column\StoreCardRequest  $request
+     * @param  \App\Http\Requests\Api\V1\Card\StoreCardRequest  $request
      * @param  \App\Models\Column  $column
      * @return \Illuminate\Http\Response
      */

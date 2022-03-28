@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Project;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\Project\StoreBoardRequest;
+use App\Http\Requests\Api\V1\Board\StoreBoardRequest;
 use App\Http\Resources\V1\Project\ProjectBoardResource;
 use App\Models\Board;
 use App\Models\Project;

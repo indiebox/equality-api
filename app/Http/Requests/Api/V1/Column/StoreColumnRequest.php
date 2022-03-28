@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Api\V1\Board;
+namespace App\Http\Requests\Api\V1\Column;
 
 use App\Rules\Api\ColumnInSameBoard;
 use App\Rules\Api\MaxColumnsPerBoard;
