@@ -15,7 +15,10 @@ class OrderColumnRequest extends FormRequest
     public function rules()
     {
         return [
-            'after' => ['present', 'integer', 'min:0', new ColumnInSameBoard($this, $this->route('column')->board)],
+            'after' => [
+                'present', 'integer', 'min:0',
+                new ColumnInSameBoard($this, $this->route('column')->board()->withoutGlobalScopes()->first()),
+            ],
         ];
     }
 }
