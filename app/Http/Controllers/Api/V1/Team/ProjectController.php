@@ -39,10 +39,7 @@ class ProjectController extends Controller
     public function indexTrashed(Team $team)
     {
         $projects = QueryBuilder::for($team->projects()->onlyTrashed())
-            ->allowedFields(
-                [ProjectResource::class],
-                [ProjectResource::class]
-            )
+            ->allowedFields([ProjectResource::class], [ProjectResource::class])
             ->get();
 
         return ProjectResource::collection($projects);
@@ -67,6 +64,7 @@ class ProjectController extends Controller
         ]);
 
         $project = QueryBuilder::for($project)
+            ->allowedFields([ProjectResource::class], [ProjectResource::class])
             ->unsetRelations()
             ->get();
 

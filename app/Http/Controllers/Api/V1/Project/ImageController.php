@@ -29,6 +29,7 @@ class ImageController extends Controller
         $project->save();
 
         $project = QueryBuilder::for($project)
+            ->allowedFields([ProjectResource::class], [ProjectResource::class])
             ->unsetRelations()
             ->get();
 
@@ -43,6 +44,7 @@ class ImageController extends Controller
         }
 
         $project = QueryBuilder::for($project)
+            ->allowedFields([ProjectResource::class], [ProjectResource::class])
             ->unsetRelations()
             ->get();
 

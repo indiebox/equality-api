@@ -39,7 +39,9 @@ class ImageControllerTest extends TestCase
             'image' => UploadedFile::fake()->image('test.jpg'),
         ]);
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
         $project->refresh();
         Storage::assertExists($project->image);
     }
@@ -89,7 +91,9 @@ class ImageControllerTest extends TestCase
 
         $response = $this->deleteJson('/api/v1/projects/' . $project->id . '/image');
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
         Storage::assertMissing($project->image);
         $project->refresh();
         $this->assertNull($project->image);

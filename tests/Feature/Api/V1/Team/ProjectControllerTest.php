@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Team;
 
-use App\Http\Resources\V1\Project\ProjectResource;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
@@ -97,7 +96,7 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new ProjectResource($project))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
         $this->assertDatabaseHas('projects', ['team_id' => $team->id, 'leader_id' => $user->id]);
         $this->assertDatabaseHas('leader_nominations', [
             'project_id' => $project->id,

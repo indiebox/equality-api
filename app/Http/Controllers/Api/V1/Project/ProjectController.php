@@ -57,6 +57,7 @@ class ProjectController extends Controller
         $project->update($request->validated());
 
         $project = QueryBuilder::for($project)
+            ->allowedFields([ProjectResource::class], [ProjectResource::class])
             ->unsetRelations()
             ->get();
 
@@ -74,6 +75,7 @@ class ProjectController extends Controller
         $project->delete();
 
         $project = QueryBuilder::for($project)
+            ->allowedFields([ProjectResource::class], [ProjectResource::class])
             ->unsetRelations()
             ->get();
 
@@ -85,6 +87,7 @@ class ProjectController extends Controller
         $project->restore();
 
         $project = QueryBuilder::for($project)
+            ->allowedFields([ProjectResource::class], [ProjectResource::class])
             ->unsetRelations()
             ->get();
 
