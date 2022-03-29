@@ -54,7 +54,14 @@ class InviteController extends Controller
         $invite->save();
 
         $invite = QueryBuilder::for($invite)
-            ->unsetRelations()
+            ->allowedFields([
+                TeamInviteResource::class,
+                UserResource::class => ['inviter', 'invited'],
+            ], [
+                TeamInviteResource::class,
+                UserResource::class => ['inviter', 'invited'],
+            ])
+            ->allowedIncludes(['inviter', 'invited'], ['inviter', 'invited'])
             ->get();
 
         return (new TeamInviteResource($invite))->response()->setStatusCode(201);

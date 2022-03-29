@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Team;
 
-use App\Http\Resources\V1\Team\TeamInviteResource;
 use App\Models\Invite;
 use App\Models\Team;
 use App\Models\User;
@@ -133,7 +132,14 @@ class InviteControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new TeamInviteResource(Invite::first()))->response()->getData(true));
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'status',
+                    'inviter' => ['id', 'name', 'email'],
+                    'invited' => ['id', 'name', 'email'],
+                ],
+            ]);
         $this->assertDatabaseHas('invites', ['team_id' => $team->id, 'inviter_id' => $user->id, 'invited_id' => $user2->id]);
     }
 
