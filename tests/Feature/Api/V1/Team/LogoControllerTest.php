@@ -38,7 +38,7 @@ class LogoControllerTest extends TestCase
             ->assertOk()
             ->assertJson(function ($json) {
                 $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name', 'logo']);
+                    $json->hasAll(['logo']);
                 });
             });
         $team->refresh();
@@ -87,13 +87,7 @@ class LogoControllerTest extends TestCase
 
         $response = $this->deleteJson('/api/v1/teams/' . $team->id . '/logo');
 
-        $response
-            ->assertOk()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name', 'logo']);
-                });
-            });
+        $response->assertNoContent();
         Storage::assertMissing($team->logo);
         $team->refresh();
         $this->assertNull($team->logo);

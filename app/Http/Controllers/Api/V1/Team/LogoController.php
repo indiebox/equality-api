@@ -29,7 +29,7 @@ class LogoController extends Controller
         $team->save();
 
         $team = QueryBuilder::for($team)
-            ->allowedFields([TeamResource::class], [TeamResource::class])
+            ->allowedFields([TeamResource::class, ...TeamResource::defaultFields()], ['logo'])
             ->get();
 
         return new TeamResource($team);
@@ -42,10 +42,6 @@ class LogoController extends Controller
             $team->save();
         }
 
-        $team = QueryBuilder::for($team)
-            ->allowedFields([TeamResource::class], [TeamResource::class])
-            ->get();
-
-        return new TeamResource($team);
+        return response('', 204);
     }
 }

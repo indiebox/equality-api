@@ -48,7 +48,8 @@ trait AddsFieldsToQuery
 
         $this->defaultFields = $this->parseFields($defaultFields, false);
         $this->allowedFields = $this->parseFields($fields, true)
-            ->concat($this->defaultFields);
+            ->concat($this->defaultFields)
+            ->unique();
 
         $this->ensureAllFieldsExist();
 
@@ -100,7 +101,6 @@ trait AddsFieldsToQuery
                     ->map(fn($value) => last(explode(".", $value)))
                     ->diff($fields)
                     ->values()
-                    ->unique()
                     ->toArray();
 
                 // Fields for current model itself (not nested).

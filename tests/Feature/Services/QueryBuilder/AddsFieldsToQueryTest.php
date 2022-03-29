@@ -719,7 +719,7 @@ class AddsFieldsToQueryTest extends TestCase
     public function test_can_use_multiple_objects()
     {
         $this->expectExceptionMessage("Requested field(s) `override.non-existing` are not allowed. "
-            . "Allowed field(s) are `models.id, models.name, nested.id, nested.name, nested.desc, models.id, nested.id`.");
+            . "Allowed field(s) are `models.id, models.name, nested.id, nested.name, nested.desc`.");
 
         QueryBuilder::for(QueryableModel::query(), $this->withFields(['override' => 'non-existing']))
             ->allowedFields([
@@ -735,7 +735,7 @@ class AddsFieldsToQueryTest extends TestCase
         $model = $this->createModel();
 
         $this->expectExceptionMessage("Requested field(s) `override.non-existing` are not allowed. "
-            . "Allowed field(s) are `override.id, override.name, nested.id, nested.name, nested.desc, override.id, nested.id`.");
+            . "Allowed field(s) are `override.id, override.name, nested.id, nested.name, nested.desc`.");
 
         QueryBuilder::for($model, $this->withFields(['override' => 'non-existing']))
             ->allowedFields([
