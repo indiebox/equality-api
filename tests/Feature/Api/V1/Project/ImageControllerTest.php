@@ -41,7 +41,11 @@ class ImageControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
         $project->refresh();
         Storage::assertExists($project->image);
     }
@@ -93,7 +97,11 @@ class ImageControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
         Storage::assertMissing($project->image);
         $project->refresh();
         $this->assertNull($project->image);

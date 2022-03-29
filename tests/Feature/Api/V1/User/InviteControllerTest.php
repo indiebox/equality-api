@@ -36,14 +36,17 @@ class InviteControllerTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-        $invites = Invite::factory(2)->team(Team::factory())->invited($user)->create();
+        $invites = Invite::factory(2)->team(Team::factory())->inviter(User::factory())->invited($user)->create();
 
         $response = $this->getJson('/api/v1/invites');
 
         $response
             ->assertOk()
-            ->assertJsonCount($invites->count(), 'data')
-            ->assertJsonStructure(['data' => [['id', 'team', 'inviter']]]);
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'team', 'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email'])]);
+                });
+            });
     }
 
     public function test_cant_accept_not_pending_invite()

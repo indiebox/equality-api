@@ -27,7 +27,11 @@ class UserControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'email']])
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'email']);
+                });
+            })
             ->assertJsonPath('data.email', $user->email);
     }
 }

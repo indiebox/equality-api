@@ -35,7 +35,11 @@ class ProjectControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.id', $project->id)
-            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
     }
 
     public function test_cant_view_leader_of_not_your_team()
@@ -60,7 +64,11 @@ class ProjectControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.id', $user->id)
-            ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'email']);
+                });
+            });
     }
 
     public function test_cant_update_without_permissions()
@@ -93,7 +101,11 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
         $this->assertDatabaseHas('projects', $data);
     }
 
@@ -121,7 +133,11 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
         $this->assertTrue($project->trashed());
     }
 
@@ -160,7 +176,11 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'image']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
         $this->assertFalse($project->trashed());
     }
 }

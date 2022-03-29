@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -33,7 +34,11 @@ class TeamControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => [['id', 'name', 'logo']]]);
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll(['id', 'name', 'logo']);
+                });
+            });
     }
 
     public function test_cant_view_without_permissions()
@@ -56,7 +61,11 @@ class TeamControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'logo']);
+                });
+            });
     }
 
     public function test_cant_view_members_without_permissions()
@@ -79,7 +88,11 @@ class TeamControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => [['id', 'name', 'email', 'joined_at']]]);
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function (AssertableJson $json) {
+                    $json->hasAll(['id', 'name', 'email', 'joined_at']);
+                });
+            });
     }
 
     public function test_can_store()
@@ -95,7 +108,11 @@ class TeamControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'logo']);
+                });
+            });
         $this->assertDatabaseCount('teams', 1);
         $this->assertDatabaseHas('teams', $data);
         $this->assertDatabaseCount('team_user', 1);
@@ -130,7 +147,11 @@ class TeamControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'logo']);
+                });
+            });
         $this->assertDatabaseHas('teams', array_merge($data, ['url' => $team->url]));
     }
 

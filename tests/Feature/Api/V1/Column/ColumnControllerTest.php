@@ -42,7 +42,11 @@ class ColumnControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.id', $column->id)
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
     }
 
     public function test_cant_update_without_permissions()
@@ -76,7 +80,11 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('columns', ['board_id' => $board->id] + $data);
     }
 

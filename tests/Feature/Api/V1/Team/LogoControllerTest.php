@@ -36,7 +36,11 @@ class LogoControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'logo']);
+                });
+            });
         $team->refresh();
         Storage::assertExists($team->logo);
     }
@@ -85,7 +89,11 @@ class LogoControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'logo']);
+                });
+            });
         Storage::assertMissing($team->logo);
         $team->refresh();
         $this->assertNull($team->logo);

@@ -31,9 +31,9 @@ class InviteControllerTest extends TestCase
         $team = Team::factory()->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
-        Invite::factory()->team($team)->invited(User::factory())->create();
-        Invite::factory()->accepted()->team($team)->invited(User::factory())->create();
-        Invite::factory()->declined()->team($team)->invited(User::factory())->create();
+        Invite::factory()->team($team)->inviter(User::factory())->invited(User::factory())->create();
+        Invite::factory()->accepted()->team($team)->inviter(User::factory())->invited(User::factory())->create();
+        Invite::factory()->declined()->team($team)->inviter(User::factory())->invited(User::factory())->create();
         $invites = Invite::all();
 
         // Filter all.
@@ -41,35 +41,67 @@ class InviteControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonCount($invites->count(), 'data')
-            ->assertJsonStructure(['data' => [['id', 'status', 'inviter', 'invited']]]);
+            ->assertJson(function ($json) {
+                $json->has('data', 3, function ($json) {
+                    $json->hasAll([
+                        'id',
+                        'status',
+                        'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                        'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                    ]);
+                });
+            });
 
         // Filter pending.
         $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=pending');
 
         $response
             ->assertOk()
-            ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $invites[0]->id)
-            ->assertJsonStructure(['data' => [['id', 'status', 'inviter', 'invited']]]);
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll([
+                        'id',
+                        'status',
+                        'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                        'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                    ]);
+                });
+            });
 
         // Filter accepted.
         $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=accepted');
 
         $response
             ->assertOk()
-            ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $invites[1]->id)
-            ->assertJsonStructure(['data' => [['id', 'status', 'inviter', 'invited']]]);
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll([
+                        'id',
+                        'status',
+                        'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                        'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                    ]);
+                });
+            });
 
         // Filter declined.
         $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=declined');
 
         $response
             ->assertOk()
-            ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $invites[2]->id)
-            ->assertJsonStructure(['data' => [['id', 'status', 'inviter', 'invited']]]);
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll([
+                        'id',
+                        'status',
+                        'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                        'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                    ]);
+                });
+            });
     }
 
     public function test_cant_invite_in_not_your_team()

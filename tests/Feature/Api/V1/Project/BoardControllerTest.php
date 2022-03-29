@@ -40,8 +40,11 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonCount($boards->count(), 'data')
-            ->assertJsonStructure(['data' => [['id', 'name']]])
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            })
             ->assertJsonPath('data.0.id', $boards->first()->id)
             ->assertJsonPath('data.1.id', $boards->get(1)->id);
     }
@@ -70,8 +73,11 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonCount($closedBoards->count(), 'data')
-            ->assertJsonStructure(['data' => [['id', 'name', 'closed_at']]])
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name', 'closed_at']);
+                });
+            })
             ->assertJsonPath('data.0.id', $closedBoards->first()->id)
             ->assertJsonPath('data.1.id', $closedBoards->get(1)->id);
     }
@@ -100,8 +106,11 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonCount($trashedBoards->count(), 'data')
-            ->assertJsonStructure(['data' => [['id', 'name', 'deleted_at']]])
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name', 'deleted_at']);
+                });
+            })
             ->assertJsonPath('data.0.id', $trashedBoards->first()->id)
             ->assertJsonPath('data.1.id', $trashedBoards->get(1)->id);
     }
@@ -149,7 +158,11 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('boards', ['project_id' => $project->id, 'name' => $data['name']]);
     }
 }

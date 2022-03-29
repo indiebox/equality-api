@@ -49,8 +49,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonCount($cards->count(), 'data')
-            ->assertJsonStructure(['data' => [['id', 'name']]])
+            ->assertJson(function ($json) {
+                $json->has('data', 3, function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            })
             ->assertJsonPath('data.0.id', $cards->get(1)->id)
             ->assertJsonPath('data.1.id', $cards->get(2)->id)
             ->assertJsonPath('data.2.id', $cards->get(0)->id);
@@ -106,7 +109,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
         $this->assertEquals(1, $card->order);
 
@@ -116,7 +123,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
         $this->assertEquals(2, $card->order);
     }
@@ -147,7 +158,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $card->order);
         $this->assertEquals(3, $cards[1]->order);
@@ -179,7 +194,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertEquals(1, $card->order);
         $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);

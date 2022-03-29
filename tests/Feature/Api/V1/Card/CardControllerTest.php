@@ -47,7 +47,11 @@ class CardControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.id', $card->id)
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
     }
 
     public function test_cant_update_without_permissions()
@@ -85,7 +89,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name']]);
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('cards', ['column_id' => $column->id] + $data);
     }
 
