@@ -43,7 +43,7 @@ class ImageControllerTest extends TestCase
             ->assertOk()
             ->assertJson(function ($json) {
                 $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name', 'image']);
+                    $json->hasAll(['image']);
                 });
             });
         $project->refresh();
@@ -95,13 +95,7 @@ class ImageControllerTest extends TestCase
 
         $response = $this->deleteJson('/api/v1/projects/' . $project->id . '/image');
 
-        $response
-            ->assertOk()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name', 'image']);
-                });
-            });
+        $response->assertNoContent();
         Storage::assertMissing($project->image);
         $project->refresh();
         $this->assertNull($project->image);
