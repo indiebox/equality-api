@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Board;
 
-use App\Http\Resources\V1\Board\BoardResource;
 use App\Models\Board;
 use App\Models\Project;
 use App\Models\Team;
@@ -130,7 +129,7 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource(Board::first()))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertDatabaseHas('boards', ['project_id' => $project->id] + $data);
     }
 
@@ -170,7 +169,7 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name', 'closed_at']]);
         $this->assertTrue($board->isClosed());
     }
 
@@ -238,7 +237,7 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertFalse($board->isClosed());
     }
 
@@ -279,7 +278,7 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name', 'deleted_at']]);
         $this->assertTrue($board->trashed());
     }
 
@@ -348,7 +347,7 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertFalse($board->trashed());
     }
 }

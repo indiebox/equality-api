@@ -70,6 +70,7 @@ class BoardController extends Controller
         $board->save();
 
         $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
             ->unsetRelations()
             ->get();
 

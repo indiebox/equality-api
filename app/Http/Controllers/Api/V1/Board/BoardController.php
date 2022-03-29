@@ -38,6 +38,11 @@ class BoardController extends Controller
     {
         $board->update($request->validated());
 
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->unsetRelations()
+            ->get();
+
         return new BoardResource($board);
     }
 
@@ -50,6 +55,11 @@ class BoardController extends Controller
     public function close(Board $board)
     {
         $board->close();
+
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->unsetRelations()
+            ->get();
 
         return new BoardResource($board);
     }
@@ -64,6 +74,11 @@ class BoardController extends Controller
     {
         $board->open();
 
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->unsetRelations()
+            ->get();
+
         return new BoardResource($board);
     }
 
@@ -77,6 +92,11 @@ class BoardController extends Controller
     {
         $board->delete();
 
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->unsetRelations()
+            ->get();
+
         return new BoardResource($board);
     }
 
@@ -89,6 +109,11 @@ class BoardController extends Controller
     public function restore(RestoreBoardRequest $request, Board $board)
     {
         $board->restore();
+
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->unsetRelations()
+            ->get();
 
         return new BoardResource($board);
     }
