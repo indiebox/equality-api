@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Team\StoreLogoRequest;
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Models\Team;
 use App\Services\Contracts\Image\ImageService;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class LogoController extends Controller
 {
@@ -27,6 +28,10 @@ class LogoController extends Controller
         $team->logo = $path;
         $team->save();
 
+        $team = QueryBuilder::for($team)
+            ->allowedFields([TeamResource::class], [TeamResource::class])
+            ->get();
+
         return new TeamResource($team);
     }
 
@@ -36,6 +41,10 @@ class LogoController extends Controller
             $team->logo = null;
             $team->save();
         }
+
+        $team = QueryBuilder::for($team)
+            ->allowedFields([TeamResource::class], [TeamResource::class])
+            ->get();
 
         return new TeamResource($team);
     }

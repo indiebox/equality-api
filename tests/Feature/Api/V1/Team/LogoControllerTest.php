@@ -34,7 +34,9 @@ class LogoControllerTest extends TestCase
 
         $response = $this->postJson('/api/v1/teams/' . $team->id . '/logo', ['logo' => UploadedFile::fake()->image('test.jpg')]);
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
         $team->refresh();
         Storage::assertExists($team->logo);
     }
@@ -81,7 +83,9 @@ class LogoControllerTest extends TestCase
 
         $response = $this->deleteJson('/api/v1/teams/' . $team->id . '/logo');
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
         Storage::assertMissing($team->logo);
         $team->refresh();
         $this->assertNull($team->logo);

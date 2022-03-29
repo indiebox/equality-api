@@ -93,7 +93,9 @@ class TeamControllerTest extends TestCase
 
         $response = $this->postJson('/api/v1/teams', $data);
 
-        $response->assertCreated();
+        $response
+            ->assertCreated()
+            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
         $this->assertDatabaseCount('teams', 1);
         $this->assertDatabaseHas('teams', $data);
         $this->assertDatabaseCount('team_user', 1);
@@ -126,7 +128,9 @@ class TeamControllerTest extends TestCase
 
         $response = $this->patchJson('/api/v1/teams/' . $team->id, $data);
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'logo']]);
         $this->assertDatabaseHas('teams', array_merge($data, ['url' => $team->url]));
     }
 

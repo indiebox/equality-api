@@ -85,6 +85,10 @@ class TeamController extends Controller
         $team = Team::create($request->validated());
         $team->members()->attach(auth()->user(), ['is_creator' => true]);
 
+        $team = QueryBuilder::for($team)
+            ->allowedFields([TeamResource::class], [TeamResource::class])
+            ->get();
+
         return (new TeamResource($team))->response()->setStatusCode(201);
     }
 
@@ -98,6 +102,10 @@ class TeamController extends Controller
     public function update(UpdateTeamRequest $request, Team $team)
     {
         $team->update($request->validated());
+
+        $team = QueryBuilder::for($team)
+            ->allowedFields([TeamResource::class], [TeamResource::class])
+            ->get();
 
         return new TeamResource($team);
     }
