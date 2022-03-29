@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Support\Facades\URL;
 
 if (!function_exists('image')) {
@@ -27,38 +26,6 @@ if (!function_exists('image')) {
         }
 
         return asset('storage/' . $path);
-    }
-}
-
-if (!function_exists('field')) {
-    /** Get field if its not null or return MissingValue otherwise.
-     * @param mixed $value Value.
-     * If `$value` is not a null it will be returned without changes.
-     * @param Closure $callback Callback that will be called when `$value` is not a null.
-     *
-     * @return mixed Returns `$value` or `MissingValue` on null.
-     *
-     * @example /
-     * ```
-     * // TeamResource.php
-     *
-     * return [
-     *     'url' => field(image($this->url)),
-     *     'description' => field($this->description),
-     * ];
-     * ```
-     */
-    function field($value, Closure $callback = null)
-    {
-        if ($value === null) {
-            return new MissingValue();
-        }
-
-        if ($callback != null) {
-            return $callback($value);
-        }
-
-        return $value;
     }
 }
 
