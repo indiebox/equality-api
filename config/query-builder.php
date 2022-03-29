@@ -34,7 +34,7 @@ return [
      * By default the package will throw an `InvalidFilterQuery` exception when a filter in the
      * URL is not allowed in the `allowedFilters()` method.
      */
-    'disable_invalid_filter_query_exception' => true,
+    'disable_invalid_filter_query_exception' => false,
 
     /*
      * By default the package inspects query string of request using $request->query().

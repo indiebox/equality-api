@@ -74,43 +74,38 @@ trait AddsFieldsToQuery
         $models = is_iterable($result) ? $result : [$result];
 
         $requestedFields = collect($this->defaultFields)
-            ->reduce(function ($result, $value) {
-                $value = explode(".", $value);
-                $key = null;
-
-                if (count($value) == 1 || ($value[0] == $this->defaultName && count($value) == 2)) {
-                    $key = $this->defaultName;
-                    $field = end($value);
-                } else {
-                    $field = array_pop($value);
-                    $key = implode(".", $value);
-                }
-
-                $result[$key] = $result[$key] ?? collect();
-                $result[$key]->add($field);
-
-                return $result;
-            }, collect())
+            ->mapToGroups(function ($key) {
+                $key = explode(".", $key);
+                $val = array_pop($key);
+                return [implode('.', $key) => $val];
+            })
             ->merge($this->request->fields());
+
+        $availableFields = collect($this->allowedFields)
+            ->mapToGroups(function ($key) {
+                $key = explode(".", $key);
+                $val = array_pop($key);
+                return [implode('.', $key) => $val];
+            });
 
         foreach ($models as $model) {
             foreach ($requestedFields as $relation => $fields) {
                 $nestedRelation = explode(".", $relation);
-                $hideFields = $this->allowedFields
-                    ->filter(fn($value) => str_starts_with($value, $relation))
-                    ->map(fn($value) => last(explode(".", $value)))
+                $isSelf = $nestedRelation[0] == $this->defaultName;
+
+                if (!$isSelf && !$model->relationLoaded($nestedRelation[0])) {
+                    continue;
+                }
+
+                $hideFields = collect($availableFields[$relation])
                     ->diff($fields)
                     ->values()
                     ->toArray();
 
                 // Fields for current model itself (not nested).
-                if ($nestedRelation[0] == $this->defaultName) {
+                if ($isSelf) {
                     $this->hideFields($model, $hideFields, []);
 
-                    continue;
-                }
-
-                if (!$model->relationLoaded($nestedRelation[0])) {
                     continue;
                 }
 
@@ -213,7 +208,7 @@ trait AddsFieldsToQuery
                 $item->makeHidden($fields);
             } else {
                 if (!$item->relationLoaded($next)) {
-                    break;
+                    continue;
                 }
 
                 $this->hideFields($item->{$next}, $fields, $nestedRelation);
