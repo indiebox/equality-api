@@ -39,6 +39,11 @@ class ColumnController extends Controller
         $column->board()->associate($board);
         $column->moveTo($request->after_column);
 
+        $column = QueryBuilder::for($column)
+            ->allowedFields([ColumnResource::class], [ColumnResource::class])
+            ->unsetRelations()
+            ->get();
+
         return (new ColumnResource($column))->response()->setStatusCode(201);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Column;
 
-use App\Http\Resources\V1\Column\ColumnResource;
 use App\Models\Board;
 use App\Models\Column;
 use App\Models\Project;
@@ -77,7 +76,7 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new ColumnResource(Column::first()))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertDatabaseHas('columns', ['board_id' => $board->id] + $data);
     }
 
