@@ -54,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
         /**
          * This method returns the attribute value or `MissingValue` if
          * this attribute is hidden.
+         *
          * @param array|string $field
          * @param mixed $value
          * @param mixed $default
@@ -64,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
          * $model = new Model(['name' => 'test']);
          * $model->visible('name') //return 'test';
          * $model->visible('name', $model->name . "_suffix") //return 'test_suffix'
+         * $model->visible('name', fn() => $model->name . "_suffix") //return 'test_suffix'
          * $model->visible('desc') //return null
          *
          * $model->makeHidden(['name']);
@@ -108,7 +110,7 @@ class AppServiceProvider extends ServiceProvider
                     if (in_array($fieldName, $model->getHidden())) {
                         $fieldValue = $default;
                     } else {
-                        $fieldValue = $isKeyValuePairs ? $fieldValue : $model->{$fieldValue};
+                        $fieldValue = $isKeyValuePairs ? value($fieldValue) : $model->{$fieldValue};
                     }
 
                     $result->add([$fieldName => $fieldValue]);

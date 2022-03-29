@@ -4,7 +4,6 @@ namespace App\Http\Resources\V1\Team;
 
 use App\Http\Resources\V1\User\UserResource;
 use App\Services\QueryBuilder\Contracts\ResourceWithFields;
-use App\Services\QueryBuilder\QueryBuilder as Query;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 
@@ -18,16 +17,10 @@ class TeamMemberResource extends JsonResource implements ResourceWithFields
      */
     public function toArray($request)
     {
-        return array_merge((new UserResource($this))->toArray($request), [
-            'joined_at' => $this->when(
-                Query::hasField('members.joined_at', true),
-                fn() => Carbon::parse($this->pivot->joined_at)
-            ),
-            'is_creator' => $this->when(
-                Query::hasField('members.is_creator'),
-                fn() => (bool)$this->pivot->is_creator
-            ),
-        ]);
+        return array_merge((new UserResource($this))->toArray($request), $this->visible([
+            'joined_at' => fn() => Carbon::parse($this->pivot->joined_at),
+            'is_creator' => fn() => (bool)$this->pivot->is_creator,
+        ]));
     }
 
     public static function defaultName(): string
@@ -37,15 +30,15 @@ class TeamMemberResource extends JsonResource implements ResourceWithFields
 
     public static function defaultFields(): array
     {
-        return UserResource::defaultFields();
+        return collect(UserResource::defaultFields())
+            ->concat(['joined_at'])
+            ->toArray();
     }
 
     public static function allowedFields(): array
     {
         $base = collect(UserResource::allowedFields())
-            ->concat([
-                'joined_at', 'is_creator',
-            ])
+            ->concat(['is_creator'])
             ->toArray();
 
         return $base;
