@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Card;
 
-use App\Http\Resources\V1\Card\CardResource;
 use App\Models\Board;
 use App\Models\Card;
 use App\Models\Column;
@@ -86,7 +85,7 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new CardResource(Card::first()))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertDatabaseHas('cards', ['column_id' => $column->id] + $data);
     }
 
@@ -278,9 +277,7 @@ class CardControllerTest extends TestCase
 
         $card->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $card->order);
@@ -291,9 +288,7 @@ class CardControllerTest extends TestCase
 
         $card->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(2, $card->order);
@@ -320,9 +315,7 @@ class CardControllerTest extends TestCase
         $card->refresh();
         $cards = $cards->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $cards[0]->order);
@@ -351,9 +344,7 @@ class CardControllerTest extends TestCase
         $card->refresh();
         $cards = $cards->fresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $card->order);
@@ -378,9 +369,7 @@ class CardControllerTest extends TestCase
 
         $card->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $card->order);
@@ -402,9 +391,7 @@ class CardControllerTest extends TestCase
 
         $card->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $card->order);

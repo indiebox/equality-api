@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Column;
 
-use App\Http\Resources\V1\Card\CardResource;
 use App\Models\Board;
 use App\Models\Card;
 use App\Models\Column;
@@ -107,7 +106,7 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
         $this->assertEquals(1, $card->order);
 
@@ -117,7 +116,7 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
         $this->assertEquals(2, $card->order);
     }
@@ -148,7 +147,7 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $card->order);
         $this->assertEquals(3, $cards[1]->order);
@@ -180,7 +179,7 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new CardResource($card))->response()->getData(true));
+            ->assertJsonStructure(['data' => ['id', 'name']]);
         $this->assertEquals(1, $card->order);
         $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);

@@ -39,6 +39,10 @@ class CardController extends Controller
         $card->column()->associate($column);
         $card->moveTo($request->after_card);
 
+        $card = QueryBuilder::for($card)
+            ->allowedFields([CardResource::class], [CardResource::class])
+            ->get();
+
         return (new CardResource($card))->response()->setStatusCode(201);
     }
 }

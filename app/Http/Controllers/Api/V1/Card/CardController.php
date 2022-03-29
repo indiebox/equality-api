@@ -39,6 +39,10 @@ class CardController extends Controller
     {
         $card->update($request->validated());
 
+        $card = QueryBuilder::for($card)
+            ->allowedFields([CardResource::class], [CardResource::class])
+            ->get();
+
         return new CardResource($card);
     }
 
@@ -54,7 +58,7 @@ class CardController extends Controller
         $card->column()->associate($column);
         $card->moveTo($request->after_card);
 
-        return new CardResource($card);
+        return response('', 204);
     }
 
     /**
