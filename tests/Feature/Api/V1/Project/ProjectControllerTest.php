@@ -131,13 +131,7 @@ class ProjectControllerTest extends TestCase
 
         $project->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name', 'image']);
-                });
-            });
+        $response->assertNoContent();
         $this->assertTrue($project->trashed());
     }
 
@@ -174,13 +168,7 @@ class ProjectControllerTest extends TestCase
 
         $project->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name', 'image']);
-                });
-            });
+        $response->assertNoContent();
         $this->assertFalse($project->trashed());
     }
 }

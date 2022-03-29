@@ -74,23 +74,13 @@ class ProjectController extends Controller
     {
         $project->delete();
 
-        $project = QueryBuilder::for($project)
-            ->allowedFields([ProjectResource::class], [ProjectResource::class])
-            ->unsetRelations()
-            ->get();
-
-        return new ProjectResource($project);
+        return response('', 204);
     }
 
     public function restore(Project $project)
     {
         $project->restore();
 
-        $project = QueryBuilder::for($project)
-            ->allowedFields([ProjectResource::class], [ProjectResource::class])
-            ->unsetRelations()
-            ->get();
-
-        return new ProjectResource($project);
+        return response('', 204);
     }
 }
