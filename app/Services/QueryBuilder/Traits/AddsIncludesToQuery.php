@@ -5,6 +5,7 @@ namespace App\Services\QueryBuilder\Traits;
 use App\Services\QueryBuilder\Includes\IncludeRelationship;
 use App\Services\QueryBuilder\Includes\LoadCount;
 use App\Services\QueryBuilder\Includes\LoadRelationship;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -32,9 +33,19 @@ trait AddsIncludesToQuery
      */
     public $loadCount = [];
 
+    /**
+     * List of default includes that will be applied
+     * when no any requested.
+     * @var \Illuminate\Support\Collectio
+     */
     protected $defaultIncludes;
 
-    protected $unsetRelations = [];
+    /**
+     * Unset all top-level relations that are not requested
+     * before getting results.
+     * @var boolean
+     */
+    protected $unsetRelations = true;
 
     /**
      * Setup allowed includes.
@@ -43,10 +54,9 @@ trait AddsIncludesToQuery
      *
      * @param array $includes Allowed includes.
      * @param array $defaultIncludes Default includes, if no any requested.
-     * @param bool $unsetRelations Unset all relations that are not requested.
      * @return self
      */
-    public function allowedIncludes($includes, $defaultIncludes = [], $unsetRelations = true): self
+    public function allowedIncludes($includes, $defaultIncludes = []): self
     {
         $hasRequestedIncludes = !$this->request->includes()->isEmpty();
 
@@ -61,36 +71,66 @@ trait AddsIncludesToQuery
 
         $this->addIncludesToQuery($includes);
 
-        if ($unsetRelations && $this->subjectIsModel) {
-            $this->unsetRelations();
-        }
+        return $this;
+    }
+
+    /**
+     * Disable unsetting relations using `unsetRelations` method.
+     *
+     * @return \App\Services\QueryBuilder\QueryBuilder
+     */
+    public function keepRelations()
+    {
+        $this->unsetRelations = false;
 
         return $this;
     }
 
     /**
      * Unset all top-level relations that are not requested.
+     *
      * This method does not unset nested relations.
+     *
+     * This method can be called only one time.
+     *
+     * Its called automatically before getting results when subject is model or collection.
+     * You can disable this by calling `->keepRelations()`,
+     * or you can call it manually, before the getting results.
      *
      * @param array $except Relations that need to keep.
      * @return \App\Services\QueryBuilder\QueryBuilder
      */
     public function unsetRelations($except = [])
     {
-        if (!$this->subjectIsModel) {
-            throw new LogicException("Method 'unsetRelations' can be used only with single loaded model.");
+        if (func_num_args() > 1) {
+            $except = func_get_args();
+        }
+
+        if (!$this->unsetRelations) {
+            return false;
+        }
+        $this->unsetRelations = false;
+
+        if (!$this->subjectIsModel && !$this->subjectIsCollection) {
+            throw new LogicException("Method 'unsetRelations' can be used only with loaded model(s).");
         }
 
         $subjects = is_iterable($this->subject) ? $this->subject : [$this->subject];
 
+        $relations = $this->request->includes()->isEmpty()
+            ? collect($this->defaultIncludes)
+            : $this->request->includes();
+        $relations = $relations->map(fn($value) => explode(".", $value, 2)[0]);
+
         $keepRelations = collect($except)
-            ->merge($this->request->includes()->map(fn($value) => explode(".", $value, 2)[0]))
-            ->merge(collect($this->defaultIncludes)->map(fn($value) => explode(".", $value, 2)[0]))
+            ->merge($relations)
             ->unique()
             ->toArray();
 
         foreach ($subjects as $subject) {
-            $subject->setRelations(Arr::only($subject->getRelations(), $keepRelations));
+            if (is_subclass_of($subject, Model::class)) {
+                $subject->setRelations(Arr::only($subject->getRelations(), $keepRelations));
+            }
         }
 
         return $this;

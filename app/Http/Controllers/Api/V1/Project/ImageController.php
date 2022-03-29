@@ -30,7 +30,6 @@ class ImageController extends Controller
 
         $project = QueryBuilder::for($project)
             ->allowedFields([ProjectResource::class, ...ProjectResource::defaultFields()], ['image'])
-            ->unsetRelations()
             ->get();
 
         return new ProjectResource($project);

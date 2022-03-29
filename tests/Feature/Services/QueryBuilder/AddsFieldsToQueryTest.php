@@ -336,6 +336,7 @@ class AddsFieldsToQueryTest extends TestCase
         $model->load('related');
         $result = QueryBuilder::for($model)
             ->allowedFields(['related.id', 'related.name'], ['related.id'])
+            ->keepRelations()
             ->get();
 
         $this->assertSame($model, $result);
@@ -348,6 +349,7 @@ class AddsFieldsToQueryTest extends TestCase
             ])
         )
         ->allowedFields(['related.id', 'related.name'], ['related.id'])
+        ->keepRelations()
         ->get();
 
         $this->assertEquals(['name'], $result->get(0)->related->first()->getHidden());
@@ -368,6 +370,7 @@ class AddsFieldsToQueryTest extends TestCase
         $model->load('related');
         $result = QueryBuilder::for($model, $this->withFields(['related' => 'name']))
             ->allowedFields(['related.id', 'related.name'], ['related.id'])
+            ->keepRelations()
             ->get();
 
         $this->assertSame($model, $result);
@@ -381,6 +384,7 @@ class AddsFieldsToQueryTest extends TestCase
             $this->withFields(['related' => 'name'])
         )
         ->allowedFields(['related.id', 'related.name'], ['related.id'])
+        ->keepRelations()
         ->get();
 
         $this->assertEquals(['id'], $result->get(0)->related->first()->getHidden());
@@ -496,6 +500,7 @@ class AddsFieldsToQueryTest extends TestCase
         $model->load('related.nested');
         $result = QueryBuilder::for($model)
             ->allowedFields(['related.nested.id', 'related.nested.name'], ['related.nested.id'])
+            ->keepRelations()
             ->get();
 
         $this->assertSame($model, $result);
@@ -508,6 +513,7 @@ class AddsFieldsToQueryTest extends TestCase
             ])
         )
         ->allowedFields(['related.nested.id', 'related.nested.name'], ['related.nested.id'])
+        ->keepRelations()
         ->get();
 
         $this->assertEquals(['name'], $result->get(0)->related[0]->nested->getHidden());
@@ -528,6 +534,7 @@ class AddsFieldsToQueryTest extends TestCase
         $model->load('related.nested');
         $result = QueryBuilder::for($model, $this->withFields(['related.nested' => 'name']))
             ->allowedFields(['related.nested.id', 'related.nested.name'], ['related.nested.id'])
+            ->keepRelations()
             ->get();
 
         $this->assertSame($model, $result);
@@ -541,6 +548,7 @@ class AddsFieldsToQueryTest extends TestCase
             $this->withFields(['related.nested' => 'name'])
         )
         ->allowedFields(['related.nested.id', 'related.nested.name'], ['related.nested.id'])
+        ->keepRelations()
         ->get();
 
         $this->assertEquals(['id'], $result->get(0)->related[0]->nested->getHidden());

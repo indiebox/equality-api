@@ -269,7 +269,7 @@ class AddsIncludesToQueryTest extends TestCase
         $this->assertFalse($result->related->first()->relationLoaded('nested'));
     }
 
-    public function test_can_unset_not_requested_relations_for_model()
+    public function test_can_unset_not_requested_relations()
     {
         $model = $this->createModelWithRelation();
         $model->load('related');
@@ -283,7 +283,21 @@ class AddsIncludesToQueryTest extends TestCase
         $this->assertSame($model, $result);
         $this->assertFalse($result->relationLoaded('related'));
 
+        $result = QueryBuilder::for(collect([
+            $this->createModelWithRelation()->load('related'),
+            $this->createModelWithRelation()->load('related'),
+        ]))
+        ->unsetRelations()
+        ->get();
+
+        $this->assertFalse($result->get(0)->relationLoaded('related'));
+        $this->assertFalse($result->get(1)->relationLoaded('related'));
+    }
+    public function test_can_unset_not_requested_relations_with_exclude()
+    {
+        $model = $this->createModelWithRelation();
         $model->load('related');
+
         $this->assertTrue($model->relationLoaded('related'));
 
         $result = QueryBuilder::for($model)
@@ -291,8 +305,18 @@ class AddsIncludesToQueryTest extends TestCase
             ->get();
 
         $this->assertTrue($result->relationLoaded('related'));
+
+        $result = QueryBuilder::for(collect([
+            $this->createModelWithRelation()->load('related'),
+            $this->createModelWithRelation()->load('related'),
+        ]))
+        ->unsetRelations(['related'])
+        ->get();
+
+        $this->assertTrue($result->get(0)->relationLoaded('related'));
+        $this->assertTrue($result->get(1)->relationLoaded('related'));
     }
-    public function test_can_unset_not_requested_relations_for_model_using_allowed_includes()
+    public function test_can_unset_not_requested_relations_before_getting_results()
     {
         $model = $this->createModelWithRelation();
         $model->load('related');
@@ -300,39 +324,50 @@ class AddsIncludesToQueryTest extends TestCase
         $this->assertTrue($model->relationLoaded('related'));
 
         $result = QueryBuilder::for($model)
-            ->allowedIncludes([], [])
             ->get();
 
         $this->assertSame($model, $result);
         $this->assertFalse($result->relationLoaded('related'));
 
-        $model->load('related');
-        $this->assertTrue($model->relationLoaded('related'));
-
-        $result = QueryBuilder::for($model)
-            ->allowedIncludes([], [], false)
-            ->get();
-
-        $this->assertTrue($result->relationLoaded('related'));
-    }
-    public function test_cant_unset_not_requested_relations_for_collection()
-    {
-        $this->expectException(LogicException::class);
-
-        QueryBuilder::for(collect([
+        $result = QueryBuilder::for(collect([
             $this->createModelWithRelation()->load('related'),
             $this->createModelWithRelation()->load('related'),
         ]))
-        ->unsetRelations()
         ->get();
+
+        $this->assertFalse($result->get(0)->relationLoaded('related'));
+        $this->assertFalse($result->get(0)->relationLoaded('related'));
     }
-    public function test_cant_unset_not_requested_relations_for_not_model()
+    public function test_cant_unset_not_requested_relations_for_not_loaded_models()
     {
         $this->expectException(LogicException::class);
 
         QueryBuilder::for(QueryableModel::query())
             ->unsetRelations()
             ->get();
+    }
+    public function test_can_keep_relations()
+    {
+        $model = $this->createModelWithRelation();
+        $model->load('related');
+
+        $this->assertTrue($model->relationLoaded('related'));
+
+        $result = QueryBuilder::for($model)
+            ->keepRelations()
+            ->get();
+
+        $this->assertTrue($result->relationLoaded('related'));
+
+        $result = QueryBuilder::for(collect([
+            $this->createModelWithRelation()->load('related'),
+            $this->createModelWithRelation()->load('related'),
+        ]))
+        ->keepRelations()
+        ->get();
+
+        $this->assertTrue($result->get(0)->relationLoaded('related'));
+        $this->assertTrue($result->get(0)->relationLoaded('related'));
     }
 
     /*

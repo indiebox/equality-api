@@ -37,6 +37,7 @@ class LeaderNominationCollection extends ResourceCollection
                     ], [
                         TeamMemberResource::class,
                     ], 'members')
+                    ->unsetRelations('pivot')
                     ->get());
             }
 
@@ -47,6 +48,7 @@ class LeaderNominationCollection extends ResourceCollection
                     ], [
                         TeamMemberResource::class,
                     ], 'members')
+                    ->unsetRelations('pivot')
                     ->get());
             }
 

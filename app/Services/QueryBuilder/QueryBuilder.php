@@ -30,8 +30,6 @@ class QueryBuilder extends BaseQueryBuilder
 
     public $subjectIsCollection = false;
 
-    protected $freshQuery = null;
-
     /**
      * Check if the field is requested.
      * @param string $field The field (ex. `users.id`)
@@ -117,16 +115,15 @@ class QueryBuilder extends BaseQueryBuilder
      *
      * @param array $includes Allowed includes.
      * @param array $defaultIncludes Default includes, if no any requested.
-     * @param bool $unsetRelations Unset all relations that are not requested.
      * @return self
      */
-    public function allowedIncludes($includes, $defaultIncludes = [], $unsetRelations = true): self
+    public function allowedIncludes($includes, $defaultIncludes = []): self
     {
         if ($this->subjectIsCollection) {
             throw new LogicException("Method 'allowedIncludes' can`t be used with collection.");
         }
 
-        return $this->traitAllowedIncludes($includes, $defaultIncludes, $unsetRelations);
+        return $this->traitAllowedIncludes($includes, $defaultIncludes);
     }
 
     #endregion
@@ -181,13 +178,13 @@ class QueryBuilder extends BaseQueryBuilder
     {
         if ($this->subjectIsModel || $this->subjectIsCollection) {
             $result = $this->subject;
+
+            $this->unsetRelations();
         } else {
             $result = $this->__call('get', func_get_args());
         }
 
         $this->applyFieldsToResult($result);
-
-        $this->freshQuery = null;
 
         return $result;
     }
@@ -195,7 +192,7 @@ class QueryBuilder extends BaseQueryBuilder
     public function getEloquentBuilder(): Builder
     {
         if ($this->subjectIsModel) {
-            return $this->freshQuery ?? $this->freshQuery = $this->subject->newQueryWithoutRelationships();
+            return $this->subject->newQueryWithoutRelationships();
         }
 
         return parent::getEloquentBuilder();

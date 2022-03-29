@@ -65,7 +65,6 @@ class ProjectController extends Controller
 
         $project = QueryBuilder::for($project)
             ->allowedFields([ProjectResource::class], [ProjectResource::class])
-            ->unsetRelations()
             ->get();
 
         return (new ProjectResource($project))->response()->setStatusCode(201);

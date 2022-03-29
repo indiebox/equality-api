@@ -71,7 +71,6 @@ class BoardController extends Controller
 
         $board = QueryBuilder::for($board)
             ->allowedFields([BoardResource::class], [BoardResource::class])
-            ->unsetRelations()
             ->get();
 
         return (new BoardResource($board))->response()->setStatusCode(201);

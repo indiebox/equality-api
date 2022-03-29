@@ -39,7 +39,6 @@ class ColumnController extends Controller
 
         $column = QueryBuilder::for($column)
             ->allowedFields([ColumnResource::class], [ColumnResource::class])
-            ->unsetRelations()
             ->get();
 
         return new ColumnResource($column);
