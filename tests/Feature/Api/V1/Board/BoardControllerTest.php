@@ -183,13 +183,7 @@ class BoardControllerTest extends TestCase
 
         $board->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name', 'closed_at']);
-                });
-            });
+        $response->assertNoContent();
         $this->assertTrue($board->isClosed());
     }
 
@@ -255,13 +249,7 @@ class BoardControllerTest extends TestCase
 
         $board->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name']);
-                });
-            });
+        $response->assertNoContent();
         $this->assertFalse($board->isClosed());
     }
 
@@ -300,13 +288,7 @@ class BoardControllerTest extends TestCase
 
         $board->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name', 'deleted_at']);
-                });
-            });
+        $response->assertNoContent();
         $this->assertTrue($board->trashed());
     }
 
@@ -373,13 +355,7 @@ class BoardControllerTest extends TestCase
 
         $board->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name']);
-                });
-            });
+        $response->assertNoContent();
         $this->assertFalse($board->trashed());
     }
 }

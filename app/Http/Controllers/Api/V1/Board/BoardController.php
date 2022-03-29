@@ -56,12 +56,7 @@ class BoardController extends Controller
     {
         $board->close();
 
-        $board = QueryBuilder::for($board)
-            ->allowedFields([BoardResource::class], [BoardResource::class])
-            ->unsetRelations()
-            ->get();
-
-        return new BoardResource($board);
+        return response('', 204);
     }
 
     /**
@@ -74,12 +69,7 @@ class BoardController extends Controller
     {
         $board->open();
 
-        $board = QueryBuilder::for($board)
-            ->allowedFields([BoardResource::class], [BoardResource::class])
-            ->unsetRelations()
-            ->get();
-
-        return new BoardResource($board);
+        return response('', 204);
     }
 
     /**
@@ -92,12 +82,7 @@ class BoardController extends Controller
     {
         $board->delete();
 
-        $board = QueryBuilder::for($board)
-            ->allowedFields([BoardResource::class], [BoardResource::class])
-            ->unsetRelations()
-            ->get();
-
-        return new BoardResource($board);
+        return response('', 204);
     }
 
     /**
@@ -110,11 +95,6 @@ class BoardController extends Controller
     {
         $board->restore();
 
-        $board = QueryBuilder::for($board)
-            ->allowedFields([BoardResource::class], [BoardResource::class])
-            ->unsetRelations()
-            ->get();
-
-        return new BoardResource($board);
+        return response('', 204);
     }
 }
