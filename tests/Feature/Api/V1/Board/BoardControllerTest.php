@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Board;
 
-use App\Http\Resources\V1\Board\BoardResource;
 use App\Models\Board;
 use App\Models\Project;
 use App\Models\Team;
@@ -39,7 +38,12 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonPath('data.id', $board->id)
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
     }
     public function test_can_view_closed()
     {
@@ -53,7 +57,12 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonPath('data.id', $board->id)
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'closed_at']);
+                });
+            });
     }
     public function test_can_view_trashed()
     {
@@ -67,7 +76,12 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+            ->assertJsonPath('data.id', $board->id)
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'deleted_at']);
+                });
+            });
     }
 
     public function test_cant_update_without_permissions()
@@ -127,7 +141,11 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new BoardResource(Board::first()))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('boards', ['project_id' => $project->id] + $data);
     }
 
@@ -165,9 +183,7 @@ class BoardControllerTest extends TestCase
 
         $board->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertTrue($board->isClosed());
     }
 
@@ -233,9 +249,7 @@ class BoardControllerTest extends TestCase
 
         $board->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertFalse($board->isClosed());
     }
 
@@ -274,9 +288,7 @@ class BoardControllerTest extends TestCase
 
         $board->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertTrue($board->trashed());
     }
 
@@ -343,9 +355,7 @@ class BoardControllerTest extends TestCase
 
         $board->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new BoardResource($board))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertFalse($board->trashed());
     }
 }

@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api\V1\Project;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Board\StoreBoardRequest;
-use App\Http\Resources\V1\Project\ProjectBoardResource;
+use App\Http\Resources\V1\Board\BoardResource;
 use App\Models\Board;
 use App\Models\Project;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class BoardController extends Controller
 {
@@ -18,7 +19,11 @@ class BoardController extends Controller
      */
     public function index(Project $project)
     {
-        return ProjectBoardResource::collection($project->boards);
+        $boards = QueryBuilder::for($project->boards())
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->get();
+
+        return BoardResource::collection($boards);
     }
 
     /**
@@ -29,7 +34,11 @@ class BoardController extends Controller
      */
     public function indexClosed(Project $project)
     {
-        return ProjectBoardResource::collection($project->boards()->onlyClosed()->get());
+        $boards = QueryBuilder::for($project->boards()->onlyClosed())
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->get();
+
+        return BoardResource::collection($boards);
     }
 
     /**
@@ -40,7 +49,11 @@ class BoardController extends Controller
      */
     public function indexTrashed(Project $project)
     {
-        return ProjectBoardResource::collection($project->boards()->onlyTrashed()->get());
+        $boards = QueryBuilder::for($project->boards()->onlyTrashed())
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->get();
+
+        return BoardResource::collection($boards);
     }
 
     /**
@@ -56,6 +69,10 @@ class BoardController extends Controller
         $board->project()->associate($project);
         $board->save();
 
-        return (new ProjectBoardResource($board))->response()->setStatusCode(201);
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->get();
+
+        return (new BoardResource($board))->response()->setStatusCode(201);
     }
 }

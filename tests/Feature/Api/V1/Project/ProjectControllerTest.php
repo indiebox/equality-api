@@ -2,9 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Project;
 
-use App\Http\Resources\V1\Project\ProjectResource;
-use App\Http\Resources\V1\Team\TeamProjectResource;
-use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
@@ -37,7 +34,12 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new ProjectResource($project))->response()->getData(true));
+            ->assertJsonPath('data.id', $project->id)
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
     }
 
     public function test_cant_view_leader_of_not_your_team()
@@ -61,7 +63,12 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new UserResource($user))->response()->getData(true));
+            ->assertJsonPath('data.id', $user->id)
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'email']);
+                });
+            });
     }
 
     public function test_cant_update_without_permissions()
@@ -94,8 +101,11 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new ProjectResource(Project::first()))->response()->getData(true));
-        ;
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
         $this->assertDatabaseHas('projects', $data);
     }
 
@@ -121,9 +131,7 @@ class ProjectControllerTest extends TestCase
 
         $project->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new TeamProjectResource($project))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertTrue($project->trashed());
     }
 
@@ -160,9 +168,7 @@ class ProjectControllerTest extends TestCase
 
         $project->refresh();
 
-        $response
-            ->assertOk()
-            ->assertJson((new ProjectResource($project))->response()->getData(true));
+        $response->assertNoContent();
         $this->assertFalse($project->trashed());
     }
 }

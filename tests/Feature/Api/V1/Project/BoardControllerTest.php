@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Project;
 
-use App\Http\Resources\V1\Project\ProjectBoardResource;
 use App\Models\Board;
 use App\Models\Project;
 use App\Models\Team;
@@ -41,7 +40,13 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(ProjectBoardResource::collection($boards)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $boards->first()->id)
+            ->assertJsonPath('data.1.id', $boards->get(1)->id);
     }
 
     public function test_cant_view_closed_in_not_your_team()
@@ -68,7 +73,13 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(ProjectBoardResource::collection($closedBoards)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name', 'closed_at']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $closedBoards->first()->id)
+            ->assertJsonPath('data.1.id', $closedBoards->get(1)->id);
     }
 
     public function test_cant_view_trashed_in_not_your_team()
@@ -95,7 +106,13 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(ProjectBoardResource::collection($trashedBoards)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name', 'deleted_at']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $trashedBoards->first()->id)
+            ->assertJsonPath('data.1.id', $trashedBoards->get(1)->id);
     }
 
     public function test_cant_store_in_not_your_team()
@@ -141,7 +158,11 @@ class BoardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new ProjectBoardResource($board))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('boards', ['project_id' => $project->id, 'name' => $data['name']]);
     }
 }

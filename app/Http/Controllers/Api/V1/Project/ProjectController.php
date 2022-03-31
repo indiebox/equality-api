@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api\V1\Project;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Project\UpdateProjectRequest;
 use App\Http\Resources\V1\Project\ProjectResource;
-use App\Http\Resources\V1\Team\TeamProjectResource;
+use App\Http\Resources\V1\Team\TeamResource;
 use App\Http\Resources\V1\User\UserResource;
 use App\Models\Project;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class ProjectController extends Controller
 {
@@ -19,12 +20,29 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
+        $project = QueryBuilder::for($project)
+            ->allowedFields([
+                ProjectResource::class,
+                UserResource::class => 'leader',
+                TeamResource::class => 'team',
+            ], [
+                ProjectResource::class,
+                UserResource::class => 'leader',
+                TeamResource::class => 'team',
+            ])
+            ->allowedIncludes(['leader', 'team'])
+            ->get();
+
         return new ProjectResource($project);
     }
 
     public function leader(Project $project)
     {
-        return new UserResource($project->leader);
+        $leader = QueryBuilder::for($project->leader)
+            ->allowedFields([UserResource::class => 'leader'], [UserResource::class => 'leader'], 'leader')
+            ->get();
+
+        return new UserResource($leader);
     }
 
     /**
@@ -37,6 +55,10 @@ class ProjectController extends Controller
     public function update(UpdateProjectRequest $request, Project $project)
     {
         $project->update($request->validated());
+
+        $project = QueryBuilder::for($project)
+            ->allowedFields([ProjectResource::class], [ProjectResource::class])
+            ->get();
 
         return new ProjectResource($project);
     }
@@ -51,13 +73,13 @@ class ProjectController extends Controller
     {
         $project->delete();
 
-        return new TeamProjectResource($project);
+        return response('', 204);
     }
 
     public function restore(Project $project)
     {
         $project->restore();
 
-        return new ProjectResource($project);
+        return response('', 204);
     }
 }

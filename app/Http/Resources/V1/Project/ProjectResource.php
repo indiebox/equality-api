@@ -4,9 +4,10 @@ namespace App\Http\Resources\V1\Project;
 
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Http\Resources\V1\User\UserResource;
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProjectResource extends JsonResource
+class ProjectResource extends JsonResource implements ResourceWithFields
 {
     /**
      * Transform the resource into an array.
@@ -16,15 +17,28 @@ class ProjectResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
-            'image' => image($this->image),
-            'team' => new TeamResource($this->team),
-            'leader' => new UserResource($this->leader),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ];
+        return $this->visible([
+            'id', 'name', 'description', 'image' => image($this->image),
+            'deleted_at' => $this->when($this->deleted_at != null, $this->deleted_at),
+            'created_at', 'updated_at',
+        ], [
+            'leader' => new UserResource($this->whenLoaded('leader')),
+            'team' => new TeamResource($this->whenLoaded('team')),
+        ]);
+    }
+
+    public static function defaultName(): string
+    {
+        return "projects";
+    }
+
+    public static function defaultFields(): array
+    {
+        return ['id', 'name', 'image'];
+    }
+
+    public static function allowedFields(): array
+    {
+        return ['description', 'deleted_at', 'created_at', 'updated_at'];
     }
 }

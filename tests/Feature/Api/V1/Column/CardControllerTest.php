@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Column;
 
-use App\Http\Resources\V1\Column\ColumnCardResource;
 use App\Models\Board;
 use App\Models\Card;
 use App\Models\Column;
@@ -50,9 +49,14 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(
-                ColumnCardResource::collection([$cards[1], $cards[2], $cards[0]])->response()->getData(true)
-            );
+            ->assertJson(function ($json) {
+                $json->has('data', 3, function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $cards->get(1)->id)
+            ->assertJsonPath('data.1.id', $cards->get(2)->id)
+            ->assertJsonPath('data.2.id', $cards->get(0)->id);
     }
 
     public function test_cant_store_in_not_your_team()
@@ -105,7 +109,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new ColumnCardResource($card))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
         $this->assertEquals(1, $card->order);
 
@@ -115,7 +123,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new ColumnCardResource($card))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
         $this->assertEquals(2, $card->order);
     }
@@ -146,7 +158,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new ColumnCardResource($card))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $card->order);
         $this->assertEquals(3, $cards[1]->order);
@@ -178,7 +194,11 @@ class CardControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new ColumnCardResource($card))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertEquals(1, $card->order);
         $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);

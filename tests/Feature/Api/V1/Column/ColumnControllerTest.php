@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Column;
 
-use App\Http\Resources\V1\Column\ColumnResource;
 use App\Models\Board;
 use App\Models\Column;
 use App\Models\Project;
@@ -42,7 +41,12 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new ColumnResource($column))->response()->getData(true));
+            ->assertJsonPath('data.id', $column->id)
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
     }
 
     public function test_cant_update_without_permissions()
@@ -76,7 +80,11 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson((new ColumnResource(Column::first()))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('columns', ['board_id' => $board->id] + $data);
     }
 

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Board;
 
-use App\Http\Resources\V1\Board\BoardColumnResource;
 use App\Models\Board;
 use App\Models\Column;
 use App\Models\Project;
@@ -43,7 +42,13 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $columns->first()->id)
+            ->assertJsonPath('data.1.id', $columns->get(1)->id);
     }
     public function test_can_view_any_in_closed_board()
     {
@@ -58,7 +63,13 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $columns->first()->id)
+            ->assertJsonPath('data.1.id', $columns->get(1)->id);
     }
     public function test_can_view_any_in_trashed_board()
     {
@@ -73,7 +84,13 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(BoardColumnResource::collection($columns)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $columns->first()->id)
+            ->assertJsonPath('data.1.id', $columns->get(1)->id);
     }
 
     public function test_cant_store_in_not_your_team()
@@ -125,7 +142,11 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new BoardColumnResource($column))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('columns', ['board_id' => $board->id, 'name' => $data['name']]);
         $this->assertEquals(1, $column->order);
 
@@ -135,7 +156,11 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new BoardColumnResource($column))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertDatabaseHas('columns', ['board_id' => $board->id, 'name' => $data['name']]);
         $this->assertEquals(2, $column->order);
     }
@@ -164,7 +189,11 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new BoardColumnResource($column))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertEquals(1, $columns[0]->order);
         $this->assertEquals(2, $column->order);
         $this->assertEquals(3, $columns[1]->order);
@@ -194,7 +223,11 @@ class ColumnControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new BoardColumnResource($column))->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            });
         $this->assertEquals(1, $column->order);
         $this->assertEquals(2, $columns[0]->order);
         $this->assertEquals(3, $columns[1]->order);

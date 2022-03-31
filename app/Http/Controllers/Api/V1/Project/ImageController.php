@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Project\StoreImageRequest;
 use App\Http\Resources\V1\Project\ProjectResource;
 use App\Models\Project;
 use App\Services\Contracts\Image\ImageService;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class ImageController extends Controller
 {
@@ -27,6 +28,10 @@ class ImageController extends Controller
         $project->image = $path;
         $project->save();
 
+        $project = QueryBuilder::for($project)
+            ->allowedFields([ProjectResource::class, ...ProjectResource::defaultFields()], ['image'])
+            ->get();
+
         return new ProjectResource($project);
     }
 
@@ -37,6 +42,6 @@ class ImageController extends Controller
             $project->save();
         }
 
-        return new ProjectResource($project);
+        return response('', 204);
     }
 }

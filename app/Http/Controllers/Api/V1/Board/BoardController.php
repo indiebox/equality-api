@@ -8,6 +8,7 @@ use App\Http\Requests\Api\V1\Board\RestoreBoardRequest;
 use App\Http\Requests\Api\V1\Board\UpdateBoardRequest;
 use App\Http\Resources\V1\Board\BoardResource;
 use App\Models\Board;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class BoardController extends Controller
 {
@@ -19,6 +20,10 @@ class BoardController extends Controller
      */
     public function show(Board $board)
     {
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->get();
+
         return new BoardResource($board);
     }
 
@@ -33,6 +38,10 @@ class BoardController extends Controller
     {
         $board->update($request->validated());
 
+        $board = QueryBuilder::for($board)
+            ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->get();
+
         return new BoardResource($board);
     }
 
@@ -46,7 +55,7 @@ class BoardController extends Controller
     {
         $board->close();
 
-        return new BoardResource($board);
+        return response('', 204);
     }
 
     /**
@@ -59,7 +68,7 @@ class BoardController extends Controller
     {
         $board->open();
 
-        return new BoardResource($board);
+        return response('', 204);
     }
 
     /**
@@ -72,7 +81,7 @@ class BoardController extends Controller
     {
         $board->delete();
 
-        return new BoardResource($board);
+        return response('', 204);
     }
 
     /**
@@ -85,6 +94,6 @@ class BoardController extends Controller
     {
         $board->restore();
 
-        return new BoardResource($board);
+        return response('', 204);
     }
 }

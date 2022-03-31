@@ -3,9 +3,10 @@
 namespace App\Http\Resources\V1\Team;
 
 use App\Http\Resources\V1\User\UserResource;
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TeamInviteResource extends JsonResource
+class TeamInviteResource extends JsonResource implements ResourceWithFields
 {
     /**
      * Transform the resource into an array.
@@ -15,15 +16,27 @@ class TeamInviteResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->id,
-            'inviter' => new UserResource($this->inviter),
-            'invited' => new UserResource($this->invited),
+        return $this->visible([
+            'id', 'accepted_at', 'declined_at', 'created_at', 'updated_at',
             'status' => $this->getStatus(),
-            'accepted_at' => $this->accepted_at,
-            'declined_at' => $this->declined_at,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ];
+        ], [
+            'inviter' => new UserResource($this->whenLoaded('inviter')),
+            'invited' => new UserResource($this->whenLoaded('invited')),
+        ]);
+    }
+
+    public static function defaultName(): string
+    {
+        return 'invites';
+    }
+
+    public static function defaultFields(): array
+    {
+        return ['id', 'status'];
+    }
+
+    public static function allowedFields(): array
+    {
+        return ['accepted_at', 'declined_at', 'created_at', 'updated_at'];
     }
 }

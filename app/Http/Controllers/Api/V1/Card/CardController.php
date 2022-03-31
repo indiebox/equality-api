@@ -9,6 +9,7 @@ use App\Http\Requests\Api\V1\Card\UpdateCardRequest;
 use App\Http\Resources\V1\Card\CardResource;
 use App\Models\Card;
 use App\Models\Column;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class CardController extends Controller
 {
@@ -20,6 +21,10 @@ class CardController extends Controller
      */
     public function show(Card $card)
     {
+        $card = QueryBuilder::for($card)
+            ->allowedFields([CardResource::class], [CardResource::class])
+            ->get();
+
         return new CardResource($card);
     }
 
@@ -33,6 +38,10 @@ class CardController extends Controller
     public function update(UpdateCardRequest $request, Card $card)
     {
         $card->update($request->validated());
+
+        $card = QueryBuilder::for($card)
+            ->allowedFields([CardResource::class], [CardResource::class])
+            ->get();
 
         return new CardResource($card);
     }
@@ -49,7 +58,7 @@ class CardController extends Controller
         $card->column()->associate($column);
         $card->moveTo($request->after_card);
 
-        return new CardResource($card);
+        return response('', 204);
     }
 
     /**

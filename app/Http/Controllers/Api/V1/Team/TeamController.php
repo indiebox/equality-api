@@ -9,6 +9,9 @@ use App\Http\Requests\Api\V1\Team\UpdateTeamRequest;
 use App\Http\Resources\V1\Team\TeamMemberResource;
 use App\Http\Resources\V1\Team\TeamResource;
 use App\Models\Team;
+use App\Services\QueryBuilder\QueryBuilder;
+use App\Services\QueryBuilder\Sorts\SortRelationsCount;
+use Spatie\QueryBuilder\AllowedSort;
 
 class TeamController extends Controller
 {
@@ -19,7 +22,13 @@ class TeamController extends Controller
      */
     public function index()
     {
-        return TeamResource::collection(auth()->user()->teams);
+        $teams = QueryBuilder::for(auth()->user()->teams())
+            ->allowedFields([TeamResource::class], [TeamResource::class])
+            ->allowedSorts(['created_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
+            ->allowedIncludes(['members_count'])
+            ->get();
+
+        return TeamResource::collection($teams);
     }
 
     /**
@@ -30,6 +39,20 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
+        $team = QueryBuilder::for($team)
+            ->allowedFields(
+                [
+                    TeamResource::class,
+                    TeamMemberResource::class,
+                ],
+                [
+                    TeamResource::class,
+                    TeamMemberResource::class,
+                ],
+            )
+            ->allowedIncludes(['members'])
+            ->get();
+
         return new TeamResource($team);
     }
 
@@ -40,7 +63,15 @@ class TeamController extends Controller
      */
     public function members(Team $team)
     {
-        return TeamMemberResource::collection($team->members);
+        $members = QueryBuilder::for($team->members())
+            ->allowedFields(
+                [TeamMemberResource::class],
+                [TeamMemberResource::class],
+                'members'
+            )
+            ->get();
+
+        return TeamMemberResource::collection($members);
     }
 
     /**
@@ -53,6 +84,10 @@ class TeamController extends Controller
     {
         $team = Team::create($request->validated());
         $team->members()->attach(auth()->user(), ['is_creator' => true]);
+
+        $team = QueryBuilder::for($team)
+            ->allowedFields([TeamResource::class], [TeamResource::class])
+            ->get();
 
         return (new TeamResource($team))->response()->setStatusCode(201);
     }
@@ -67,6 +102,10 @@ class TeamController extends Controller
     public function update(UpdateTeamRequest $request, Team $team)
     {
         $team->update($request->validated());
+
+        $team = QueryBuilder::for($team)
+            ->allowedFields([TeamResource::class], [TeamResource::class])
+            ->get();
 
         return new TeamResource($team);
     }

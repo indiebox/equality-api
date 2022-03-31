@@ -4,40 +4,32 @@ namespace Tests\Feature\Traits\HasOrder;
 
 use App\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class EloquentHasOrderIntegrationTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+    use DatabaseTransactions;
 
-        $this->createSchema();
-    }
-
-    /**
-     * Tear down the database schema.
-     *
-     * @return void
-     */
-    protected function tearDown(): void
+    protected function setupDatabase($schema)
     {
-        $this->schema()->drop('models');
-    }
+        parent::setupDatabase($schema);
 
-    /**
-     * Setup the database schema.
-     *
-     * @return void
-     */
-    public function createSchema()
-    {
-        $this->schema()->create('models', function ($table) {
+        if ($schema->hasTable('models')) {
+            return;
+        }
+
+        $schema->create('models', function ($table) {
             $table->increments('id');
             $table->integer('group_id')->nullable();
             $table->decimal('order', 6, 1)->nullable();
             $table->timestamps();
         });
+    }
+
+    protected static function clearTestsData($schema)
+    {
+        $schema->dropIfExists('models');
     }
 
     /**
@@ -234,26 +226,6 @@ class EloquentHasOrderIntegrationTest extends TestCase
         foreach ($models as $model) {
             $model->refresh();
         }
-    }
-
-     /**
-     * Get a schema builder instance.
-     *
-     * @return \Illuminate\Database\Schema\Builder
-     */
-    protected function schema()
-    {
-        return $this->connection()->getSchemaBuilder();
-    }
-
-    /**
-     * Get a database connection instance.
-     *
-     * @return \Illuminate\Database\Connection
-     */
-    protected function connection()
-    {
-        return Model::getConnectionResolver()->connection();
     }
 }
 

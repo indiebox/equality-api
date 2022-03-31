@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api\V1\Column;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Card\StoreCardRequest;
 use App\Http\Resources\V1\Card\CardResource;
-use App\Http\Resources\V1\Column\ColumnCardResource;
 use App\Models\Card;
 use App\Models\Column;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class CardController extends Controller
 {
@@ -19,9 +19,11 @@ class CardController extends Controller
      */
     public function index(Column $column)
     {
-        $cards = $column->cards()->orderByPosition()->get();
+        $cards = QueryBuilder::for($column->cards()->orderByPosition())
+            ->allowedFields([CardResource::class], [CardResource::class])
+            ->get();
 
-        return ColumnCardResource::collection($cards);
+        return CardResource::collection($cards);
     }
 
     /**
@@ -36,6 +38,10 @@ class CardController extends Controller
         $card = new Card($request->validated());
         $card->column()->associate($column);
         $card->moveTo($request->after_card);
+
+        $card = QueryBuilder::for($card)
+            ->allowedFields([CardResource::class], [CardResource::class])
+            ->get();
 
         return (new CardResource($card))->response()->setStatusCode(201);
     }

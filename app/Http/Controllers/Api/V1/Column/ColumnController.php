@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Column\OrderColumnRequest;
 use App\Http\Requests\Api\V1\Column\UpdateColumnRequest;
 use App\Http\Resources\V1\Column\ColumnResource;
 use App\Models\Column;
+use App\Services\QueryBuilder\QueryBuilder;
 
 class ColumnController extends Controller
 {
@@ -18,6 +19,10 @@ class ColumnController extends Controller
      */
     public function show(Column $column)
     {
+        $column = QueryBuilder::for($column)
+            ->allowedFields([ColumnResource::class], [ColumnResource::class])
+            ->get();
+
         return new ColumnResource($column);
     }
 
@@ -31,6 +36,10 @@ class ColumnController extends Controller
     public function update(UpdateColumnRequest $request, Column $column)
     {
         $column->update($request->validated());
+
+        $column = QueryBuilder::for($column)
+            ->allowedFields([ColumnResource::class], [ColumnResource::class])
+            ->get();
 
         return new ColumnResource($column);
     }

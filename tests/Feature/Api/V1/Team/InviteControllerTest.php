@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Team;
 
-use App\Http\Resources\V1\Team\TeamInviteResource;
 use App\Models\Invite;
 use App\Models\Team;
 use App\Models\User;
@@ -32,9 +31,9 @@ class InviteControllerTest extends TestCase
         $team = Team::factory()->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
-        Invite::factory()->team($team)->invited(User::factory())->create();
-        Invite::factory()->accepted()->team($team)->invited(User::factory())->create();
-        Invite::factory()->declined()->team($team)->invited(User::factory())->create();
+        Invite::factory()->team($team)->inviter(User::factory())->invited(User::factory())->create();
+        Invite::factory()->accepted()->team($team)->inviter(User::factory())->invited(User::factory())->create();
+        Invite::factory()->declined()->team($team)->inviter(User::factory())->invited(User::factory())->create();
         $invites = Invite::all();
 
         // Filter all.
@@ -42,28 +41,67 @@ class InviteControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(TeamInviteResource::collection($invites)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 3, function ($json) {
+                    $json->hasAll([
+                        'id',
+                        'status',
+                        'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                        'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                    ]);
+                });
+            });
 
         // Filter pending.
-        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter=pending');
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=pending');
 
         $response
             ->assertOk()
-            ->assertJson(TeamInviteResource::collection([$invites[0]])->response()->getData(true));
+            ->assertJsonPath('data.0.id', $invites[0]->id)
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll([
+                        'id',
+                        'status',
+                        'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                        'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                    ]);
+                });
+            });
 
         // Filter accepted.
-        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter=accepted');
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=accepted');
 
         $response
             ->assertOk()
-            ->assertJson(TeamInviteResource::collection([$invites[1]])->response()->getData(true));
+            ->assertJsonPath('data.0.id', $invites[1]->id)
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll([
+                        'id',
+                        'status',
+                        'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                        'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                    ]);
+                });
+            });
 
         // Filter declined.
-        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter=declined');
+        $response = $this->getJson('/api/v1/teams/' . $team->id . '/invites?filter[status]=declined');
 
         $response
             ->assertOk()
-            ->assertJson(TeamInviteResource::collection([$invites[2]])->response()->getData(true));
+            ->assertJsonPath('data.0.id', $invites[2]->id)
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll([
+                        'id',
+                        'status',
+                        'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                        'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
+                    ]);
+                });
+            });
     }
 
     public function test_cant_invite_in_not_your_team()
@@ -126,7 +164,14 @@ class InviteControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new TeamInviteResource(Invite::first()))->response()->getData(true));
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'status',
+                    'inviter' => ['id', 'name', 'email'],
+                    'invited' => ['id', 'name', 'email'],
+                ],
+            ]);
         $this->assertDatabaseHas('invites', ['team_id' => $team->id, 'inviter_id' => $user->id, 'invited_id' => $user2->id]);
     }
 

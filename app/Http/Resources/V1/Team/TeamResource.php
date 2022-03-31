@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources\V1\Team;
 
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TeamResource extends JsonResource
+class TeamResource extends JsonResource implements ResourceWithFields
 {
     /**
      * Transform the resource into an array.
@@ -14,15 +15,30 @@ class TeamResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
-            'url' => $this->url,
-            'logo' => image($this->logo),
+        return $this->visible([
+            'id', 'name', 'description', 'url', 'logo' => image($this->logo), 'created_at', 'updated_at',
+        ], [
             'members' => TeamMemberResource::collection($this->whenLoaded('members')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'members_count' => $this->when($this->members_count != null, $this->members_count),
+        ]);
+    }
+
+    public static function defaultName(): string
+    {
+        return "teams";
+    }
+
+    public static function defaultFields(): array
+    {
+        return [
+            'id', 'name', 'logo',
+        ];
+    }
+
+    public static function allowedFields(): array
+    {
+        return [
+            'description', 'url', 'created_at', 'updated_at',
         ];
     }
 }

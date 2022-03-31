@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Api\V1\Team;
 
-use App\Http\Resources\V1\Team\TeamProjectResource;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -37,7 +37,13 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(TeamProjectResource::collection($projects)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $projects->first()->id)
+            ->assertJsonPath('data.1.id', $projects->get(1)->id);
     }
     public function test_cant_view_trashed_in_not_your_team()
     {
@@ -62,7 +68,13 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJson(TeamProjectResource::collection($projects)->response()->getData(true));
+            ->assertJson(function ($json) {
+                $json->has('data', 2, function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            })
+            ->assertJsonPath('data.0.id', $projects->first()->id)
+            ->assertJsonPath('data.1.id', $projects->get(1)->id);
     }
 
     public function test_cant_store_in_not_your_team()
@@ -91,7 +103,11 @@ class ProjectControllerTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJson((new TeamProjectResource($project))->response()->getData(true));
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', function (AssertableJson $json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                });
+            });
         $this->assertDatabaseHas('projects', ['team_id' => $team->id, 'leader_id' => $user->id]);
         $this->assertDatabaseHas('leader_nominations', [
             'project_id' => $project->id,

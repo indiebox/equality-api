@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources\V1\Card;
 
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CardResource extends JsonResource
+class CardResource extends JsonResource implements ResourceWithFields
 {
     /**
      * Transform the resource into an array.
@@ -14,12 +15,23 @@ class CardResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ];
+        return $this->visible([
+            'id', 'name', 'description', 'created_at', 'updated_at',
+        ]);
+    }
+
+    public static function defaultName(): string
+    {
+        return "cards";
+    }
+
+    public static function defaultFields(): array
+    {
+        return ['id', 'name'];
+    }
+
+    public static function allowedFields(): array
+    {
+        return ['description', 'created_at', 'updated_at'];
     }
 }
