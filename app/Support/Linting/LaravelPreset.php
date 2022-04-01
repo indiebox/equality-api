@@ -14,7 +14,6 @@ class LaravelPreset implements PresetInterface
     {
         return [
             // General Php
-            Linters\AlphabeticalImports::class,
             Linters\NoUnusedImports::class,
             Linters\NoStringInterpolationWithoutBraces::class,
             Linters\OneLineBetweenClassVisibilityChanges::class,
@@ -48,7 +47,6 @@ class LaravelPreset implements PresetInterface
     {
         return [
             // General Php
-            Formatters\AlphabeticalImports::class,
             Formatters\UnusedImports::class,
             Formatters\ExcessSpaceBetweenAndAfterImports::class,
 
