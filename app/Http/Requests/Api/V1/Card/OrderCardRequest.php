@@ -14,10 +14,15 @@ class OrderCardRequest extends FormRequest
      */
     public function rules()
     {
+        $card = $this->route('card');
+        $column = $card->relationLoaded('column')
+            ? $card->column
+            : $card->column()->withoutGlobalScopes()->first();
+
         return [
             'after' => [
                 'present', 'integer', 'min:0',
-                new CardInSameColumn($this, $this->route('card')->column()->withoutGlobalScopes()->first()),
+                new CardInSameColumn($this, $column),
             ],
         ];
     }

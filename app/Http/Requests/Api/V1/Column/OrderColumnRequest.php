@@ -14,10 +14,15 @@ class OrderColumnRequest extends FormRequest
      */
     public function rules()
     {
+        $column = $this->route('column');
+        $board = $column->relationLoaded('board')
+            ? $column->board
+            : $column->board()->withoutGlobalScopes()->first();
+
         return [
             'after' => [
                 'present', 'integer', 'min:0',
-                new ColumnInSameBoard($this, $this->route('column')->board()->withoutGlobalScopes()->first()),
+                new ColumnInSameBoard($this, $board),
             ],
         ];
     }
