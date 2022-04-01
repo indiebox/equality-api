@@ -1,0 +1,37 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Services\QueryBuilder\Contracts\ResourceWithFields;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class {{ class }} extends JsonResource implements ResourceWithFields
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public function toArray($request)
+    {
+        return $this->visible([
+
+        ]);
+    }
+
+    public static function defaultName(): string
+    {
+        return "{{ class }}";
+    }
+
+    public static function defaultFields(): array
+    {
+        return [];
+    }
+
+    public static function allowedFields(): array
+    {
+        return [];
+    }
+}
