@@ -19,7 +19,7 @@ class ColumnController extends Controller
      */
     public function index(Board $board)
     {
-        $columns = QueryBuilder::for($board->columns())
+        $columns = QueryBuilder::for($board->columns()->orderByPosition())
             ->allowedFields([ColumnResource::class], [ColumnResource::class])
             ->get();
 

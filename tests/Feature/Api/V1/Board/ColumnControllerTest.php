@@ -36,19 +36,24 @@ class ColumnControllerTest extends TestCase
         $board = Board::factory()->project($project)->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
-        $columns = Column::factory(2)->board($board)->create();
+        $columns = Column::factory(3)->board($board)->state(new Sequence(
+            ['order' => 3],
+            ['order' => 1],
+            ['order' => 2],
+        ))->create();
 
         $response = $this->getJson('/api/v1/boards/' . $board->id . '/columns');
 
         $response
             ->assertOk()
             ->assertJson(function ($json) {
-                $json->has('data', 2, function ($json) {
+                $json->has('data', 3, function ($json) {
                     $json->hasAll(['id', 'name']);
                 });
             })
-            ->assertJsonPath('data.0.id', $columns->first()->id)
-            ->assertJsonPath('data.1.id', $columns->get(1)->id);
+            ->assertJsonPath('data.0.id', $columns->get(1)->id)
+            ->assertJsonPath('data.1.id', $columns->get(2)->id)
+            ->assertJsonPath('data.2.id', $columns->get(0)->id);
     }
     public function test_can_view_any_in_closed_board()
     {
