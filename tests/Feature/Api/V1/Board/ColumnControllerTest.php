@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Board;
 
+use App\Events\Api\Columns\ColumnCreated;
 use App\Models\Board;
 use App\Models\Column;
 use App\Models\Project;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Rules\Api\MaxColumnsPerBoard;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Event;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -132,6 +134,8 @@ class ColumnControllerTest extends TestCase
     }
     public function test_can_store()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -154,23 +158,14 @@ class ColumnControllerTest extends TestCase
             });
         $this->assertDatabaseHas('columns', ['board_id' => $board->id, 'name' => $data['name']]);
         $this->assertEquals(1, $column->order);
-
-        $response = $this->postJson('/api/v1/boards/' . $board->id . '/columns', $data);
-
-        $column = Column::find($response->json('data.id'));
-
-        $response
-            ->assertCreated()
-            ->assertJson(function ($json) {
-                $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name']);
-                });
-            });
-        $this->assertDatabaseHas('columns', ['board_id' => $board->id, 'name' => $data['name']]);
-        $this->assertEquals(2, $column->order);
+        Event::assertDispatched(ColumnCreated::class, function (ColumnCreated $event) use ($column) {
+            return $event->column->id == $column->id && $event->afterColumn == null;
+        });
     }
     public function test_can_store_after_card()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -202,9 +197,14 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(1, $columns[0]->order);
         $this->assertEquals(2, $column->order);
         $this->assertEquals(3, $columns[1]->order);
+        Event::assertDispatched(ColumnCreated::class, function (ColumnCreated $event) use ($column, $data) {
+            return $event->column->id == $column->id && $event->afterColumn->id == $data['after_column'];
+        });
     }
     public function test_can_store_at_first_position()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -236,5 +236,8 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(1, $column->order);
         $this->assertEquals(2, $columns[0]->order);
         $this->assertEquals(3, $columns[1]->order);
+        Event::assertDispatched(ColumnCreated::class, function (ColumnCreated $event) use ($column) {
+            return $event->column->id == $column->id && $event->afterColumn == 0;
+        });
     }
 }

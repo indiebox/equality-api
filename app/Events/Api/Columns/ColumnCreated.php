@@ -13,9 +13,9 @@ class ColumnCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    protected $column;
+    public $column;
 
-    protected $afterColumn;
+    public $afterColumn;
 
     /**
      * Create a new event instance.
@@ -55,19 +55,16 @@ class ColumnCreated implements ShouldBroadcastNow
      */
     public function broadcastWith()
     {
-        $result = [
+        return [
             'column' => [
                 'id' => $this->column->id,
                 'name' => $this->column->name,
                 'created_at' => $this->column->created_at,
                 'updated_at' => $this->column->updated_at,
             ],
+            'after_column' => $this->afterColumn instanceof Column
+                ? $this->afterColumn->id
+                : $this->afterColumn,
         ];
-
-        if ($this->afterColumn !== null) {
-            $result['after_column'] = $this->afterColumn;
-        }
-
-        return $result;
     }
 }
