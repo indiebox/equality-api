@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Column;
 
+use App\Events\Api\Columns\ColumnDeleted;
 use App\Events\Api\Columns\ColumnUpdated;
 use App\Models\Board;
 use App\Models\Column;
@@ -220,6 +221,8 @@ class ColumnControllerTest extends TestCase
     }
     public function test_can_delete()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -231,5 +234,8 @@ class ColumnControllerTest extends TestCase
 
         $response->assertNoContent();
         $this->assertDatabaseCount('columns', 0);
+        Event::assertDispatched(ColumnDeleted::class, function (ColumnDeleted $event) use ($column) {
+            return $event->column->id == $column->id;
+        });
     }
 }

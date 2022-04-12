@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Column;
 
+use App\Events\Api\Columns\ColumnDeleted;
 use App\Events\Api\Columns\ColumnUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Column\OrderColumnRequest;
@@ -63,6 +64,8 @@ class ColumnController extends Controller
     public function destroy(Column $column)
     {
         $column->delete();
+
+        broadcast(new ColumnDeleted($column))->toOthers();
 
         return response('', 204);
     }
