@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Column;
 
+use App\Events\Api\Columns\ColumnUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Column\OrderColumnRequest;
 use App\Http\Requests\Api\V1\Column\UpdateColumnRequest;
@@ -36,6 +37,8 @@ class ColumnController extends Controller
     public function update(UpdateColumnRequest $request, Column $column)
     {
         $column->update($request->validated());
+
+        broadcast(new ColumnUpdated($column))->toOthers();
 
         $column = QueryBuilder::for($column)
             ->allowedFields([ColumnResource::class], [ColumnResource::class])

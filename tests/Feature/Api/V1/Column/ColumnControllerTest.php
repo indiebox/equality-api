@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Column;
 
+use App\Events\Api\Columns\ColumnUpdated;
 use App\Models\Board;
 use App\Models\Column;
 use App\Models\Project;
@@ -9,6 +10,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Event;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -66,6 +68,8 @@ class ColumnControllerTest extends TestCase
     }
     public function test_can_update()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -86,6 +90,9 @@ class ColumnControllerTest extends TestCase
                 });
             });
         $this->assertDatabaseHas('columns', ['board_id' => $board->id] + $data);
+        Event::assertDispatched(ColumnUpdated::class, function (ColumnUpdated $event) use ($column) {
+            return $event->column->id == $column->id;
+        });
     }
 
     public function test_cant_change_order_without_permissions()
