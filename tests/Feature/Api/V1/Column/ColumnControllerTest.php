@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1\Column;
 
 use App\Events\Api\Columns\ColumnDeleted;
+use App\Events\Api\Columns\ColumnOrderChanged;
 use App\Events\Api\Columns\ColumnUpdated;
 use App\Models\Board;
 use App\Models\Column;
@@ -170,6 +171,8 @@ class ColumnControllerTest extends TestCase
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
+        Event::fake();
+
         // Move to up dirrection
         $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => $columns[1]->id]);
 
@@ -181,6 +184,11 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(2, $columns[1]->order);
         $this->assertEquals(3, $column->order);
         $this->assertEquals(4, $columns[2]->order);
+        Event::assertDispatched(ColumnOrderChanged::class, function (ColumnOrderChanged $event) use ($column, $columns) {
+            return $event->column->id == $column->id && $event->after->id == $columns[1]->id;
+        });
+
+        Event::fake();
 
         // First position
         $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => 0]);
@@ -193,6 +201,11 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(2, $columns[0]->order);
         $this->assertEquals(3, $columns[1]->order);
         $this->assertEquals(4, $columns[2]->order);
+        Event::assertDispatched(ColumnOrderChanged::class, function (ColumnOrderChanged $event) use ($column) {
+            return $event->column->id == $column->id && $event->after == 0;
+        });
+
+        Event::fake();
 
         // Move to bottom direction
         $response = $this->postJson('/api/v1/columns/' . $column->id . '/order', ['after' => $columns[2]->id]);
@@ -205,6 +218,9 @@ class ColumnControllerTest extends TestCase
         $this->assertEquals(2, $columns[1]->order);
         $this->assertEquals(3, $columns[2]->order);
         $this->assertEquals(4, $column->order);
+        Event::assertDispatched(ColumnOrderChanged::class, function (ColumnOrderChanged $event) use ($column, $columns) {
+            return $event->column->id == $column->id && $event->after->id == $columns[2]->id;
+        });
     }
 
     public function test_cant_delete_without_permissions()
