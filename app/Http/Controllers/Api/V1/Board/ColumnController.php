@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Board;
 
+use App\Events\Api\Columns\ColumnCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Column\StoreColumnRequest;
 use App\Http\Resources\V1\Column\ColumnResource;
@@ -38,6 +39,8 @@ class ColumnController extends Controller
         $column = new Column($request->validated());
         $column->board()->associate($board);
         $column->moveTo($request->after_column);
+
+        broadcast(new ColumnCreated($column, $request->after_column))->toOthers();
 
         $column = QueryBuilder::for($column)
             ->allowedFields([ColumnResource::class], [ColumnResource::class])
