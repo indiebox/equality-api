@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Project;
 
+use App\Events\Api\Projects\LeaderNominated;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\Project\LeaderNominationCollection;
 use App\Models\LeaderNomination;
@@ -39,6 +40,10 @@ class LeaderNominationController extends Controller
 
         $leaderService->determineNewLeader($project);
 
-        return new LeaderNominationCollection($leaderService->makeNominationsCollection($project));
+        $nominations = $leaderService->makeNominationsCollection($project);
+
+        broadcast(new LeaderNominated($project, $nominations))->toOthers();
+
+        return new LeaderNominationCollection($nominations);
     }
 }

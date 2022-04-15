@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Api\V1\Project;
 
+use App\Events\Api\Projects\LeaderNominated;
 use App\Models\LeaderNomination;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
+use Event;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Laravel\Sanctum\Sanctum;
@@ -142,6 +144,8 @@ class LeaderNominationControllerTest extends TestCase
         [$user, $nominated] = $team->members;
         Sanctum::actingAs($user);
 
+        Event::fake();
+
         $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $nominated->id);
 
         $response
@@ -154,6 +158,11 @@ class LeaderNominationControllerTest extends TestCase
                 ])->interacted();
             });
         $this->assertDatabaseCount('leader_nominations', 1);
+        Event::assertDispatched(LeaderNominated::class, function (LeaderNominated $event) use ($project) {
+            return $event->project->id == $project->id;
+        });
+
+        Event::fake();
 
         $nominated = User::factory()->hasAttached($team)->create();
         $nominated = $team->members()->find($nominated->id);
@@ -170,7 +179,11 @@ class LeaderNominationControllerTest extends TestCase
                 ])->interacted();
             });
         $this->assertDatabaseCount('leader_nominations', 1);
+        Event::assertDispatched(LeaderNominated::class, function (LeaderNominated $event) use ($project) {
+            return $event->project->id == $project->id;
+        });
 
+        Event::fake();
         Sanctum::actingAs($nominated);
 
         $response = $this->postJson('/api/v1/projects/' . $project->id . '/leader-nominations/' . $nominated->id);
@@ -186,6 +199,9 @@ class LeaderNominationControllerTest extends TestCase
                 ])->interacted();
             });
         $this->assertDatabaseCount('leader_nominations', 2);
+        Event::assertDispatched(LeaderNominated::class, function (LeaderNominated $event) use ($project) {
+            return $event->project->id == $project->id;
+        });
     }
     public function test_leader_recalculates_after_user_nominating()
     {
