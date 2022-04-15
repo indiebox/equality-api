@@ -1,6 +1,7 @@
 <?php
 
 use App\Broadcasting\ColumnChannel;
+use App\Broadcasting\ProjectChannel;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -14,4 +15,5 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
+Broadcast::channel('projects.{project}', ProjectChannel::class);
 Broadcast::channel('boards.{board}.columns', ColumnChannel::class);
