@@ -50,6 +50,11 @@ class Card extends Model
         return $this->belongsTo(Column::class);
     }
 
+    public function board()
+    {
+        return $this->belongsToThrough(Board::class, [Column::class]);
+    }
+
     public function team()
     {
         return $this->belongsToThrough(Team::class, [Project::class, Board::class, Column::class])

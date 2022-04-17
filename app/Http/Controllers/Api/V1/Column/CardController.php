@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Column;
 
+use App\Events\Api\Cards\CardCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Card\StoreCardRequest;
 use App\Http\Resources\V1\Card\CardResource;
@@ -38,6 +39,8 @@ class CardController extends Controller
         $card = new Card($request->validated());
         $card->column()->associate($column);
         $card->moveTo($request->after_card);
+
+        broadcast(new CardCreated($card, $request->after_card))->toOthers();
 
         $card = QueryBuilder::for($card)
             ->allowedFields([CardResource::class], [CardResource::class])
