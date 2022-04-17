@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Card;
 
+use App\Events\Api\Cards\CardUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Card\MoveCardRequest;
 use App\Http\Requests\Api\V1\Card\OrderCardRequest;
@@ -38,6 +39,8 @@ class CardController extends Controller
     public function update(UpdateCardRequest $request, Card $card)
     {
         $card->update($request->validated());
+
+        broadcast(new CardUpdated($card))->toOthers();
 
         $card = QueryBuilder::for($card)
             ->allowedFields([CardResource::class], [CardResource::class])

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Card;
 
+use App\Events\Api\Cards\CardUpdated;
 use App\Models\Board;
 use App\Models\Card;
 use App\Models\Column;
@@ -11,6 +12,7 @@ use App\Models\User;
 use App\Rules\Api\MaxCardsPerColumn;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Event;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -73,6 +75,8 @@ class CardControllerTest extends TestCase
     }
     public function test_can_update()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -95,6 +99,9 @@ class CardControllerTest extends TestCase
                 });
             });
         $this->assertDatabaseHas('cards', ['column_id' => $column->id] + $data);
+        Event::assertDispatched(CardUpdated::class, function (CardUpdated $event) use ($card) {
+            return $event->card->id == $card->id;
+        });
     }
 
     public function test_cant_change_order_without_permissions()
