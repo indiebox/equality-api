@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1\Card;
 
 use App\Events\Api\Cards\CardDeleted;
+use App\Events\Api\Cards\CardMoved;
 use App\Events\Api\Cards\CardOrderChanged;
 use App\Events\Api\Cards\CardUpdated;
 use App\Models\Board;
@@ -305,6 +306,8 @@ class CardControllerTest extends TestCase
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
+        Event::fake();
+
         $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id);
 
         $card->refresh();
@@ -313,8 +316,15 @@ class CardControllerTest extends TestCase
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $card->order);
+        Event::assertDispatched(CardMoved::class, function (CardMoved $event) use ($card, $newColumn) {
+            return $event->card->id == $card->id
+                && $event->after == null
+                && $event->column->id == $newColumn->id;
+        });
 
         $card = Card::factory()->column($column)->create();
+
+        Event::fake();
 
         $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $newColumn->id);
 
@@ -324,9 +334,16 @@ class CardControllerTest extends TestCase
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(2, $card->order);
+        Event::assertDispatched(CardMoved::class, function (CardMoved $event) use ($card, $newColumn) {
+            return $event->card->id == $card->id
+                && $event->after == null
+                && $event->column->id == $newColumn->id;
+        });
     }
     public function test_can_move_after_card()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -353,9 +370,16 @@ class CardControllerTest extends TestCase
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $card->order);
         $this->assertEquals(3, $cards[1]->order);
+        Event::assertDispatched(CardMoved::class, function (CardMoved $event) use ($card, $newColumn, $cards) {
+            return $event->card->id == $card->id
+                && $event->after->id == $cards[0]->id
+                && $event->column->id == $newColumn->id;
+        });
     }
     public function test_can_move_at_first_position()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -382,9 +406,16 @@ class CardControllerTest extends TestCase
         $this->assertEquals(1, $card->order);
         $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);
+        Event::assertDispatched(CardMoved::class, function (CardMoved $event) use ($card, $newColumn) {
+            return $event->card->id == $card->id
+                && $event->after == 0
+                && $event->column->id == $newColumn->id;
+        });
     }
     public function test_can_move_between_projects()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project1 = Project::factory()->team($team)->create();
         $project2 = Project::factory()->team($team)->create();
@@ -405,9 +436,16 @@ class CardControllerTest extends TestCase
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $card->order);
+        Event::assertDispatched(CardMoved::class, function (CardMoved $event) use ($card, $newColumn) {
+            return $event->card->id == $card->id
+                && $event->after == null
+                && $event->column->id == $newColumn->id;
+        });
     }
     public function test_can_move_between_boards()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board1 = Board::factory()->project($project)->create();
@@ -427,6 +465,11 @@ class CardControllerTest extends TestCase
         $this->assertDatabaseMissing('cards', ['column_id' => $column->id]);
         $this->assertDatabaseHas('cards', ['column_id' => $newColumn->id]);
         $this->assertEquals(1, $card->order);
+        Event::assertDispatched(CardMoved::class, function (CardMoved $event) use ($card, $newColumn) {
+            return $event->card->id == $card->id
+                && $event->after == null
+                && $event->column->id == $newColumn->id;
+        });
     }
 
     public function test_cant_delete_without_permissions()

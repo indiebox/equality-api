@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Card;
 
 use App\Events\Api\Cards\CardDeleted;
+use App\Events\Api\Cards\CardMoved;
 use App\Events\Api\Cards\CardOrderChanged;
 use App\Events\Api\Cards\CardUpdated;
 use App\Http\Controllers\Controller;
@@ -64,6 +65,8 @@ class CardController extends Controller
     {
         $card->column()->associate($column);
         $card->moveTo($request->after_card);
+
+        broadcast(new CardMoved($card, $column, $request->after_card))->toOthers();
 
         return response('', 204);
     }
