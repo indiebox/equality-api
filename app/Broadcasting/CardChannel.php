@@ -2,7 +2,7 @@
 
 namespace App\Broadcasting;
 
-use App\Models\Card;
+use App\Models\Board;
 use App\Models\User;
 
 class CardChannel
@@ -11,11 +11,11 @@ class CardChannel
      * Authenticate the user's access to the channel.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Card  $card
+     * @param  \App\Models\Board  $board
      * @return array|bool
      */
-    public function join(User $user, Card $card)
+    public function join(User $user, Board $board)
     {
-        return $card->team->isMember($user);
+        return $board->team->isMember($user);
     }
 }
