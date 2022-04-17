@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Card;
 
+use App\Events\Api\Cards\CardDeleted;
 use App\Events\Api\Cards\CardUpdated;
 use App\Models\Board;
 use App\Models\Card;
@@ -428,6 +429,8 @@ class CardControllerTest extends TestCase
     }
     public function test_can_delete()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -440,5 +443,8 @@ class CardControllerTest extends TestCase
 
         $response->assertNoContent();
         $this->assertDatabaseCount('cards', 0);
+        Event::assertDispatched(CardDeleted::class, function (CardDeleted $event) use ($card) {
+            return $event->card->id == $card->id;
+        });
     }
 }
