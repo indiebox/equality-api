@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1\Card;
 
+use App\Events\Api\Cards\CardDeleted;
+use App\Events\Api\Cards\CardMoved;
+use App\Events\Api\Cards\CardOrderChanged;
+use App\Events\Api\Cards\CardUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Card\MoveCardRequest;
 use App\Http\Requests\Api\V1\Card\OrderCardRequest;
@@ -39,6 +43,8 @@ class CardController extends Controller
     {
         $card->update($request->validated());
 
+        broadcast(new CardUpdated($card))->toOthers();
+
         $card = QueryBuilder::for($card)
             ->allowedFields([CardResource::class], [CardResource::class])
             ->get();
@@ -50,6 +56,8 @@ class CardController extends Controller
     {
         $card->moveTo($request->after);
 
+        broadcast(new CardOrderChanged($card, $request->after))->toOthers();
+
         return response('', 204);
     }
 
@@ -57,6 +65,8 @@ class CardController extends Controller
     {
         $card->column()->associate($column);
         $card->moveTo($request->after_card);
+
+        broadcast(new CardMoved($card, $column, $request->after_card))->toOthers();
 
         return response('', 204);
     }
@@ -70,6 +80,8 @@ class CardController extends Controller
     public function destroy(Card $card)
     {
         $card->delete();
+
+        broadcast(new CardDeleted($card))->toOthers();
 
         return response('', 204);
     }

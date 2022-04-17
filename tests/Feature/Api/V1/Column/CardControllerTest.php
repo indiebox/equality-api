@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Column;
 
+use App\Events\Api\Cards\CardCreated;
 use App\Models\Board;
 use App\Models\Card;
 use App\Models\Column;
@@ -11,6 +12,7 @@ use App\Models\User;
 use App\Rules\Api\MaxCardsPerColumn;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Event;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -92,6 +94,8 @@ class CardControllerTest extends TestCase
     }
     public function test_can_store()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -130,9 +134,16 @@ class CardControllerTest extends TestCase
             });
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
         $this->assertEquals(2, $card->order);
+        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card, $column) {
+            return $event->column->id == $column->id
+                && $event->card->id == $card->id
+                && $event->afterCard == null;
+        });
     }
     public function test_can_store_after_card()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -166,9 +177,16 @@ class CardControllerTest extends TestCase
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $card->order);
         $this->assertEquals(3, $cards[1]->order);
+        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card, $column, $data) {
+            return $event->column->id == $column->id
+                && $event->card->id == $card->id
+                && $event->afterCard->id == $data['after_card'];
+        });
     }
     public function test_can_store_at_first_position()
     {
+        Event::fake();
+
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
@@ -202,5 +220,10 @@ class CardControllerTest extends TestCase
         $this->assertEquals(1, $card->order);
         $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);
+        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card, $column) {
+            return $event->column->id == $column->id
+                && $event->card->id == $card->id
+                && $event->afterCard == 0;
+        });
     }
 }
