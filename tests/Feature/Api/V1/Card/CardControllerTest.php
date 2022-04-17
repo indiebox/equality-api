@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1\Card;
 
 use App\Events\Api\Cards\CardDeleted;
+use App\Events\Api\Cards\CardOrderChanged;
 use App\Events\Api\Cards\CardUpdated;
 use App\Models\Board;
 use App\Models\Card;
@@ -183,6 +184,8 @@ class CardControllerTest extends TestCase
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
+        Event::fake();
+
         // Move to up dirrection
         $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[1]->id]);
 
@@ -194,6 +197,11 @@ class CardControllerTest extends TestCase
         $this->assertEquals(2, $cards[1]->order);
         $this->assertEquals(3, $card->order);
         $this->assertEquals(4, $cards[2]->order);
+        Event::assertDispatched(CardOrderChanged::class, function (CardOrderChanged $event) use ($card, $cards) {
+            return $event->card->id == $card->id && $event->after->id == $cards[1]->id;
+        });
+
+        Event::fake();
 
         // First position
         $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => 0]);
@@ -206,6 +214,11 @@ class CardControllerTest extends TestCase
         $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);
         $this->assertEquals(4, $cards[2]->order);
+        Event::assertDispatched(CardOrderChanged::class, function (CardOrderChanged $event) use ($card) {
+            return $event->card->id == $card->id && $event->after == 0;
+        });
+
+        Event::fake();
 
         // Move to bottom direction
         $response = $this->postJson('/api/v1/cards/' . $card->id . '/order', ['after' => $cards[2]->id]);
@@ -218,6 +231,9 @@ class CardControllerTest extends TestCase
         $this->assertEquals(2, $cards[1]->order);
         $this->assertEquals(3, $cards[2]->order);
         $this->assertEquals(4, $card->order);
+        Event::assertDispatched(CardOrderChanged::class, function (CardOrderChanged $event) use ($card, $cards) {
+            return $event->card->id == $card->id && $event->after->id == $cards[2]->id;
+        });
     }
 
     public function test_cant_move_without_permissions()
