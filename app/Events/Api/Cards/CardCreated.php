@@ -3,6 +3,7 @@
 namespace App\Events\Api\Cards;
 
 use App\Models\Card;
+use App\Models\Column;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
@@ -15,6 +16,8 @@ class CardCreated implements ShouldBroadcastNow
 
     public $card;
 
+    public $column;
+
     public $afterCard;
 
     /**
@@ -22,9 +25,10 @@ class CardCreated implements ShouldBroadcastNow
      *
      * @return void
      */
-    public function __construct(Card $card, $afterCard)
+    public function __construct(Card $card, Column $column, $afterCard)
     {
         $this->card = $card;
+        $this->column = $column;
         $this->afterCard = $afterCard;
     }
 
@@ -56,6 +60,7 @@ class CardCreated implements ShouldBroadcastNow
     public function broadcastWith()
     {
         return [
+            'column' => $this->column->id,
             'card' => [
                 'id' => $this->card->id,
                 'name' => $this->card->name,

@@ -40,7 +40,7 @@ class CardController extends Controller
         $card->column()->associate($column);
         $card->moveTo($request->after_card);
 
-        broadcast(new CardCreated($card, $request->after_card))->toOthers();
+        broadcast(new CardCreated($card, $column, $request->after_card))->toOthers();
 
         $card = QueryBuilder::for($card)
             ->allowedFields([CardResource::class], [CardResource::class])

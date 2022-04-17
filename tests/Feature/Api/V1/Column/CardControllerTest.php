@@ -134,8 +134,10 @@ class CardControllerTest extends TestCase
             });
         $this->assertDatabaseHas('cards', ['column_id' => $column->id, 'name' => $data['name']]);
         $this->assertEquals(2, $card->order);
-        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card) {
-            return $event->card->id == $card->id && $event->afterCard == null;
+        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card, $column) {
+            return $event->column->id == $column->id
+                && $event->card->id == $card->id
+                && $event->afterCard == null;
         });
     }
     public function test_can_store_after_card()
@@ -175,8 +177,10 @@ class CardControllerTest extends TestCase
         $this->assertEquals(1, $cards[0]->order);
         $this->assertEquals(2, $card->order);
         $this->assertEquals(3, $cards[1]->order);
-        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card, $data) {
-            return $event->card->id == $card->id && $event->afterCard->id == $data['after_card'];
+        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card, $column, $data) {
+            return $event->column->id == $column->id
+                && $event->card->id == $card->id
+                && $event->afterCard->id == $data['after_card'];
         });
     }
     public function test_can_store_at_first_position()
@@ -216,8 +220,10 @@ class CardControllerTest extends TestCase
         $this->assertEquals(1, $card->order);
         $this->assertEquals(2, $cards[0]->order);
         $this->assertEquals(3, $cards[1]->order);
-        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card) {
-            return $event->card->id == $card->id && $event->afterCard == 0;
+        Event::assertDispatched(CardCreated::class, function (CardCreated $event) use ($card, $column) {
+            return $event->column->id == $column->id
+                && $event->card->id == $card->id
+                && $event->afterCard == 0;
         });
     }
 }
