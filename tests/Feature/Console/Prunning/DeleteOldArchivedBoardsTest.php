@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Console\Pruning;
+namespace Tests\Feature\Console\Prunning;
 
 use App\Models\Board;
 use App\Models\Project;

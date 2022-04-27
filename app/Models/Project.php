@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Services\Contracts\Image\ImageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -31,12 +33,36 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Project extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Prunable;
 
     protected $fillable = [
         'name',
         'description',
     ];
+
+    /**
+     * Get the prunable model query.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function prunable()
+    {
+        return static::where('deleted_at', '<=', now()->subWeek());
+    }
+
+    /**
+     * Prepare the model for pruning.
+     *
+     * @return void
+     */
+    protected function pruning()
+    {
+        /**
+         * @var ImageService
+         */
+        $imageService = app(ImageService::class);
+        $imageService->delete($this->image);
+    }
 
     /*
     |-------------------------------------------------------------
