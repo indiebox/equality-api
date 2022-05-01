@@ -230,6 +230,43 @@ class TeamControllerTest extends TestCase
         $this->assertDatabaseCount('teams', 0);
         Storage::assertMissing($team->logo);
     }
+    public function test_projects_images_deleted_on_team_deleting()
+    {
+        Storage::fake();
+
+        $team = Team::factory()->has(User::factory()->count(2), 'members')->create();
+        $projectImages = [
+            UploadedFile::fake()->image('project1.jpg')->store('projects'),
+            UploadedFile::fake()->image('project2.jpg')->store('projects'),
+        ];
+        Project::factory()->team($team)->create(['image' => $projectImages[0]]);
+        Project::factory()->team($team)->create(['image' => $projectImages[1]]);
+        $user = User::all()->first();
+        Sanctum::actingAs($user);
+
+        Storage::assertExists($projectImages[0]);
+        Storage::assertExists($projectImages[1]);
+
+        $response = $this->postJson('/api/v1/teams/' . $team->id . '/leave');
+
+        $response->assertNoContent();
+        Storage::assertExists($projectImages[0]);
+        Storage::assertExists($projectImages[1]);
+
+        $user = User::all()->last();
+        Sanctum::actingAs($user);
+
+        $this->assertDatabaseCount('teams', 1);
+        $this->assertDatabaseCount('projects', 2);
+
+        $response = $this->postJson('/api/v1/teams/' . $team->id . '/leave');
+
+        $response->assertNoContent();
+        $this->assertDatabaseCount('teams', 0);
+        $this->assertDatabaseCount('projects', 0);
+        Storage::assertMissing($projectImages[0]);
+        Storage::assertMissing($projectImages[1]);
+    }
 
     public function test_associated_leader_nominations_deleted_after_user_leave_team()
     {
