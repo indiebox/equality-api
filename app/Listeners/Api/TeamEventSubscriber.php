@@ -34,7 +34,13 @@ class TeamEventSubscriber
     {
         // Delete resources associated with team.
         $imageService = app(ImageService::class);
+
         $imageService->delete($team->logo);
+        $team->projects()->withoutGlobalScopes()->chunk(100, function ($projects) use ($imageService) {
+            foreach ($projects as $project) {
+                $imageService->delete($project->image);
+            }
+        });
     }
 
     /**
