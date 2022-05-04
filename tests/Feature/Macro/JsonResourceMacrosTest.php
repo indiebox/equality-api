@@ -3,31 +3,33 @@
 namespace Tests\Feature\Macro;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\MissingValue;
 use Tests\TestCase;
 
-class EloquentBuilderMacrosTest extends TestCase
+class JsonResourceMacrosTest extends TestCase
 {
     public function test_visible_macro()
     {
         $model = new EloquentBuilderMacroTestModel(['name' => 1, 'desc' => 2, 'title' => 3]);
+        $resource = new JsonResourceMacroTest($model);
 
         // Visible attributes.
-        $this->assertEquals(1, $model->visible('name'));
-        $this->assertEquals(2, $model->visible('desc'));
-        $this->assertEquals(3, $model->visible('title'));
-        $this->assertNull($model->visible('dodo'));
+        $this->assertEquals(1, $resource->visible('name'));
+        $this->assertEquals(2, $resource->visible('desc'));
+        $this->assertEquals(3, $resource->visible('title'));
+        $this->assertNull($resource->visible('dodo'));
 
-        $this->assertEquals('test', $model->visible('name', 'test'));
-        $this->assertEquals('result from closure', $model->visible('desc', fn() => 'result from closure'));
-        $this->assertEquals('foo', $model->visible('dodo', 'foo'));
+        $this->assertEquals('test', $resource->visible('name', 'test'));
+        $this->assertEquals('result from closure', $resource->visible('desc', fn() => 'result from closure'));
+        $this->assertEquals('foo', $resource->visible('dodo', 'foo'));
 
         $model->makeHidden(['name', 'title']);
 
         // Hidden attributes.
-        $this->assertEquals(new MissingValue(), $model->visible('name', 'other'));
-        $this->assertEquals(2, $model->visible('desc'));
-        $this->assertEquals('default', $model->visible('title', 'other', 'default'));
+        $this->assertEquals(new MissingValue(), $resource->visible('name', 'other'));
+        $this->assertEquals(2, $resource->visible('desc'));
+        $this->assertEquals('default', $resource->visible('title', 'other', 'default'));
 
         $model->makeVisible(['name', 'title']);
 
@@ -37,7 +39,7 @@ class EloquentBuilderMacrosTest extends TestCase
             'desc' => 2,
             'title' => 'val',
             'other' => null,
-        ], $model->visible(['name', 'desc', 'title' => 'val', 'other']));
+        ], $resource->visible(['name', 'desc', 'title' => 'val', 'other']));
 
         $this->assertEquals([
             'name' => 1,
@@ -45,7 +47,7 @@ class EloquentBuilderMacrosTest extends TestCase
             'title' => 'val',
             'other' => null,
             'merged' => 'bar',
-        ], $model->visible(['name', 'desc', 'title' => 'val', 'other'], ['merged' => 'bar']));
+        ], $resource->visible(['name', 'desc', 'title' => 'val', 'other'], ['merged' => 'bar']));
 
         // Merged parameters are not checked for visibility
         $model->makeHidden(['merged']);
@@ -56,7 +58,7 @@ class EloquentBuilderMacrosTest extends TestCase
             'title' => 'val',
             'other' => null,
             'merged' => 'bar',
-        ], $model->visible(['name', 'desc', 'title' => 'val', 'other'], ['merged' => 'bar']));
+        ], $resource->visible(['name', 'desc', 'title' => 'val', 'other'], ['merged' => 'bar']));
     }
 }
 
@@ -65,4 +67,8 @@ class EloquentBuilderMacroTestModel extends Model
     protected $fillable = ['name', 'desc', 'title'];
 
     protected $hidden = ['id'];
+}
+
+class JsonResourceMacroTest extends JsonResource
+{
 }
