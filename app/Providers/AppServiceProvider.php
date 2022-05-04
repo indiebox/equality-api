@@ -6,7 +6,6 @@ use App\Services\Contracts\Image\ImageService as ImageServiceContract;
 use App\Services\Contracts\Projects\LeaderService as LeaderServiceContract;
 use App\Services\Image\ImageService;
 use App\Services\Projects\LeaderService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\MissingValue;
