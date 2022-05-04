@@ -25,9 +25,10 @@ Route::view('/', 'welcome');
 Route::group([
     'prefix' => '/register',
     'as' => 'register.',
+    'controller' => Auth\RegisteredUserController::class,
 ], function () {
-    Route::get('/', [Auth\RegisteredUserController::class, 'create'])->name('create');
-    Route::post('/', [Auth\RegisteredUserController::class, 'store'])->name('store');
+    Route::get('/', 'create')->name('create');
+    Route::post('/', 'store')->name('store');
 });
 Route::get('/verify-email/{id}/{hash}', Auth\VerifyEmailController::class)
     ->middleware('signed')
