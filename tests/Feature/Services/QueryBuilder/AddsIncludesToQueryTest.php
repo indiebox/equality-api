@@ -82,21 +82,23 @@ class AddsIncludesToQueryTest extends TestCase
     {
         $model = $this->createModel();
 
-        $result = QueryBuilder::for(QueryableModel::query(), $this->withIncludes('related'))
+        $result = QueryBuilder::for(QueryableModel::query(), $this->withIncludes('related,related_count'))
             ->allowedIncludes(['related']);
 
         $result = $result->get();
 
         $this->assertTrue($result->first()->relationLoaded('related'));
+        $this->assertEquals(0, $result->first()->related_count);
 
         $this->assertEquals([], $model->getRelations());
 
-        $result = QueryBuilder::for($model, $this->withIncludes('related'))
+        $result = QueryBuilder::for($model, $this->withIncludes('related,related_count'))
             ->allowedIncludes(['related'])
             ->get();
 
         $this->assertSame($model, $result);
         $this->assertTrue($result->relationLoaded('related'));
+        $this->assertEquals(0, $result->related_count);
     }
     public function test_can_set_default_includes()
     {
@@ -183,19 +185,20 @@ class AddsIncludesToQueryTest extends TestCase
         $model = $this->createModelWithNested();
         $model->related2()->save(new RelatedModel());
 
-        $result = QueryBuilder::for(QueryableModel::query(), $this->withIncludes('related.nested,related2'))
+        $result = QueryBuilder::for(QueryableModel::query(), $this->withIncludes('related.nested,related2,related2_count'))
             ->allowedIncludes(['related.nested', 'related2']);
 
         $result = $result->get();
 
         $this->assertTrue($result->first()->relationLoaded('related2'));
         $this->assertFalse($result->first()->related2->first()->relationLoaded('nested'));
+        $this->assertEquals(1, $result->first()->related2_count);
         $this->assertTrue($result->first()->relationLoaded('related'));
         $this->assertTrue($result->first()->related->first()->relationLoaded('nested'));
 
         $this->assertEquals([], $model->getRelations());
 
-        $result = QueryBuilder::for($model, $this->withIncludes('related.nested,related2'))
+        $result = QueryBuilder::for($model, $this->withIncludes('related.nested,related2,related2_count'))
             ->allowedIncludes(['related.nested', 'related2']);
 
         $result = $result->get();
@@ -203,6 +206,7 @@ class AddsIncludesToQueryTest extends TestCase
         $this->assertSame($model, $result);
         $this->assertTrue($result->relationLoaded('related2'));
         $this->assertFalse($result->related2->first()->relationLoaded('nested'));
+        $this->assertEquals(1, $result->related2_count);
         $this->assertTrue($result->relationLoaded('related'));
         $this->assertTrue($result->related->first()->relationLoaded('nested'));
     }
