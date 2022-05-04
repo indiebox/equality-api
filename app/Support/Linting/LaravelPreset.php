@@ -28,15 +28,13 @@ class LaravelPreset implements PresetInterface
             Linters\RestControllersMethodOrder::class,
             Linters\UseAuthHelperOverFacade::class,
             Linters\UseConfigOverEnv::class,
+            Linters\UseAnonymousMigrations::class,
 
             // Blade related
             Linters\SpacesAroundBladeRenderContent::class,
             CustomLinters\NoSpaceAfterAnyBladeDirective::class,
             CustomLinters\NoWhitespaceAtEndOfLine::class,
             CustomLinters\NewLineAtEndOfBladeFile::class,
-
-            // TODO: Enable in Laravel 9
-            // Linters\UseAnonymousMigrations::class,
 
             // Enable if project code-style will be changed to this behaviour
             // Linters\ApplyMiddlewareInRoutes::class,
@@ -52,13 +50,11 @@ class LaravelPreset implements PresetInterface
 
             // Laravel related
             Formatters\FullyQualifiedFacades::class,
+            Formatters\UseAnonymousMigrations::class,
 
             // Blade related
             CustomFormatters\NewLineAtEndOfBladeFile::class,
             CustomFormatters\NoWhitespaceAtEndOfLine::class,
-
-            // TODO: Enable in Laravel 9
-            // Formatters\UseAnonymousMigrations::class,
         ];
     }
 }

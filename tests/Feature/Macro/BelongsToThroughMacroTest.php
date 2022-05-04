@@ -17,8 +17,8 @@ class BelongsToThroughMacroTest extends TestCase
         . " on `eloquent_model4s`.`eloquent_model5_id` = `eloquent_model5s`.`id`"
         . " inner join `eloquent_model3s` on `eloquent_model3s`.`eloquent_model4_id` = `eloquent_model4s`.`id`"
         . " inner join `eloquent_model2s` on `eloquent_model2s`.`eloquent_model3_id` = `eloquent_model3s`.`id`"
-        . " where `eloquent_model4s`.`deleted_at` is null and `eloquent_model2s`.`deleted_at` is null"
-        . " and `eloquent_model2s`.`id` is null";
+        . " where `eloquent_model2s`.`id` is null and `eloquent_model4s`.`deleted_at` is null"
+        . " and `eloquent_model2s`.`deleted_at` is null";
 
         $this->assertEquals($expected, $model->relation()->toSql());
 
