@@ -53,27 +53,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |-------------------------------------------------------------
     */
 
-    Route::prefix('teams')->group(function () {
-        Route::get('/', [Team\TeamController::class, 'index']);
-        Route::post('/', [Team\TeamController::class, 'store']);
-        Route::post('{team}/leave', [Team\TeamController::class, 'leave'])->can('leave', 'team');
+    Route::group([
+        'prefix' => 'teams',
+        'controller' => Team\TeamController::class,
+    ], function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::post('{team}/leave', 'leave')->can('leave', 'team');
 
         // Projects.
         Route::group([
             'prefix' => '{team}/projects',
+            'controller' => Team\ProjectController::class,
         ], function () {
-            Route::get('/', [Team\ProjectController::class, 'index'])->can('viewAny', [ProjectModel::class, 'team']);
-            Route::get('/trashed', [Team\ProjectController::class, 'indexTrashed'])
-                ->can('viewAny', [ProjectModel::class, 'team']);
-            Route::post('/', [Team\ProjectController::class, 'store'])->can('create', [ProjectModel::class, 'team']);
+            Route::get('/', 'index')->can('viewAny', [ProjectModel::class, 'team']);
+            Route::get('/trashed', 'indexTrashed')->can('viewAny', [ProjectModel::class, 'team']);
+            Route::post('/', 'store')->can('create', [ProjectModel::class, 'team']);
         });
 
         // Invites.
         Route::group([
             'prefix' => '{team}/invites',
+            'controller' => Team\InviteController::class,
         ], function () {
-            Route::get('/', [Team\InviteController::class, 'index'])->can('viewAny', [InviteModel::class, 'team']);
-            Route::post('/', [Team\InviteController::class, 'store'])->can('create', [InviteModel::class, 'team']);
+            Route::get('/', 'index')->can('viewAny', [InviteModel::class, 'team']);
+            Route::post('/', 'store')->can('create', [InviteModel::class, 'team']);
         });
 
         // Update team settings.
@@ -87,8 +91,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/logo', [Team\LogoController::class, 'destroy']);
         });
 
-        Route::get('/{team}/members', [Team\TeamController::class, 'members'])->can('view', 'team');
-        Route::get('/{team}', [Team\TeamController::class, 'show'])->can('view', 'team');
+        Route::get('/{team}/members', 'members')->can('view', 'team');
+        Route::get('/{team}', 'show')->can('view', 'team');
     });
 
     /*
@@ -97,12 +101,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |-------------------------------------------------------------
     */
 
-    Route::prefix('invites')->group(function () {
-        Route::get('/', [User\InviteController::class, 'index']);
+    Route::group([
+        'prefix' => 'invites',
+        'controller' => User\InviteController::class,
+    ], function () {
+        Route::get('/', 'index');
 
         Route::prefix('/{pendingInvite}')->group(function () {
-            Route::post('/accept', [User\InviteController::class, 'accept'])->can('accept', 'pendingInvite');
-            Route::post('/decline', [User\InviteController::class, 'decline'])->can('decline', 'pendingInvite');
+            Route::post('/accept', 'accept')->can('accept', 'pendingInvite');
+            Route::post('/decline', 'decline')->can('decline', 'pendingInvite');
             Route::delete('/', [Team\InviteController::class, 'destroy'])->can('delete', 'pendingInvite');
         });
     });
@@ -113,27 +120,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |-------------------------------------------------------------
     */
 
-    Route::prefix('projects')->group(function () {
+    Route::group([
+        'prefix' => 'projects',
+        'controller' => Project\ProjectController::class,
+    ], function () {
         // Leader nominations.
         Route::group([
             'prefix' => '{project}/leader-nominations',
+            'controller' => Project\LeaderNominationController::class,
         ], function () {
-            Route::get('/', [Project\LeaderNominationController::class, 'index'])
-                ->can('viewAny', [LeaderNominationModel::class, 'project']);
-            Route::post('/{user}', [Project\LeaderNominationController::class, 'nominate'])
-                ->can('nominate', [LeaderNominationModel::class, 'project', 'user']);
+            Route::get('/', 'index')->can('viewAny', [LeaderNominationModel::class, 'project']);
+            Route::post('/{user}', 'nominate')->can('nominate', [LeaderNominationModel::class, 'project', 'user']);
         });
 
         // Boards.
         Route::group([
             'prefix' => '{project}/boards',
+            'controller' => Project\BoardController::class,
         ], function () {
-            Route::get('/', [Project\BoardController::class, 'index'])->can('viewAny', [BoardModel::class, 'project']);
-            Route::get('/trashed', [Project\BoardController::class, 'indexTrashed'])
-                ->can('viewAny', [BoardModel::class, 'project']);
-            Route::get('/closed', [Project\BoardController::class, 'indexClosed'])
-                ->can('viewAny', [BoardModel::class, 'project']);
-            Route::post('/', [Project\BoardController::class, 'store'])->can('create', [BoardModel::class, 'project']);
+            Route::get('/', 'index')->can('viewAny', [BoardModel::class, 'project']);
+            Route::get('/trashed', 'indexTrashed')->can('viewAny', [BoardModel::class, 'project']);
+            Route::get('/closed', 'indexClosed')->can('viewAny', [BoardModel::class, 'project']);
+            Route::post('/', 'store')->can('create', [BoardModel::class, 'project']);
         });
 
         // Update project settings.
@@ -147,11 +155,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/image', [Project\ImageController::class, 'destroy']);
         });
 
-        Route::post('/{trashed:project}/restore', [Project\ProjectController::class, 'restore'])
-            ->can('restore', 'trashed:project');
-        Route::get('/{project}/leader', [Project\ProjectController::class, 'leader'])->can('view', 'project');
-        Route::get('/{project}', [Project\ProjectController::class, 'show'])->can('view', 'project');
-        Route::delete('/{project}', [Project\ProjectController::class, 'destroy'])->can('delete', 'project');
+        Route::post('/{trashed:project}/restore', 'restore')->can('restore', 'trashed:project');
+        Route::get('/{project}/leader', 'leader')->can('view', 'project');
+        Route::get('/{project}', 'show')->can('view', 'project');
+        Route::delete('/{project}', 'destroy')->can('delete', 'project');
     });
 
     /*
@@ -160,22 +167,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::prefix('boards')->group(function () {
+    Route::group([
+        'prefix' => 'boards',
+        'controller' => Board\BoardController::class,
+    ], function () {
         // Columns.
-        Route::get('{anyBoard}/columns', [Board\ColumnController::class, 'index'])
-            ->can('viewAny', [ColumnModel::class, 'anyBoard']);
-        Route::post('{board}/columns', [Board\ColumnController::class, 'store'])
-            ->can('create', [ColumnModel::class, 'board']);
+        Route::controller(Board\ColumnController::class)->group(function () {
+            Route::get('{anyBoard}/columns', 'index')->can('viewAny', [ColumnModel::class, 'anyBoard']);
+            Route::post('{board}/columns', 'store')->can('create', [ColumnModel::class, 'board']);
+        });
 
-        Route::get('/{anyBoard}', [Board\BoardController::class, 'show'])
-            ->can('view', 'anyBoard');
-        Route::patch('/{board}', [Board\BoardController::class, 'update'])->can('update', 'board');
+        Route::get('/{anyBoard}', 'show')->can('view', 'anyBoard');
 
-        Route::post('/{closed:board}/open', [Board\BoardController::class, 'open'])->can('update', 'closed:board');
-        Route::post('/{board}/close', [Board\BoardController::class, 'close'])->can('update', 'board');
+        Route::patch('/{board}', 'update')->can('update', 'board');
+        Route::post('/{closed:board}/open', 'open')->can('update', 'closed:board');
+        Route::post('/{board}/close', 'close')->can('update', 'board');
 
-        Route::post('/{trashed:board}/restore', [Board\BoardController::class, 'restore'])->can('restore', 'trashed:board');
-        Route::delete('/{board}', [Board\BoardController::class, 'destroy'])->can('delete', 'board');
+        Route::post('/{trashed:board}/restore', 'restore')->can('restore', 'trashed:board');
+        Route::delete('/{board}', 'destroy')->can('delete', 'board');
     });
 
     /*
@@ -184,19 +193,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::prefix('columns')->group(function () {
+    Route::group([
+        'prefix' => 'columns',
+        'controller' => Column\ColumnController::class,
+    ], function () {
         // Cards.
         Route::group([
             'prefix' => '{column}/cards',
+            'controller' => Column\CardController::class,
         ], function () {
-            Route::get('/', [Column\CardController::class, 'index'])->can('viewAny', [CardModel::class, 'column']);
-            Route::post('/', [Column\CardController::class, 'store'])->can('create', [CardModel::class, 'column']);
+            Route::get('/', 'index')->can('viewAny', [CardModel::class, 'column']);
+            Route::post('/', 'store')->can('create', [CardModel::class, 'column']);
         });
 
-        Route::post('/{column}/order', [Column\ColumnController::class, 'order'])->can('update', 'column');
-        Route::get('/{column}', [Column\ColumnController::class, 'show'])->can('view', 'column');
-        Route::patch('/{column}', [Column\ColumnController::class, 'update'])->can('update', 'column');
-        Route::delete('/{column}', [Column\ColumnController::class, 'destroy'])->can('delete', 'column');
+        Route::post('/{column}/order', 'order')->can('update', 'column');
+        Route::get('/{column}', 'show')->can('view', 'column');
+        Route::patch('/{column}', 'update')->can('update', 'column');
+        Route::delete('/{column}', 'destroy')->can('delete', 'column');
     });
 
     /*
@@ -205,11 +218,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::prefix('cards')->group(function () {
-        Route::post('/{card}/order', [Card\CardController::class, 'order'])->can('update', 'card');
-        Route::post('/{card}/move/{column}', [Card\CardController::class, 'move'])->can('move', ['card', 'column']);
-        Route::get('/{card}', [Card\CardController::class, 'show'])->can('view', 'card');
-        Route::patch('/{card}', [Card\CardController::class, 'update'])->can('update', 'card');
-        Route::delete('/{card}', [Card\CardController::class, 'destroy'])->can('delete', 'card');
+    Route::group([
+        'prefix' => 'cards',
+        'controller' => Card\CardController::class,
+    ], function () {
+        Route::post('/{card}/order', 'order')->can('update', 'card');
+        Route::post('/{card}/move/{column}', 'move')->can('move', ['card', 'column']);
+        Route::get('/{card}', 'show')->can('view', 'card');
+        Route::patch('/{card}', 'update')->can('update', 'card');
+        Route::delete('/{card}', 'destroy')->can('delete', 'card');
     });
 });

@@ -19,7 +19,7 @@ class TeamResource extends JsonResource implements ResourceWithFields
             'id', 'name', 'description', 'url', 'logo' => image($this->logo), 'created_at', 'updated_at',
         ], [
             'members' => TeamMemberResource::collection($this->whenLoaded('members')),
-            'members_count' => $this->when($this->members_count != null, $this->members_count),
+            'members_count' => $this->whenNotNull($this->members_count),
         ]);
     }
 

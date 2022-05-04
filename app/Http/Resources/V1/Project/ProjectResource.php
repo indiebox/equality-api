@@ -19,7 +19,7 @@ class ProjectResource extends JsonResource implements ResourceWithFields
     {
         return $this->visible([
             'id', 'name', 'description', 'image' => image($this->image),
-            'deleted_at' => $this->when($this->deleted_at != null, $this->deleted_at),
+            'deleted_at' => $this->whenNotNull($this->deleted_at),
             'created_at', 'updated_at',
         ], [
             'leader' => new UserResource($this->whenLoaded('leader')),

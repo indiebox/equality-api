@@ -6,8 +6,8 @@ use App\Services\Contracts\Image\ImageService as ImageServiceContract;
 use App\Services\Contracts\Projects\LeaderService as LeaderServiceContract;
 use App\Services\Image\ImageService;
 use App\Services\Projects\LeaderService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -47,9 +47,34 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->registerQueryMacros();
+        $this->registerResourceMacros();
     }
 
     protected function registerQueryMacros()
+    {
+        /**
+         * Indicate that trashed "through" parents should be included in the query.
+         *
+         * @return \Znck\Eloquent\Relations\BelongsToThrough
+         */
+        BelongsToThrough::macro('withTrashedParents', function () {
+            $columns = [];
+
+            foreach ($this->getThroughParents() as $parent) {
+                if (in_array(SoftDeletes::class, class_uses_recursive(get_class($parent)))) {
+                    $columns[] = $parent->getQualifiedDeletedAtColumn();
+                }
+            }
+
+            if (empty($columns)) {
+                return $this;
+            }
+
+            return $this->withTrashed($columns);
+        });
+    }
+
+    protected function registerResourceMacros()
     {
         /**
          * This method returns the attribute value or `MissingValue` if
@@ -89,8 +114,8 @@ class AppServiceProvider extends ServiceProvider
          * $model->visible(['name' => 'other', 'desc' => 'test']) //return ['name' => new MissingValue, 'desc' => 'test']
          * ```
          */
-        Builder::macro('visible', function ($field, $value = null, $default = null) {
-            $model = $this->getModel();
+        JsonResource::macro('visible', function ($field, $value = null, $default = null) {
+            $model = $this->resource;
 
             if (func_num_args() < 3) {
                 $default = new MissingValue();
@@ -130,27 +155,6 @@ class AppServiceProvider extends ServiceProvider
             return func_num_args() > 1
                 ? value($value)
                 : $model->{$field};
-        });
-
-        /**
-         * Indicate that trashed "through" parents should be included in the query.
-         *
-         * @return \Znck\Eloquent\Relations\BelongsToThrough
-         */
-        BelongsToThrough::macro('withTrashedParents', function () {
-            $columns = [];
-
-            foreach ($this->getThroughParents() as $parent) {
-                if (in_array(SoftDeletes::class, class_uses_recursive(get_class($parent)))) {
-                    $columns[] = $parent->getQualifiedDeletedAtColumn();
-                }
-            }
-
-            if (empty($columns)) {
-                return $this;
-            }
-
-            return $this->withTrashed($columns);
         });
     }
 }
