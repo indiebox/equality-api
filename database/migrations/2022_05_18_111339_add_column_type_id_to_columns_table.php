@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('columns', function (Blueprint $table) {
-            $table->unsignedTinyInteger('column_type_id')->after('board_id');
+            $table->unsignedTinyInteger('column_type_id')->default(0)->after('board_id');
             $table->foreign(['column_type_id'])->references('id')->on('column_types');
         });
     }
