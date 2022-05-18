@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
         $this->call(CardSeeder::class);
 
         $this->call(ColumnTypeSeeder::class);
+        $this->call(ModuleSeeder::class);
     }
 }
