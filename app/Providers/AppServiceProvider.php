@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\Boards\ModuleService;
+use App\Services\Contracts\Boards\ModuleService as ModuleServiceContract;
 use App\Services\Contracts\Image\ImageService as ImageServiceContract;
 use App\Services\Contracts\Projects\LeaderService as LeaderServiceContract;
 use App\Services\Image\ImageService;
@@ -18,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
     public $singletons = [
         ImageServiceContract::class => ImageService::class,
         LeaderServiceContract::class => LeaderService::class,
+        ModuleServiceContract::class => ModuleService::class,
     ];
 
     /**
