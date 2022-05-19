@@ -43,8 +43,14 @@ class ModuleService implements ModuleServiceContract
 
     protected function setupKanbanModule(Board $board, array $settings)
     {
-        foreach ($settings as $name => $column) {
-            $columnType = $this->availableColumns[$name];
+        $columns = array_intersect_key($settings, static::$availableColumns);
+
+        // Reset column types only for columns that are not in our settings array.
+        $ids = collect($columns)->values()->filter(fn($value) => $value instanceof Column)->pluck('id');
+        Column::kanbanRelated()->whereNotIn('id', $ids)->update(['column_type_id' => ColumnType::NONE]);
+
+        foreach ($columns as $name => $column) {
+            $columnType = static::$availableColumns[$name];
 
             if ($column instanceof Column) {
                 $column->columnType()->associate($columnType);
