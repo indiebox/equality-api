@@ -2,45 +2,20 @@
 
 namespace App\Rules\Api;
 
-use App\Models\Board;
-use Illuminate\Contracts\Validation\ImplicitRule;
+use App\Rules\Base\MaxItemsRule;
 
-class MaxColumnsPerBoard implements ImplicitRule
+class MaxColumnsPerBoard extends MaxItemsRule
 {
     /** Max columns per board.*/
-    public const MAX_COLUMNS = 50;
+    public const MAX_ITEMS = 50;
 
-    protected $board;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(Board $board)
+    protected function getCount()
     {
-        $this->board = $board;
+        return $this->container->columns()->count();
     }
 
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
-     */
-    public function passes($attribute, $value)
+    protected function transKey()
     {
-        return $this->board->columns()->count() < static::MAX_COLUMNS;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return trans('validation.max_columns_per_board', ['max' => static::MAX_COLUMNS]);
+        return 'validation.max_columns_per_board';
     }
 }

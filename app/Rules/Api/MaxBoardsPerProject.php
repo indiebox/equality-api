@@ -2,45 +2,20 @@
 
 namespace App\Rules\Api;
 
-use App\Models\Project;
-use Illuminate\Contracts\Validation\ImplicitRule;
+use App\Rules\Base\MaxItemsRule;
 
-class MaxBoardsPerProject implements ImplicitRule
+class MaxBoardsPerProject extends MaxItemsRule
 {
     /** Max boards per project.*/
-    public const MAX_BOARDS = 10;
+    public const MAX_ITEMS = 10;
 
-    protected $project;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(Project $project)
+    protected function getCount()
     {
-        $this->project = $project;
+        return $this->container->boards()->count();
     }
 
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
-     */
-    public function passes($attribute, $value)
+    protected function transKey()
     {
-        return $this->project->boards()->count() < static::MAX_BOARDS;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return trans('validation.max_boards_per_project', ['max' => static::MAX_BOARDS]);
+        return 'validation.max_boards_per_project';
     }
 }

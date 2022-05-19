@@ -280,7 +280,7 @@ class CardControllerTest extends TestCase
         $board = Board::factory()->project($project)->create();
         $column = Column::factory()->board($board)->create();
         $newColumn = Column::factory()->board($board)->create();
-        Card::factory(MaxCardsPerColumn::MAX_CARDS)->column($newColumn)->create();
+        Card::factory(MaxCardsPerColumn::MAX_ITEMS)->column($newColumn)->create();
 
         $card = Card::factory()->column($column)->create();
         $user = User::factory()->hasAttached($team)->create();
@@ -291,7 +291,7 @@ class CardControllerTest extends TestCase
         $response
             ->assertUnprocessable()
             ->assertJsonPath('errors.column', [
-                trans('validation.max_cards_per_column', ['max' => MaxCardsPerColumn::MAX_CARDS])
+                trans('validation.max_cards_per_column', ['max' => MaxCardsPerColumn::MAX_ITEMS])
             ]);
     }
     public function test_can_move()

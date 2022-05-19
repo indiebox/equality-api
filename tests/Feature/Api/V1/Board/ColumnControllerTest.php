@@ -117,7 +117,7 @@ class ColumnControllerTest extends TestCase
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
-        Column::factory(MaxColumnsPerBoard::MAX_COLUMNS)->board($board)->create();
+        Column::factory(MaxColumnsPerBoard::MAX_ITEMS)->board($board)->create();
         $user = User::factory()->hasAttached($team)->create();
         $data = [
             'name' => 'Col 1',
@@ -129,7 +129,7 @@ class ColumnControllerTest extends TestCase
         $response
             ->assertUnprocessable()
             ->assertJsonPath('errors.board', [
-                trans('validation.max_columns_per_board', ['max' => MaxColumnsPerBoard::MAX_COLUMNS])
+                trans('validation.max_columns_per_board', ['max' => MaxColumnsPerBoard::MAX_ITEMS])
             ]);
     }
     public function test_can_store()

@@ -224,7 +224,7 @@ class BoardControllerTest extends TestCase
     {
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
-        Board::factory(MaxBoardsPerProject::MAX_BOARDS)->project($project)->create();
+        Board::factory(MaxBoardsPerProject::MAX_ITEMS)->project($project)->create();
         $board = Board::factory()->project($project)->closed()->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
@@ -234,7 +234,7 @@ class BoardControllerTest extends TestCase
         $response
             ->assertUnprocessable()
             ->assertJsonPath('errors.project', [
-                trans('validation.max_boards_per_project', ['max' => MaxBoardsPerProject::MAX_BOARDS])
+                trans('validation.max_boards_per_project', ['max' => MaxBoardsPerProject::MAX_ITEMS])
             ]);
     }
     public function test_can_open()
@@ -330,7 +330,7 @@ class BoardControllerTest extends TestCase
     {
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
-        Board::factory(MaxBoardsPerProject::MAX_BOARDS)->project($project)->create();
+        Board::factory(MaxBoardsPerProject::MAX_ITEMS)->project($project)->create();
         $board = Board::factory()->project($project)->deleted()->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
@@ -340,7 +340,7 @@ class BoardControllerTest extends TestCase
         $response
             ->assertUnprocessable()
             ->assertJsonPath('errors.project', [
-                trans('validation.max_boards_per_project', ['max' => MaxBoardsPerProject::MAX_BOARDS])
+                trans('validation.max_boards_per_project', ['max' => MaxBoardsPerProject::MAX_ITEMS])
             ]);
     }
     public function test_can_restore_trashed()
