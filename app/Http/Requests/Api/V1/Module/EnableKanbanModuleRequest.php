@@ -3,9 +3,9 @@
 namespace App\Http\Requests\Api\V1\Module;
 
 use App\Rules\Api\ColumnInSameBoard;
+use App\Rules\Api\MaxColumnsPerBoard;
+use App\Services\Boards\ModuleService;
 use Illuminate\Foundation\Http\FormRequest;
-
-// use Illuminate\Validation\Validator;
 
 class EnableKanbanModuleRequest extends FormRequest
 {
@@ -34,15 +34,19 @@ class EnableKanbanModuleRequest extends FormRequest
      * @param  \Illuminate\Validation\Validator  $validator
      * @return void
      */
-    // public function withValidator($validator)
-    // {
-    //     $validator->after(function (Validator $validator) {
-    //         $newColumns = $this->safe()->collect()->where(fn($value) => $value == 0)->count();
-    //         if ($newColumns != 0) {
-    //             $validator->add
-    //         }
+    public function withValidator($validator)
+    {
+        $data = $validator->getData();
+        $newColumns = 0;
 
-    // 'board' => [new MaxColumnsPerBoard($this->route('board'))],
-    //     });
-    // }
+        foreach ($data as $key => $value) {
+            if (array_key_exists($key, ModuleService::$availableColumns) && $value == 0) {
+                $newColumns++;
+            }
+        }
+
+        if ($newColumns != 0) {
+            $validator->addRules(['board' => [new MaxColumnsPerBoard($this->route('board'), $newColumns)]]);
+        }
+    }
 }

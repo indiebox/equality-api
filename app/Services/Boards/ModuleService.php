@@ -11,6 +11,18 @@ use Illuminate\Support\Facades\DB;
 
 class ModuleService implements ModuleServiceContract
 {
+    /**
+     * Available column types.
+     * The key is the key of column from settings, the value is a column type.
+     * @var array<string,int>
+     */
+    public static $availableColumns = [
+        'todo_column_id' => ColumnType::TODO,
+        'inprogress_column_id' => ColumnType::IN_PROGRESS,
+        'done_column_id' => ColumnType::DONE,
+        'onreview_column_id' => ColumnType::ON_REVIEW,
+    ];
+
     public function enableKanban(Board $board, array $settings)
     {
         DB::transaction(function () use ($board, $settings) {
@@ -32,12 +44,7 @@ class ModuleService implements ModuleServiceContract
     protected function setupKanbanModule(Board $board, array $settings)
     {
         foreach ($settings as $name => $column) {
-            $columnType = match ($name) {
-                'todo_column_id'=> ColumnType::TODO,
-                'inprogress_column_id' => ColumnType::IN_PROGRESS,
-                'done_column_id' => ColumnType::DONE,
-                'onreview_column_id' => ColumnType::ON_REVIEW,
-            };
+            $columnType = $this->availableColumns[$name];
 
             if ($column instanceof Column) {
                 $column->columnType()->associate($columnType);
