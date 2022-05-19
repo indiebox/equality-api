@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasOrder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Znck\Eloquent\Traits\BelongsToThrough;
@@ -15,6 +16,8 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @property double|null $order
  * @property-read \App\Models\Board $board
  * @property int $board_id
+ * @property-read \App\Models\ColumnType $columnType
+ * @property int $column_type_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Team $team
@@ -24,6 +27,7 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @method static \Illuminate\Database\Eloquent\Builder|Column newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Column newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Column query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Column kanbanRelated()
  * @mixin \Eloquent
  */
 class Column extends Model
@@ -37,6 +41,17 @@ class Column extends Model
     public function getOrderQuery($query)
     {
         return $query->where('board_id', $this->board_id);
+    }
+
+    /*
+    |-------------------------------------------------------------
+    | Scopes
+    |-------------------------------------------------------------
+    */
+
+    public function scopeKanbanRelated(Builder $query)
+    {
+        return $query->where('column_type_id', '!=', ColumnType::NONE);
     }
 
     /*
@@ -59,5 +74,10 @@ class Column extends Model
     {
         return $this->belongsToThrough(Team::class, [Project::class, Board::class])
             ->withTrashedParents();
+    }
+
+    public function columnType()
+    {
+        return $this->belongsTo(ColumnType::class);
     }
 }
