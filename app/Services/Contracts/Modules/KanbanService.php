@@ -6,6 +6,9 @@ use App\Models\Board;
 use App\Models\Card;
 use App\Models\Column;
 
+/**
+ * This service interactes with `Kanban` module.
+ */
 interface KanbanService
 {
     /**
@@ -13,13 +16,13 @@ interface KanbanService
      * @param Board $board The board.
      * @param array $settings The settings.
      */
-    public function enableKanban(Board $board, array $settings);
+    public function enable(Board $board, array $settings);
 
     /**
      * Disable `Kanban` module for board.
      * @param Board $board The board.
      */
-    public function disableKanban(Board $board);
+    public function disable(Board $board);
 
     /**
      * Does user can move card to column.

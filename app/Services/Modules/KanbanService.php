@@ -24,7 +24,7 @@ class KanbanService implements KanbanServiceContract
         'onreview_column_id' => ColumnType::ON_REVIEW,
     ];
 
-    public function enableKanban(Board $board, array $settings)
+    public function enable(Board $board, array $settings)
     {
         DB::transaction(function () use ($board, $settings) {
             $board->modules()->syncWithoutDetaching(Module::KANBAN);
@@ -33,7 +33,7 @@ class KanbanService implements KanbanServiceContract
         });
     }
 
-    public function disableKanban(Board $board)
+    public function disable(Board $board)
     {
         DB::transaction(function () use ($board) {
             $board->modules()->detach(Module::KANBAN);
@@ -45,6 +45,12 @@ class KanbanService implements KanbanServiceContract
     public function canMoveCardToColumn(Card $card, Column $column)
     {
         $order = $this->getColumnsMovementOrder($column->board);
+
+        // Kanban module is disabled (no any columns with functional types).
+        if (count($order) == 1 && $order[0] == ColumnType::NONE) {
+            return true;
+        }
+
         $oldColumn = $card->column;
         $index = array_search($column->column_type_id, $order);
 

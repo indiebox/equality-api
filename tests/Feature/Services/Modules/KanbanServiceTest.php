@@ -18,7 +18,7 @@ class KanbanServiceTest extends TestCase
     use DatabaseTransactions;
 
     /**
-     * @var ModuleService
+     * @var KanbanService
      */
     protected $service;
 
@@ -36,7 +36,7 @@ class KanbanServiceTest extends TestCase
 
         $this->assertDatabaseCount('board_module', 0);
 
-        $this->service->enableKanban($board, [
+        $this->service->enable($board, [
             'todo_column_id' => $columns,
         ]);
 
@@ -45,7 +45,7 @@ class KanbanServiceTest extends TestCase
         $this->assertEquals(1, $columns->filter(fn($column) => $column->column_type_id != ColumnType::NONE)->count());
         $this->assertEquals(ColumnType::TODO, $columns[0]->column_type_id);
 
-        $this->service->enableKanban($board, [
+        $this->service->enable($board, [
             'todo_column_id' => 0,
         ]);
 
@@ -55,7 +55,7 @@ class KanbanServiceTest extends TestCase
         $this->assertEquals(ColumnType::NONE, $columns[0]->column_type_id);
         $this->assertEquals(ColumnType::TODO, $columns[1]->column_type_id);
 
-        $this->service->enableKanban($board, [
+        $this->service->enable($board, [
             'todo_column_id' => $columns[0],
         ]);
 
@@ -72,7 +72,7 @@ class KanbanServiceTest extends TestCase
 
         $this->assertDatabaseCount('board_module', 0);
 
-        $this->service->enableKanban($board, [
+        $this->service->enable($board, [
             'todo_column_id' => $columns[0],
             'inprogress_column_id' => $columns[1],
             'done_column_id' => $columns[2],
@@ -83,7 +83,7 @@ class KanbanServiceTest extends TestCase
         $this->assertEquals(3, $columns->filter(fn($column) => $column->column_type_id != ColumnType::NONE)->count());
         $this->assertEquals(ColumnType::NONE, $columns[3]->column_type_id);
 
-        $this->service->enableKanban($board, [
+        $this->service->enable($board, [
             'todo_column_id' => $columns[0],
             'inprogress_column_id' => 0,
             'done_column_id' => $columns[2],
@@ -102,7 +102,7 @@ class KanbanServiceTest extends TestCase
 
         $this->assertDatabaseCount('board_module', 0);
 
-        $this->service->enableKanban($board, [
+        $this->service->enable($board, [
             'todo_column_id' => $columns[0],
             'inprogress_column_id' => $columns[1],
             'done_column_id' => $columns[2],
@@ -114,7 +114,7 @@ class KanbanServiceTest extends TestCase
         $this->assertEquals(4, $columns->filter(fn($column) => $column->column_type_id != ColumnType::NONE)->count());
         $this->assertEquals(ColumnType::NONE, $columns[4]->column_type_id);
 
-        $this->service->enableKanban($board, [
+        $this->service->enable($board, [
             'todo_column_id' => $columns[0],
             'inprogress_column_id' => 0,
             'done_column_id' => $columns[2],
@@ -130,7 +130,7 @@ class KanbanServiceTest extends TestCase
         $this->assertEquals('On Review', $columns[6]->name);
 
         // Dont pass optional columns, so columns with that types should unset.
-        $this->service->enableKanban($board, [
+        $this->service->enable($board, [
             'todo_column_id' => $columns[0],
             'inprogress_column_id' => $columns[5],
             'done_column_id' => $columns[2],
@@ -159,7 +159,7 @@ class KanbanServiceTest extends TestCase
 
         $this->assertDatabaseCount('board_module', 1);
 
-        $this->service->disableKanban($board);
+        $this->service->disable($board);
 
         $this->assertDatabaseCount('board_module', 0);
         $columns = $columns->fresh();

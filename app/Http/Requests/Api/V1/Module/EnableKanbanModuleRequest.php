@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api\V1\Module;
 
 use App\Rules\Api\ColumnInSameBoard;
 use App\Rules\Api\MaxColumnsPerBoard;
-use App\Services\Boards\ModuleService;
+use App\Services\Modules\KanbanService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -57,7 +57,7 @@ class EnableKanbanModuleRequest extends FormRequest
         $newColumns = 0;
 
         foreach ($data as $key => $value) {
-            if (array_key_exists($key, ModuleService::$availableColumns) && $value == 0) {
+            if (array_key_exists($key, KanbanService::$availableColumns) && $value == 0) {
                 $newColumns++;
             }
         }
@@ -71,6 +71,6 @@ class EnableKanbanModuleRequest extends FormRequest
     {
         return array_map(function ($value) {
                 return 'different:' . $value;
-        }, array_keys(array_diff_key(ModuleService::$availableColumns, [$column => 0])));
+        }, array_keys(array_diff_key(KanbanService::$availableColumns, [$column => 0])));
     }
 }
