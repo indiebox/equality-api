@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use App\Services\Boards\ModuleService;
-use App\Services\Contracts\Boards\ModuleService as ModuleServiceContract;
+use App\Services\Contracts\Modules\KanbanService as KanbanServiceContract;
 use App\Services\Contracts\Image\ImageService as ImageServiceContract;
 use App\Services\Contracts\Projects\LeaderService as LeaderServiceContract;
 use App\Services\Image\ImageService;
+use App\Services\Modules\KanbanService;
 use App\Services\Projects\LeaderService;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
     public $singletons = [
         ImageServiceContract::class => ImageService::class,
         LeaderServiceContract::class => LeaderService::class,
-        ModuleServiceContract::class => ModuleService::class,
+        KanbanServiceContract::class => KanbanService::class,
     ];
 
     /**

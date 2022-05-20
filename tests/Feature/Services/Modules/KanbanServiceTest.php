@@ -1,18 +1,19 @@
 <?php
 
-namespace Tests\Feature\Services\Boards;
+namespace Tests\Feature\Services\Modules;
 
 use App\Models\Board;
+use App\Models\Card;
 use App\Models\Column;
 use App\Models\ColumnType;
 use App\Models\Module;
 use App\Models\Project;
 use App\Models\Team;
-use App\Services\Contracts\Boards\ModuleService;
+use App\Services\Contracts\Modules\KanbanService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
-class ModuleServiceTest extends TestCase
+class KanbanServiceTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -25,7 +26,7 @@ class ModuleServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->service = app(ModuleService::class);
+        $this->service = app(KanbanService::class);
     }
 
     public function test_enable_kanban_method_with_single_column()
@@ -163,5 +164,95 @@ class ModuleServiceTest extends TestCase
         $this->assertDatabaseCount('board_module', 0);
         $columns = $columns->fresh();
         $this->assertEquals(0, $columns->filter(fn($column) => $column->column_type_id != ColumnType::NONE)->count());
+    }
+
+    public function test_can_move_card_to_column_module()
+    {
+        $board = Board::factory()->project(Project::factory()->team(Team::factory()))->create();
+        $columns = Column::factory(4)->board($board)->sequence(
+            ['column_type_id' => ColumnType::NONE],
+            ['column_type_id' => ColumnType::TODO],
+            ['column_type_id' => ColumnType::IN_PROGRESS],
+            ['column_type_id' => ColumnType::DONE],
+        )->create();
+
+        // None -> ToDo
+        $card = Card::factory()->column($columns[0])->create();
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[3]));
+
+        // ToDo -> None; ToDo -> InProgress
+        $card = Card::factory()->column($columns[1])->create();
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[3]));
+
+        // InProgress -> ToDo; InProgress -> Done
+        $card = Card::factory()->column($columns[2])->create();
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[3]));
+
+        // Done -> InProgress
+        $card = Card::factory()->column($columns[3])->create();
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[3]));
+    }
+    public function test_can_move_card_to_column_module_with_on_review_column()
+    {
+        $board = Board::factory()->project(Project::factory()->team(Team::factory()))->create();
+        $columns = Column::factory(5)->board($board)->sequence(
+            ['column_type_id' => ColumnType::NONE],
+            ['column_type_id' => ColumnType::TODO],
+            ['column_type_id' => ColumnType::IN_PROGRESS],
+            ['column_type_id' => ColumnType::ON_REVIEW],
+            ['column_type_id' => ColumnType::DONE],
+        )->create();
+
+        // None -> ToDo
+        $card = Card::factory()->column($columns[0])->create();
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[3]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[4]));
+
+        // ToDo -> None; ToDo -> InProgress
+        $card = Card::factory()->column($columns[1])->create();
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[3]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[4]));
+
+        // InProgress -> ToDo; InProgress -> OnReview
+        $card = Card::factory()->column($columns[2])->create();
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[3]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[4]));
+
+        // OnReview -> InProgress; OnReview -> Done
+        $card = Card::factory()->column($columns[3])->create();
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[3]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[4]));
+
+        // Done -> OnReview
+        $card = Card::factory()->column($columns[4])->create();
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[0]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[1]));
+        $this->assertFalse($this->service->canMoveCardToColumn($card, $columns[2]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[3]));
+        $this->assertTrue($this->service->canMoveCardToColumn($card, $columns[4]));
     }
 }

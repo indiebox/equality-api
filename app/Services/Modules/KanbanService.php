@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Services\Boards;
+namespace App\Services\Modules;
 
 use App\Models\Board;
+use App\Models\Card;
 use App\Models\Column;
 use App\Models\ColumnType;
 use App\Models\Module;
-use App\Services\Contracts\Boards\ModuleService as ModuleServiceContract;
+use App\Services\Contracts\Modules\KanbanService as KanbanServiceContract;
 use Illuminate\Support\Facades\DB;
 
-class ModuleService implements ModuleServiceContract
+class KanbanService implements KanbanServiceContract
 {
     /**
      * Available column types.
@@ -41,6 +42,32 @@ class ModuleService implements ModuleServiceContract
         });
     }
 
+    public function canMoveCardToColumn(Card $card, Column $column)
+    {
+        $order = $this->getColumnsMovementOrder($column->board);
+        $oldColumn = $card->column;
+        $index = array_search($column->column_type_id, $order);
+
+        $allowedTypes = [];
+        if ($index == 0) {
+            $allowedTypes[] = $order[$index + 1];
+        } elseif ($index == count($order) - 1) {
+            $allowedTypes[] = $order[$index - 1];
+        } else {
+            $allowedTypes[] = $order[$index - 1];
+            $allowedTypes[] = $order[$index + 1];
+        }
+
+        $allowedTypes[] = $order[$index];
+
+        return in_array($oldColumn->column_type_id, $allowedTypes);
+    }
+
+    /**
+     * Setup the kanban module with settings.
+     * @param Board $board
+     * @param array $settings
+     */
     protected function setupKanbanModule(Board $board, array $settings)
     {
         $columns = array_intersect_key($settings, static::$availableColumns);
@@ -61,6 +88,11 @@ class ModuleService implements ModuleServiceContract
         }
     }
 
+    /**
+     * Create the new kanban-related column.
+     * @param Board $board
+     * @param integer $columnType
+     */
     protected function createColumn(Board $board, int $columnType)
     {
         $columnName = match ($columnType) {
@@ -74,5 +106,24 @@ class ModuleService implements ModuleServiceContract
         $column->columnType()->associate($columnType);
         $column->board()->associate($board);
         $column->moveToEnd();
+    }
+
+    /**
+     * Get the order of movement columns.
+     * @param Board $board
+     * @return array
+     */
+    protected function getColumnsMovementOrder(Board $board)
+    {
+        $baseOrder = collect([
+            ColumnType::TODO,
+            ColumnType::IN_PROGRESS,
+            ColumnType::ON_REVIEW,
+            ColumnType::DONE,
+        ]);
+
+        $columns = $board->columns()->kanbanRelated()->pluck('column_type_id');
+
+        return $baseOrder->intersect($columns)->prepend(ColumnType::NONE)->values()->toArray();
     }
 }
