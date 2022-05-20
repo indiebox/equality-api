@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Card;
 use App\Models\Column;
 use App\Models\User;
+use App\Services\Contracts\Modules\KanbanService;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CardPolicy
@@ -57,10 +58,21 @@ class CardPolicy
         return $card->team->isMember($user);
     }
 
+    /**
+     * Determine whether the user can update the card.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Card  $card
+     * @param  \App\Models\Column  $column
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
     public function move(User $user, Card $card, Column $column)
     {
-        return $card->team->isMember($user)
+        $baseCondition = $card->team->isMember($user)
             && $column->team->is($card->team);
+
+        return $baseCondition
+            && app(KanbanService::class)->canMoveCardToColumn($card, $column);
     }
 
     /**
