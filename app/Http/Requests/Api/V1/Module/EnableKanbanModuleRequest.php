@@ -6,6 +6,7 @@ use App\Rules\Api\ColumnInSameBoard;
 use App\Rules\Api\MaxColumnsPerBoard;
 use App\Services\Boards\ModuleService;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class EnableKanbanModuleRequest extends FormRequest
 {
@@ -19,12 +20,28 @@ class EnableKanbanModuleRequest extends FormRequest
         $board = $this->route('board');
 
         return [
-            'todo_column_id' => ['required', 'integer', 'min:0', new ColumnInSameBoard($this, $board)],
-            'inprogress_column_id' => ['required', 'integer', 'min:0', new ColumnInSameBoard($this, $board)],
-            'done_column_id' => ['required', 'integer', 'min:0', new ColumnInSameBoard($this, $board)],
+            'todo_column_id' => [
+                'required', 'integer', 'min:0',
+                Rule::when($this->todo_column_id != 0, $this->getDifferentRule('todo_column_id')),
+                new ColumnInSameBoard($board),
+            ],
+            'inprogress_column_id' => [
+                'required', 'integer', 'min:0',
+                Rule::when($this->inprogress_column_id != 0, $this->getDifferentRule('inprogress_column_id')),
+                new ColumnInSameBoard($board),
+            ],
+            'done_column_id' => [
+                'required', 'integer', 'min:0',
+                Rule::when($this->done_column_id != 0, $this->getDifferentRule('done_column_id')),
+                new ColumnInSameBoard($board),
+            ],
 
             // Optional columns.
-            'onreview_column_id' => ['sometimes', 'required', 'integer', 'min:0', new ColumnInSameBoard($this, $board)],
+            'onreview_column_id' => [
+                'sometimes', 'required', 'integer', 'min:0',
+                Rule::when($this->onreview_column_id != 0, $this->getDifferentRule('onreview_column_id')),
+                new ColumnInSameBoard($board),
+            ],
         ];
     }
 
@@ -48,5 +65,12 @@ class EnableKanbanModuleRequest extends FormRequest
         if ($newColumns != 0) {
             $validator->addRules(['board' => [new MaxColumnsPerBoard($this->route('board'), $newColumns)]]);
         }
+    }
+
+    protected function getDifferentRule($column)
+    {
+        return array_map(function ($value) {
+                return 'different:' . $value;
+        }, array_keys(array_diff_key(ModuleService::$availableColumns, [$column => 0])));
     }
 }
