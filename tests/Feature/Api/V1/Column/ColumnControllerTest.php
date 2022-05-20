@@ -7,6 +7,7 @@ use App\Events\Api\Columns\ColumnOrderChanged;
 use App\Events\Api\Columns\ColumnUpdated;
 use App\Models\Board;
 use App\Models\Column;
+use App\Models\ColumnType;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
@@ -223,11 +224,23 @@ class ColumnControllerTest extends TestCase
         });
     }
 
-    public function test_cant_delete_without_permissions()
+    public function test_cant_delete_in_not_your_team()
     {
         $project = Project::factory()->team(Team::factory())->create();
         $board = Board::factory()->project($project)->create();
         $column = Column::factory()->board($board)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->deleteJson('/api/v1/columns/' . $column->id);
+
+        $response->assertForbidden();
+    }
+    public function test_cant_delete_kanban_related()
+    {
+        $project = Project::factory()->team(Team::factory())->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory()->board($board)->create(['column_type_id' => ColumnType::TODO]);
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
