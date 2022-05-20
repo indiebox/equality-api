@@ -5,25 +5,42 @@ namespace App\Rules\Api;
 use App\Models\Card;
 use App\Models\Column;
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\Validation\ValidatorAwareRule;
+use Illuminate\Validation\Validator;
 
-class CardInSameColumn implements Rule
+/**
+ * None: This rule setup actual \App\Models\Card after complete validation.
+ * If you need to get the original data(id), get it from model.
+ */
+class CardInSameColumn implements Rule, ValidatorAwareRule
 {
-    protected $request;
-
     protected $column;
 
     protected $attribute;
+
+    protected $card;
 
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct(Request $request, Column $column)
+    public function __construct(Column $column)
     {
-        $this->request = $request;
         $this->column = $column;
+    }
+
+    public function setValidator($validator)
+    {
+        $validator->after(function (Validator $validator) {
+            if ($this->card == null) {
+                return;
+            }
+
+            $data = [$this->attribute => $this->card];
+            $validator->setData(array_merge($validator->getData(), $data));
+            request()->merge($data);
+        });
     }
 
     /**
@@ -47,7 +64,7 @@ class CardInSameColumn implements Rule
             return false;
         }
 
-        $this->request->merge([$attribute => $card]);
+        $this->card = $card;
 
         return true;
     }

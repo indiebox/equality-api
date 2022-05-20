@@ -22,7 +22,7 @@ class OrderCardRequest extends FormRequest
         return [
             'after' => [
                 'present', 'integer', 'min:0',
-                new CardInSameColumn($this, $column),
+                new CardInSameColumn($column),
             ],
         ];
     }

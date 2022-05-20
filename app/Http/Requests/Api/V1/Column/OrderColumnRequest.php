@@ -22,7 +22,7 @@ class OrderColumnRequest extends FormRequest
         return [
             'after' => [
                 'required', 'integer', 'min:0',
-                new ColumnInSameBoard($this, $board),
+                new ColumnInSameBoard($board),
             ],
         ];
     }
