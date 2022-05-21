@@ -35,7 +35,6 @@ class ModuleControllerTest extends TestCase
         $team = Team::factory()->create();
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
-        Module::find(Module::KANBAN)->boards()->attach($board);
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
@@ -45,10 +44,25 @@ class ModuleControllerTest extends TestCase
             ->assertOk()
             ->assertJson(function ($json) {
                 $json->has('data', 1, function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'enabled']);
                 });
             })
-            ->assertJsonPath('data.0.id', Module::KANBAN);
+            ->assertJsonPath('data.0.id', Module::KANBAN)
+            ->assertJsonPath('data.0.enabled', false);
+
+        Module::find(Module::KANBAN)->boards()->attach($board);
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/modules');
+
+        $response
+            ->assertOk()
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll(['id', 'name', 'enabled']);
+                });
+            })
+            ->assertJsonPath('data.0.id', Module::KANBAN)
+            ->assertJsonPath('data.0.enabled', true);
     }
 
     public function test_cant_enable_kanban_module_in_not_your_team()

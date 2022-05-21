@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api\V1\Board;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Module\EnableKanbanModuleRequest;
-use App\Http\Resources\V1\Board\ModuleResource;
+use App\Http\Resources\V1\Board\ModuleCollection;
 use App\Models\Board;
+use App\Models\Module;
 use App\Services\Contracts\Modules\KanbanService;
 
 class ModuleController extends Controller
@@ -17,9 +18,15 @@ class ModuleController extends Controller
 
     public function index(Board $board)
     {
-        $modules = $board->modules()->get();
+        $modules = Module::all()->map(function ($module) use ($board) {
+            return [
+                'id' => $module->id,
+                'name' => $module->name,
+                'enabled' => $board->modules?->find($module->id) != null,
+            ];
+        });
 
-        return ModuleResource::collection($modules);
+        return new ModuleCollection($modules);
     }
 
     public function enableKanban(EnableKanbanModuleRequest $request, Board $board)
