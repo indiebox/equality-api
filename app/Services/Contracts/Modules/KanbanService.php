@@ -12,6 +12,12 @@ use App\Models\Column;
 interface KanbanService
 {
     /**
+     * Get the settings of `Kanban` module for board.
+     * @param Board $board The board.
+     */
+    public function getSettings(Board $board);
+
+    /**
      * Enable `Kanban` module for board.
      * @param Board $board The board.
      * @param array $settings The settings.

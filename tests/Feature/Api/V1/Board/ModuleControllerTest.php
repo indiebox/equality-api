@@ -65,6 +65,80 @@ class ModuleControllerTest extends TestCase
             ->assertJsonPath('data.0.enabled', true);
     }
 
+    public function test_cant_view_settings_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/modules');
+
+        $response->assertForbidden();
+    }
+    public function test_cant_view_kanban_settings_when_module_disabled()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/modules/kanban');
+
+        $response
+            ->assertForbidden()
+            ->assertJson(['message' => 'Kanban module is disabled.']);
+    }
+    public function test_can_view_kanban_settings()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        Module::find(Module::KANBAN)->boards()->attach($board);
+        $columns = Column::factory(3)->sequence(
+            ['column_type_id' => ColumnType::TODO],
+            ['column_type_id' => ColumnType::IN_PROGRESS],
+            ['column_type_id' => ColumnType::DONE],
+        )->board($board)->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/modules/kanban');
+
+        $response
+            ->assertOk()
+            ->assertJson(function ($json) {
+                $json->has('data.todo_column_id');
+                $json->has('data.inprogress_column_id');
+                $json->has('data.done_column_id');
+                $json->has('data.onreview_column_id');
+            })
+            ->assertJsonPath('data.todo_column_id', $columns[0]->id)
+            ->assertJsonPath('data.inprogress_column_id', $columns[1]->id)
+            ->assertJsonPath('data.done_column_id', $columns[2]->id)
+            ->assertJsonPath('data.onreview_column_id', 0);
+
+        $columns[1]->column_type_id = ColumnType::NONE;
+        $columns[1]->save();
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/modules/kanban');
+
+        $response
+            ->assertOk()
+            ->assertJson(function ($json) {
+                $json->has('data.todo_column_id');
+                $json->has('data.inprogress_column_id');
+                $json->has('data.done_column_id');
+                $json->has('data.onreview_column_id');
+            })
+            ->assertJsonPath('data.todo_column_id', $columns[0]->id)
+            ->assertJsonPath('data.inprogress_column_id', 0)
+            ->assertJsonPath('data.done_column_id', $columns[2]->id)
+            ->assertJsonPath('data.onreview_column_id', 0);
+    }
+
     public function test_cant_enable_kanban_module_in_not_your_team()
     {
         $team = Team::factory()->create();

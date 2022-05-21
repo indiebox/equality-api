@@ -25,6 +25,22 @@ class ModuleController extends Controller
         return ModuleResource::collection($modules);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Kanban module
+    |--------------------------------------------------------------------------
+    |
+    | Endpoints related to Kanban module.
+    |
+    */
+
+    public function kanbanSettings(Board $board)
+    {
+        $settings = $this->kanban->getSettings($board);
+
+        return response(['data' => $settings]);
+    }
+
     public function enableKanban(EnableKanbanModuleRequest $request, Board $board)
     {
         $this->kanban->enable($board, $request->validated());

@@ -24,6 +24,21 @@ class KanbanService implements KanbanServiceContract
         'onreview_column_id' => ColumnType::ON_REVIEW,
     ];
 
+    public function getSettings(Board $board)
+    {
+        if (!$board->modules()->where('module_id', Module::KANBAN)->exists()) {
+            abort(403, "Kanban module is disabled.");
+        }
+
+        $columns = $board->columns()->kanbanRelated()->get();
+
+        return collect(static::$availableColumns)->map(fn() => 0)->merge($columns->flatMap(function ($column) {
+            $index = array_search($column->column_type_id, static::$availableColumns);
+
+            return [$index => $column->id];
+        }));
+    }
+
     public function enable(Board $board, array $settings)
     {
         DB::transaction(function () use ($board, $settings) {
