@@ -18,7 +18,7 @@ class StoreCardRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:65535'],
-            'after_card' => ['nullable', 'integer', 'min:0', new CardInSameColumn($this->route('column'))],
+            'after_card' => ['nullable', 'integer', 'min:0', new CardInSameColumn($this, $this->route('column'))],
 
             'column' => [new MaxCardsPerColumn($this->route('column'))],
         ];

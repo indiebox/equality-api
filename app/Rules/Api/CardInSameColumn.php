@@ -6,6 +6,7 @@ use App\Models\Card;
 use App\Models\Column;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Contracts\Validation\ValidatorAwareRule;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Validator;
 
 /**
@@ -14,8 +15,6 @@ use Illuminate\Validation\Validator;
  */
 class CardInSameColumn implements Rule, ValidatorAwareRule
 {
-    protected $column;
-
     protected $attribute;
 
     protected $card;
@@ -25,9 +24,10 @@ class CardInSameColumn implements Rule, ValidatorAwareRule
      *
      * @return void
      */
-    public function __construct(Column $column)
-    {
-        $this->column = $column;
+    public function __construct(
+        protected Request $request,
+        protected Column $column
+    ) {
     }
 
     public function setValidator($validator)
@@ -39,7 +39,7 @@ class CardInSameColumn implements Rule, ValidatorAwareRule
 
             $data = [$this->attribute => $this->card];
             $validator->setData(array_merge($validator->getData(), $data));
-            request()->merge($data);
+            $this->request->merge($data);
         });
     }
 

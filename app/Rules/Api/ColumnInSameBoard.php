@@ -6,12 +6,11 @@ use App\Models\Board;
 use App\Models\Column;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Contracts\Validation\ValidatorAwareRule;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Validator;
 
 class ColumnInSameBoard implements Rule, ValidatorAwareRule
 {
-    protected $board;
-
     protected $attribute;
 
     protected $column;
@@ -21,9 +20,10 @@ class ColumnInSameBoard implements Rule, ValidatorAwareRule
      *
      * @return void
      */
-    public function __construct(Board $board)
-    {
-        $this->board = $board;
+    public function __construct(
+        protected Request $request,
+        protected Board $board
+    ) {
     }
 
     public function setValidator($validator)
@@ -35,7 +35,7 @@ class ColumnInSameBoard implements Rule, ValidatorAwareRule
 
             $data = [$this->attribute => $this->column];
             $validator->setData(array_merge($validator->getData(), $data));
-            request()->merge($data);
+            $this->request->merge($data);
         });
     }
 

@@ -18,29 +18,30 @@ class EnableKanbanModuleRequest extends FormRequest
     public function rules()
     {
         $board = $this->route('board');
+        $sameBoardRule = new ColumnInSameBoard($this, $board);
 
         return [
             'todo_column_id' => [
                 'required', 'integer', 'min:0',
                 Rule::when($this->todo_column_id != 0, $this->getDifferentRule('todo_column_id')),
-                new ColumnInSameBoard($board),
+                $sameBoardRule,
             ],
             'inprogress_column_id' => [
                 'required', 'integer', 'min:0',
                 Rule::when($this->inprogress_column_id != 0, $this->getDifferentRule('inprogress_column_id')),
-                new ColumnInSameBoard($board),
+                $sameBoardRule,
             ],
             'done_column_id' => [
                 'required', 'integer', 'min:0',
                 Rule::when($this->done_column_id != 0, $this->getDifferentRule('done_column_id')),
-                new ColumnInSameBoard($board),
+                $sameBoardRule,
             ],
 
             // Optional columns.
             'onreview_column_id' => [
                 'sometimes', 'required', 'integer', 'min:0',
                 Rule::when($this->onreview_column_id != 0, $this->getDifferentRule('onreview_column_id')),
-                new ColumnInSameBoard($board),
+                $sameBoardRule,
             ],
         ];
     }

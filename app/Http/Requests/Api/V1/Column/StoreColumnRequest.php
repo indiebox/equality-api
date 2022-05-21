@@ -17,7 +17,7 @@ class StoreColumnRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'after_column' => ['nullable', 'integer', 'min:0', new ColumnInSameBoard($this->route('board'))],
+            'after_column' => ['nullable', 'integer', 'min:0', new ColumnInSameBoard($this, $this->route('board'))],
 
             'board' => [new MaxColumnsPerBoard($this->route('board'))],
         ];
