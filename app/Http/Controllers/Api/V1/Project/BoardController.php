@@ -21,6 +21,7 @@ class BoardController extends Controller
     {
         $boards = QueryBuilder::for($project->boards())
             ->allowedFields([BoardResource::class], [BoardResource::class])
+            ->allowedIncludes(['modules'])
             ->get();
 
         return BoardResource::collection($boards);

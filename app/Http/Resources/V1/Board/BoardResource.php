@@ -22,6 +22,7 @@ class BoardResource extends JsonResource implements ResourceWithFields
             'deleted_at' => $this->when($this->trashed(), $this->deleted_at),
         ], [
             'project' => new ProjectResource($this->whenLoaded('project')),
+            'modules' => ModuleResource::collection($this->whenLoaded('modules')),
         ]);
     }
 
