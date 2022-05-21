@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Board;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Module\EnableKanbanModuleRequest;
+use App\Http\Resources\V1\Board\ModuleResource;
 use App\Models\Board;
 use App\Services\Contracts\Modules\KanbanService;
 
@@ -12,6 +13,13 @@ class ModuleController extends Controller
     public function __construct(
         protected KanbanService $kanban
     ) {
+    }
+
+    public function index(Board $board)
+    {
+        $modules = $board->modules()->get();
+
+        return ModuleResource::collection($modules);
     }
 
     public function enableKanban(EnableKanbanModuleRequest $request, Board $board)

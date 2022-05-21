@@ -183,6 +183,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'prefix' => '{board}/modules',
             'controller' => Board\ModuleController::class,
         ], function () {
+            Route::get('/', 'index')->can('viewAny', [ModuleModel::class, 'board']);
+
             // Kanban.
             Route::put('kanban', 'enableKanban')->can('enableKanban', [ModuleModel::class, 'board']);
             Route::post('kanban/disable', 'disableKanban')->can('disableKanban', [ModuleModel::class, 'board']);

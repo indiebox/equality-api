@@ -18,6 +18,39 @@ class ModuleControllerTest extends TestCase
 {
     use DatabaseTransactions;
 
+    public function test_cant_view_any_in_not_your_team()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/modules');
+
+        $response->assertForbidden();
+    }
+    public function test_can_view_any()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        Module::find(Module::KANBAN)->boards()->attach($board);
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/boards/' . $board->id . '/modules');
+
+        $response
+            ->assertOk()
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll(['id', 'name']);
+                });
+            })
+            ->assertJsonPath('data.0.id', Module::KANBAN);
+    }
+
     public function test_cant_enable_kanban_module_in_not_your_team()
     {
         $team = Team::factory()->create();
