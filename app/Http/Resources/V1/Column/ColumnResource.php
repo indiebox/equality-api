@@ -16,7 +16,7 @@ class ColumnResource extends JsonResource implements ResourceWithFields
     public function toArray($request)
     {
         return $this->visible([
-            'id', 'name', 'created_at', 'updated_at',
+            'id', 'name', 'column_type_id', 'created_at', 'updated_at',
         ]);
     }
 
@@ -27,7 +27,7 @@ class ColumnResource extends JsonResource implements ResourceWithFields
 
     public static function defaultFields(): array
     {
-        return ['id', 'name'];
+        return ['id', 'name', 'column_type_id'];
     }
 
     public static function allowedFields(): array

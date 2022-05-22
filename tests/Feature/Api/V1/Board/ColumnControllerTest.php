@@ -50,7 +50,7 @@ class ColumnControllerTest extends TestCase
             ->assertOk()
             ->assertJson(function ($json) {
                 $json->has('data', 3, function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'column_type_id']);
                 });
             })
             ->assertJsonPath('data.0.id', $columns->get(1)->id)
@@ -72,7 +72,7 @@ class ColumnControllerTest extends TestCase
             ->assertOk()
             ->assertJson(function ($json) {
                 $json->has('data', 2, function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'column_type_id']);
                 });
             })
             ->assertJsonPath('data.0.id', $columns->first()->id)
@@ -93,7 +93,7 @@ class ColumnControllerTest extends TestCase
             ->assertOk()
             ->assertJson(function ($json) {
                 $json->has('data', 2, function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'column_type_id']);
                 });
             })
             ->assertJsonPath('data.0.id', $columns->first()->id)
@@ -153,7 +153,7 @@ class ColumnControllerTest extends TestCase
             ->assertCreated()
             ->assertJson(function ($json) {
                 $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'column_type_id']);
                 });
             });
         $this->assertDatabaseHas('columns', ['board_id' => $board->id, 'name' => $data['name']]);
@@ -191,7 +191,7 @@ class ColumnControllerTest extends TestCase
             ->assertCreated()
             ->assertJson(function ($json) {
                 $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'column_type_id']);
                 });
             });
         $this->assertEquals(1, $columns[0]->order);
@@ -230,7 +230,7 @@ class ColumnControllerTest extends TestCase
             ->assertCreated()
             ->assertJson(function ($json) {
                 $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'column_type_id']);
                 });
             });
         $this->assertEquals(1, $column->order);

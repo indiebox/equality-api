@@ -49,7 +49,7 @@ class ColumnControllerTest extends TestCase
             ->assertJsonPath('data.id', $column->id)
             ->assertJson(function ($json) {
                 $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'column_type_id']);
                 });
             });
     }
@@ -89,7 +89,7 @@ class ColumnControllerTest extends TestCase
             ->assertOk()
             ->assertJson(function ($json) {
                 $json->has('data', function ($json) {
-                    $json->hasAll(['id', 'name']);
+                    $json->hasAll(['id', 'name', 'column_type_id']);
                 });
             });
         $this->assertDatabaseHas('columns', ['board_id' => $board->id] + $data);
