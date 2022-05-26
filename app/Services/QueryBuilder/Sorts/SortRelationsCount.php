@@ -2,7 +2,7 @@
 
 namespace App\Services\QueryBuilder\Sorts;
 
-use App\Services\QueryBuilder\Exceptions\SortQueryException;
+use App\Services\QueryBuilder\Exceptions\InvalidSortQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Spatie\QueryBuilder\QueryBuilderRequest;
@@ -22,7 +22,7 @@ class SortRelationsCount implements Sort
         $fullName = $this->relationName . config('query-builder.count_suffix');
 
         if (!app(QueryBuilderRequest::class)->includes()->contains($fullName)) {
-            throw new SortQueryException(
+            throw new InvalidSortQuery(
                 Response::HTTP_BAD_REQUEST,
                 "Sort by '{$this->relationName}' count allowed only with including '{$fullName}' in query."
             );
