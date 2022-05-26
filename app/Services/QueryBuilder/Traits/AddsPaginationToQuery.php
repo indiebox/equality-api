@@ -27,13 +27,14 @@ trait AddsPaginationToQuery
 
         $args = func_get_args();
         $args[0] = $this->perPage ?? $defaultPerPage;
+
         return $this->__call('cursorPaginate', $args);
     }
 
-    public function allowedCursorPagination($max = null, $min = null)
+    public function allowCursorPagination($max = null, $min = null)
     {
         if ($this->subjectIsModel || $this->subjectIsCollection) {
-            throw new LogicException("Method 'allowedCursorPagination' can`t be used with loaded model(s).");
+            throw new LogicException("Method 'allowCursorPagination' can`t be used with loaded model(s).");
         }
 
         $min ??= config('query-builder.pagination.min_count');
@@ -49,12 +50,11 @@ trait AddsPaginationToQuery
     protected function getPaginationData()
     {
         $key = config('query-builder.pagination.parameter');
-
         if (config('query-builder.request_data_source') === 'body') {
-            return request()->input($key, []);
+            return $this->request->input($key, []);
         }
 
-        return request()->get($key, []);
+        return $this->request->get($key, []);
     }
 
     protected function ensureCursorPaginationValid($min, $max)
