@@ -4,6 +4,7 @@ namespace App\Services\QueryBuilder;
 
 use App\Services\QueryBuilder\Traits\AddsFieldsToQuery;
 use App\Services\QueryBuilder\Traits\AddsIncludesToQuery;
+use App\Services\QueryBuilder\Traits\AddsPaginationToQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ use Spatie\QueryBuilder\QueryBuilderRequest;
  */
 class QueryBuilder extends BaseQueryBuilder
 {
+    use AddsPaginationToQuery;
     use AddsIncludesToQuery {
         allowedIncludes as traitAllowedIncludes;
     }

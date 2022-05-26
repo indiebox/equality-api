@@ -25,6 +25,26 @@ return [
     ],
 
     /*
+     * Pagination settings.
+     */
+    'pagination' => [
+        // The name of the query parameter.
+        'parameter' => 'page',
+
+        // The default min items count.
+        'min_count' => 10,
+
+        // The default max items count.
+        'max_count' => 100,
+
+        // The page[x] key for number of the page(dont work with cursor pagination).
+        'number' => 'number',
+
+        // The page[x] key for count of the items per page.
+        'count' => 'count',
+    ],
+
+    /*
      * Related model counts are included using the relationship name suffixed with this string.
      * For example: GET /users?include=posts_count
      */
