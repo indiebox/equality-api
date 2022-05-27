@@ -25,7 +25,8 @@ class ProjectController extends Controller
                 [ProjectResource::class, UserResource::class => 'leader']
             )
             ->allowedIncludes('leader')
-            ->get();
+            ->allowCursorPagination()
+            ->cursorPaginate(50);
 
         return ProjectResource::collection($projects);
     }

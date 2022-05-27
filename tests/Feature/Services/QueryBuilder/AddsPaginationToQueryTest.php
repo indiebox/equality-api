@@ -45,7 +45,7 @@ class AddsPaginationToQueryTest extends TestCase
 
         $this->expectException(LogicException::class);
 
-        $result = QueryBuilder::for($model)->allowCursorPagination()->cursorPaginate();
+        QueryBuilder::for($model)->allowCursorPagination()->cursorPaginate();
     }
     public function test_cant_use_pagination_at_collection()
     {
@@ -53,14 +53,14 @@ class AddsPaginationToQueryTest extends TestCase
 
         $this->expectException(LogicException::class);
 
-        $result = QueryBuilder::for($model)->allowCursorPagination()->cursorPaginate();
+        QueryBuilder::for($model)->allowCursorPagination()->cursorPaginate();
     }
 
     public function test_cant_use_cursor_pagination_count_lower_than_min()
     {
         $this->expectException(InvalidPaginationQuery::class);
 
-        $result = QueryBuilder::for(QueryableModel::query(), $this->withPaginationCount(1))
+        QueryBuilder::for(QueryableModel::query(), $this->withPaginationCount(1))
             ->allowCursorPagination(30, 10)
             ->cursorPaginate(10);
     }
@@ -68,7 +68,7 @@ class AddsPaginationToQueryTest extends TestCase
     {
         $this->expectException(InvalidPaginationQuery::class);
 
-        $result = QueryBuilder::for(QueryableModel::query(), $this->withPaginationCount(31))
+        QueryBuilder::for(QueryableModel::query(), $this->withPaginationCount(31))
             ->allowCursorPagination(30, 10)
             ->cursorPaginate(10);
     }
@@ -83,7 +83,7 @@ class AddsPaginationToQueryTest extends TestCase
     }
     public function test_allow_cursor_pagination_applied()
     {
-        $model = $this->createModel();
+        $this->createModel();
 
         $result = QueryBuilder::for(QueryableModel::query(), $this->withPaginationCount(15))
             ->allowCursorPagination(30, 10)
