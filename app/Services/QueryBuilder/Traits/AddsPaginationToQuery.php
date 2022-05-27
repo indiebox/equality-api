@@ -19,7 +19,7 @@ trait AddsPaginationToQuery
      * @param  \Illuminate\Pagination\Cursor|string|null  $cursor
      * @return \Illuminate\Contracts\Pagination\CursorPaginator
      */
-    public function cursorPaginate($defaultPerPage = null, $columns = ['*'], $cursorName = 'cursor', $cursor = null)
+    public function cursorPaginate($defaultPerPage, $columns = ['*'], $cursorName = 'cursor', $cursor = null)
     {
         if ($this->subjectIsModel || $this->subjectIsCollection) {
             throw new LogicException("Method 'cursorPaginate' can`t be used with loaded model(s).");
