@@ -26,7 +26,8 @@ class TeamController extends Controller
             ->allowedFields([TeamResource::class], [TeamResource::class])
             ->allowedSorts(['created_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
             ->allowedIncludes(['members_count'])
-            ->get();
+            ->allowCursorPagination()
+            ->cursorPaginate(50);
 
         return TeamResource::collection($teams);
     }
