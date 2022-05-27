@@ -70,7 +70,8 @@ class TeamController extends Controller
                 [TeamMemberResource::class],
                 'members'
             )
-            ->get();
+            ->allowCursorPagination()
+            ->cursorPaginate(50);
 
         return TeamMemberResource::collection($members);
     }
