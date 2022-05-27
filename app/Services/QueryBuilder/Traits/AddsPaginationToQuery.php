@@ -28,7 +28,7 @@ trait AddsPaginationToQuery
         $args = func_get_args();
         $args[0] = $this->perPage ?? $defaultPerPage;
 
-        return $this->__call('cursorPaginate', $args)->withQueryString();
+        return $this->getResults(__FUNCTION__, $args)->withQueryString();
     }
 
     public function allowCursorPagination($max = null, $min = null)

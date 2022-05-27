@@ -174,21 +174,12 @@ class QueryBuilder extends BaseQueryBuilder
 
     /**
      * Gets results.
-     * @return mixed
+     * @param array $columns
+     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
      */
-    public function get()
+    public function get($columns = ['*'])
     {
-        if ($this->subjectIsModel || $this->subjectIsCollection) {
-            $result = $this->subject;
-
-            $this->unsetRelations();
-        } else {
-            $result = $this->__call('get', func_get_args());
-        }
-
-        $this->applyFieldsToResult($result);
-
-        return $result;
+        return $this->getResults(__FUNCTION__, func_get_args());
     }
 
     public function getEloquentBuilder(): Builder
@@ -222,5 +213,24 @@ class QueryBuilder extends BaseQueryBuilder
         }
 
         return parent::initializeSubject($subject);
+    }
+
+    /**
+     * Get the results of query builder.
+     * @param string $method Method name.
+     */
+    protected function getResults($method, $args)
+    {
+        if ($this->subjectIsModel || $this->subjectIsCollection) {
+            $result = $this->subject;
+
+            $this->unsetRelations();
+        } else {
+            $result = $this->__call($method, $args);
+        }
+
+        $this->applyFieldsToResult($result);
+
+        return $result;
     }
 }

@@ -6,6 +6,7 @@ use App\Services\QueryBuilder\Exceptions\InvalidPaginationQuery;
 use App\Services\QueryBuilder\QueryBuilder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use LogicException;
 use Tests\Feature\Services\QueryBuilder\Stubs\QueryableModel;
 use Tests\TestCase;
@@ -90,6 +91,20 @@ class AddsPaginationToQueryTest extends TestCase
             ->cursorPaginate(10);
 
         $this->assertEquals(15, $result->perPage());
+    }
+    public function test_append_query_string_to_cursor_pagination_result()
+    {
+        $this->createModel();
+        $this->createModel();
+
+        Paginator::queryStringResolver(fn() => ['test' => 1, 'test2' => 'test']);
+
+        $result = QueryBuilder::for(QueryableModel::query())
+            ->allowCursorPagination(30, 1)
+            ->cursorPaginate(1);
+
+        $this->assertEquals(1, $result->perPage());
+        $this->assertStringContainsString('test=1&test2=test&cursor=' . $result->nextCursor()->encode(), $result->nextPageUrl());
     }
 
     /*
