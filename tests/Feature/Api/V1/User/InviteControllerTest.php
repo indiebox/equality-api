@@ -45,7 +45,7 @@ class InviteControllerTest extends TestCase
             ->assertJson(function ($json) {
                 $json->has('data', 2, function ($json) {
                     $json->hasAll(['id', 'team', 'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email'])]);
-                });
+                })->hasAll(['links', 'meta']);
             });
     }
 
