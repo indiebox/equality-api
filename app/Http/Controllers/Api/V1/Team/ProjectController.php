@@ -41,7 +41,8 @@ class ProjectController extends Controller
     {
         $projects = QueryBuilder::for($team->projects()->onlyTrashed())
             ->allowedFields([ProjectResource::class], [ProjectResource::class])
-            ->get();
+            ->allowCursorPagination()
+            ->cursorPaginate(50);
 
         return ProjectResource::collection($projects);
     }
