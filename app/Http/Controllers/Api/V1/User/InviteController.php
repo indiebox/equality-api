@@ -19,7 +19,7 @@ class InviteController extends Controller
      */
     public function index(Request $request)
     {
-        $invites = QueryBuilder::for(auth()->user()->invites()->orderByDesc('updated_at'))
+        $invites = QueryBuilder::for(auth()->user()->invites())
             ->allowedFields([
                 UserInviteResource::class,
                 TeamResource::class => 'team',
@@ -30,6 +30,8 @@ class InviteController extends Controller
                 UserResource::class => 'inviter',
             ])
             ->allowedIncludes(['team', 'inviter'], ['team', 'inviter'])
+            ->allowedSorts('updated_at')
+            ->defaultSorts('-updated_at')
             ->allowCursorPagination()
             ->cursorPaginate(10);
 
