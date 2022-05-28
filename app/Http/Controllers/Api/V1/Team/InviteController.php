@@ -23,7 +23,7 @@ class InviteController extends Controller
      */
     public function index(Request $request, Team $team)
     {
-        $invites = QueryBuilder::for($team->invites())
+        $invites = QueryBuilder::for($team->invites()->orderByDesc('updated_at'))
             ->allowedFilters(AllowedFilter::scope('status', 'filterByStatus')->default('all'))
             ->allowedFields([
                 TeamInviteResource::class,
@@ -34,7 +34,7 @@ class InviteController extends Controller
             ])
             ->allowedIncludes(['inviter', 'invited'], ['inviter', 'invited'])
             ->allowCursorPagination()
-            ->cursorPaginate(50);
+            ->cursorPaginate(20);
 
         return TeamInviteResource::collection($invites);
     }

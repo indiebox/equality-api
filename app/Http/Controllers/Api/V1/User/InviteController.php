@@ -19,7 +19,7 @@ class InviteController extends Controller
      */
     public function index(Request $request)
     {
-        $invites = QueryBuilder::for(auth()->user()->invites())
+        $invites = QueryBuilder::for(auth()->user()->invites()->orderByDesc('updated_at'))
             ->allowedFields([
                 UserInviteResource::class,
                 TeamResource::class => 'team',
