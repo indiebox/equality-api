@@ -32,7 +32,7 @@ return [
         'parameter' => 'page',
 
         // The default min items count.
-        'min_count' => 10,
+        'min_count' => 5,
 
         // The default max items count.
         'max_count' => 100,
