@@ -69,9 +69,10 @@ class TeamController extends Controller
     {
         $members = QueryBuilder::for(
             $team->members()
-                ->orderByDesc('joined_at')
                 ->select(['*', 'team_user.joined_at as joined_at'])
         )->allowedFields([TeamMemberResource::class], [TeamMemberResource::class], 'members')
+        ->allowedSorts(['joined_at'])
+        ->defaultSorts('-joined_at')
         ->allowCursorPagination()
         ->cursorPaginate(25);
 
