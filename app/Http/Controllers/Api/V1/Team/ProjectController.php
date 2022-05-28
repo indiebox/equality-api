@@ -19,12 +19,14 @@ class ProjectController extends Controller
      */
     public function index(Team $team)
     {
-        $projects = QueryBuilder::for($team->projects()->orderByDesc('updated_at'))
+        $projects = QueryBuilder::for($team->projects())
             ->allowedFields(
                 [ProjectResource::class, UserResource::class => 'leader'],
                 [ProjectResource::class, UserResource::class => 'leader']
             )
             ->allowedIncludes('leader')
+            ->allowedSorts(['created_at', 'updated_at'])
+            ->defaultSorts('-updated_at')
             ->allowCursorPagination()
             ->cursorPaginate();
 
@@ -39,8 +41,10 @@ class ProjectController extends Controller
      */
     public function indexTrashed(Team $team)
     {
-        $projects = QueryBuilder::for($team->projects()->onlyTrashed()->orderByDesc('deleted_at'))
+        $projects = QueryBuilder::for($team->projects()->onlyTrashed())
             ->allowedFields([ProjectResource::class], [ProjectResource::class])
+            ->allowedSorts(['created_at', 'deleted_at'])
+            ->defaultSorts('-deleted_at')
             ->allowCursorPagination()
             ->cursorPaginate();
 
