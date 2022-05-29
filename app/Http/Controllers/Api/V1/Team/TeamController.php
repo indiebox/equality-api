@@ -71,6 +71,7 @@ class TeamController extends Controller
             $team->members()
                 ->select(['*', 'team_user.joined_at as joined_at'])
         )->allowedFields([TeamMemberResource::class], [TeamMemberResource::class], 'members')
+            ->allowedFilters(['name'])
             ->allowedSorts(['joined_at'])
             ->defaultSorts('-joined_at')
             ->allowCursorPagination()
