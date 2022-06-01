@@ -22,11 +22,15 @@ class TeamController extends Controller
      */
     public function index()
     {
-        $teams = QueryBuilder::for(auth()->user()->teams())
-            ->allowedFields([TeamResource::class], [TeamResource::class])
-            ->allowedSorts(['created_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
+        $teams = QueryBuilder::for(
+            auth()->user()->teams()
+                ->select(['*', 'team_user.joined_at as joined_at'])
+        )->allowedFields([TeamResource::class], [TeamResource::class])
+            ->allowedSorts(['created_at', 'joined_at', AllowedSort::custom('members_count', new SortRelationsCount('members'))])
+            ->defaultSorts('-joined_at')
             ->allowedIncludes(['members_count'])
-            ->get();
+            ->allowCursorPagination()
+            ->cursorPaginate();
 
         return TeamResource::collection($teams);
     }
@@ -63,13 +67,15 @@ class TeamController extends Controller
      */
     public function members(Team $team)
     {
-        $members = QueryBuilder::for($team->members())
-            ->allowedFields(
-                [TeamMemberResource::class],
-                [TeamMemberResource::class],
-                'members'
-            )
-            ->get();
+        $members = QueryBuilder::for(
+            $team->members()
+                ->select(['*', 'team_user.joined_at as joined_at'])
+        )->allowedFields([TeamMemberResource::class], [TeamMemberResource::class], 'members')
+            ->allowedFilters(['name'])
+            ->allowedSorts(['joined_at'])
+            ->defaultSorts('-joined_at')
+            ->allowCursorPagination()
+            ->cursorPaginate(25);
 
         return TeamMemberResource::collection($members);
     }

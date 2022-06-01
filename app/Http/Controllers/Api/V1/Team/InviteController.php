@@ -33,7 +33,10 @@ class InviteController extends Controller
                 UserResource::class => ['inviter', 'invited'],
             ])
             ->allowedIncludes(['inviter', 'invited'], ['inviter', 'invited'])
-            ->get();
+            ->allowedSorts('updated_at')
+            ->defaultSorts('-updated_at')
+            ->allowCursorPagination()
+            ->cursorPaginate(20);
 
         return TeamInviteResource::collection($invites);
     }

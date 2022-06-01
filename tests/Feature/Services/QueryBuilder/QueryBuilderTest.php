@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Services\QueryBuilder;
 
-use App\Services\QueryBuilder\Exceptions\SortQueryException;
+use App\Services\QueryBuilder\Exceptions\InvalidSortQuery;
 use App\Services\QueryBuilder\QueryBuilder;
 use App\Services\QueryBuilder\Sorts\SortRelationsCount;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -184,7 +184,7 @@ class QueryBuilderTest extends TestCase
      */
     public function test_sort_relations_count_not_available_without_include_count()
     {
-        $this->expectException(SortQueryException::class);
+        $this->expectException(InvalidSortQuery::class);
 
         $result = QueryBuilder::for(QueryableModel::query(), $this->withSorts('related_count'))
             ->allowedSorts([AllowedSort::custom('related_count', new SortRelationsCount('related'))])

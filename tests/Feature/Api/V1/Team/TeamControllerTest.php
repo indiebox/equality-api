@@ -37,7 +37,7 @@ class TeamControllerTest extends TestCase
             ->assertJson(function ($json) {
                 $json->has('data', 1, function ($json) {
                     $json->hasAll(['id', 'name', 'logo']);
-                });
+                })->hasAll(['links', 'meta']);
             });
     }
 
@@ -91,7 +91,7 @@ class TeamControllerTest extends TestCase
             ->assertJson(function ($json) {
                 $json->has('data', 1, function (AssertableJson $json) {
                     $json->hasAll(['id', 'name', 'email', 'joined_at']);
-                });
+                })->hasAll(['links', 'meta']);
             });
     }
 

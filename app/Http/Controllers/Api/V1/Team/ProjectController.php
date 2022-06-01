@@ -25,7 +25,10 @@ class ProjectController extends Controller
                 [ProjectResource::class, UserResource::class => 'leader']
             )
             ->allowedIncludes('leader')
-            ->get();
+            ->allowedSorts(['created_at', 'updated_at'])
+            ->defaultSorts('-updated_at')
+            ->allowCursorPagination()
+            ->cursorPaginate();
 
         return ProjectResource::collection($projects);
     }
@@ -40,7 +43,10 @@ class ProjectController extends Controller
     {
         $projects = QueryBuilder::for($team->projects()->onlyTrashed())
             ->allowedFields([ProjectResource::class], [ProjectResource::class])
-            ->get();
+            ->allowedSorts(['created_at', 'deleted_at'])
+            ->defaultSorts('-deleted_at')
+            ->allowCursorPagination()
+            ->cursorPaginate();
 
         return ProjectResource::collection($projects);
     }

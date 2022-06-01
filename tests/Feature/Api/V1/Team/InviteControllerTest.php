@@ -49,7 +49,7 @@ class InviteControllerTest extends TestCase
                         'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
                         'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
                     ]);
-                });
+                })->hasAll(['links', 'meta']);
             });
 
         // Filter pending.
@@ -66,7 +66,7 @@ class InviteControllerTest extends TestCase
                         'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
                         'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
                     ]);
-                });
+                })->hasAll(['links', 'meta']);
             });
 
         // Filter accepted.
@@ -83,7 +83,7 @@ class InviteControllerTest extends TestCase
                         'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
                         'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
                     ]);
-                });
+                })->hasAll(['links', 'meta']);
             });
 
         // Filter declined.
@@ -100,7 +100,7 @@ class InviteControllerTest extends TestCase
                         'inviter' => fn($json) => $json->hasAll(['id', 'name', 'email']),
                         'invited' => fn($json) => $json->hasAll(['id', 'name', 'email']),
                     ]);
-                });
+                })->hasAll(['links', 'meta']);
             });
     }
 

@@ -40,9 +40,9 @@ class ProjectControllerTest extends TestCase
             ->assertJson(function ($json) {
                 $json->has('data', 2, function ($json) {
                     $json->hasAll(['id', 'name', 'image']);
-                });
+                })->hasAll(['links', 'meta']);
             })
-            ->assertJsonPath('data.0.id', $projects->first()->id)
+            ->assertJsonPath('data.0.id', $projects->get(0)->id)
             ->assertJsonPath('data.1.id', $projects->get(1)->id);
     }
     public function test_cant_view_trashed_in_not_your_team()
@@ -71,7 +71,7 @@ class ProjectControllerTest extends TestCase
             ->assertJson(function ($json) {
                 $json->has('data', 2, function ($json) {
                     $json->hasAll(['id', 'name', 'image']);
-                });
+                })->hasAll(['links', 'meta']);
             })
             ->assertJsonPath('data.0.id', $projects->first()->id)
             ->assertJsonPath('data.1.id', $projects->get(1)->id);

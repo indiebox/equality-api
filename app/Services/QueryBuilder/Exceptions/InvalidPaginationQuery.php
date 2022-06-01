@@ -4,6 +4,6 @@ namespace App\Services\QueryBuilder\Exceptions;
 
 use Spatie\QueryBuilder\Exceptions\InvalidQuery;
 
-class SortQueryException extends InvalidQuery
+class InvalidPaginationQuery extends InvalidQuery
 {
 }
