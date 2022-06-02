@@ -170,6 +170,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/', 'destroy')->can('delete', 'project');
         });
 
+        Route::get('/', 'index');
         Route::post('/{trashed:project}/restore', 'restore')->can('restore', 'trashed:project');
     });
 

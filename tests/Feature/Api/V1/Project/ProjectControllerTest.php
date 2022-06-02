@@ -13,6 +13,30 @@ class ProjectControllerTest extends TestCase
 {
     use DatabaseTransactions;
 
+    public function test_cant_view_any_unauthorized()
+    {
+        $response = $this->getJson('/api/v1/projects');
+
+        $response->assertUnauthorized();
+    }
+    public function test_can_view_any()
+    {
+        $team = Team::factory()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Project::factory()->team($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects');
+
+        $response
+            ->assertOk()
+            ->assertJson(function ($json) {
+                $json->has('data', 1, function ($json) {
+                    $json->hasAll(['id', 'name', 'image']);
+                })->hasAll(['links', 'meta']);
+            });
+    }
+
     public function test_cant_view_in_not_your_team()
     {
         $project = Project::factory()->team(Team::factory())->create();
