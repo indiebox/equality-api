@@ -45,6 +45,15 @@ class ProjectController extends Controller
         return new UserResource($leader);
     }
 
+    public function team(Project $project)
+    {
+        $team = QueryBuilder::for($project->team)
+            ->allowedFields([TeamResource::class => 'team'], [TeamResource::class => 'team'], 'team')
+            ->get();
+
+        return new TeamResource($team);
+    }
+
     /**
      * Update the specified resource in storage.
      *

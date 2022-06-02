@@ -71,6 +71,35 @@ class ProjectControllerTest extends TestCase
             });
     }
 
+    public function test_cant_view_project_team_in_not_your_team()
+    {
+        $user = User::factory()->create();
+        $project = Project::factory()->team(Team::factory())->leader($user)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/team');
+
+        $response->assertForbidden();
+    }
+    public function test_can_view_project_team()
+    {
+        $team = Team::factory()->create();
+        $user = User::factory()->hasAttached($team)->create();
+        $project = Project::factory()->team($team)->leader($user)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/' . $project->id . '/team');
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.id', $team->id)
+            ->assertJson(function ($json) {
+                $json->has('data', function ($json) {
+                    $json->hasAll(['id', 'name', 'logo']);
+                });
+            });
+    }
+
     public function test_cant_update_without_permissions()
     {
         $team = Team::factory()->create();
