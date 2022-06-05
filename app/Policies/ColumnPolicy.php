@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Board;
 use App\Models\Column;
+use App\Models\ColumnType;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -68,6 +69,7 @@ class ColumnPolicy
      */
     public function delete(User $user, Column $column)
     {
-        return $column->team->isMember($user);
+        return $column->team->isMember($user)
+            && $column->column_type_id == ColumnType::NONE;
     }
 }

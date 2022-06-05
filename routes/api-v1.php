@@ -12,6 +12,7 @@ use App\Models\Card as CardModel;
 use App\Models\Column as ColumnModel;
 use App\Models\Invite as InviteModel;
 use App\Models\LeaderNomination as LeaderNominationModel;
+use App\Models\Module as ModuleModel;
 use App\Models\Project as ProjectModel;
 use Illuminate\Support\Facades\Route;
 
@@ -188,6 +189,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::controller(Board\ColumnController::class)->group(function () {
             Route::get('{anyBoard}/columns', 'index')->can('viewAny', [ColumnModel::class, 'anyBoard']);
             Route::post('{board}/columns', 'store')->can('create', [ColumnModel::class, 'board']);
+        });
+
+        // Modules.
+        Route::group([
+            'prefix' => '{board}/modules',
+            'controller' => Board\ModuleController::class,
+        ], function () {
+            Route::get('/', 'index')->can('viewAny', [ModuleModel::class, 'board']);
+
+            // Kanban.
+            Route::get('kanban', 'kanbanSettings')->can('viewSettings', [ModuleModel::class, 'board']);
+            Route::put('kanban', 'enableKanban')->can('enableKanban', [ModuleModel::class, 'board']);
+            Route::post('kanban/disable', 'disableKanban')->can('disableKanban', [ModuleModel::class, 'board']);
         });
 
         Route::get('/{anyBoard}', 'show')->can('view', 'anyBoard');

@@ -21,5 +21,8 @@ class DatabaseSeeder extends Seeder
         $this->call(BoardSeeder::class);
         $this->call(ColumnSeeder::class);
         $this->call(CardSeeder::class);
+
+        $this->call(ColumnTypeSeeder::class);
+        $this->call(ModuleSeeder::class);
     }
 }

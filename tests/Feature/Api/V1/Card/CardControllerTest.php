@@ -9,6 +9,7 @@ use App\Events\Api\Cards\CardUpdated;
 use App\Models\Board;
 use App\Models\Card;
 use App\Models\Column;
+use App\Models\ColumnType;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
@@ -280,7 +281,7 @@ class CardControllerTest extends TestCase
         $board = Board::factory()->project($project)->create();
         $column = Column::factory()->board($board)->create();
         $newColumn = Column::factory()->board($board)->create();
-        Card::factory(MaxCardsPerColumn::MAX_CARDS)->column($newColumn)->create();
+        Card::factory(MaxCardsPerColumn::MAX_ITEMS)->column($newColumn)->create();
 
         $card = Card::factory()->column($column)->create();
         $user = User::factory()->hasAttached($team)->create();
@@ -291,8 +292,26 @@ class CardControllerTest extends TestCase
         $response
             ->assertUnprocessable()
             ->assertJsonPath('errors.column', [
-                trans('validation.max_cards_per_column', ['max' => MaxCardsPerColumn::MAX_CARDS])
+                trans('validation.max_cards_per_column', ['max' => MaxCardsPerColumn::MAX_ITEMS])
             ]);
+    }
+    public function test_cant_move_in_wrong_column_with_kanban_module()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory(3)->board($board)->sequence(
+            ['column_type_id' => ColumnType::TODO],
+            ['column_type_id' => ColumnType::IN_PROGRESS],
+            ['column_type_id' => ColumnType::DONE],
+        )->create();
+        $card = Card::factory()->column($column[0])->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $column[2]->id);
+
+        $response->assertForbidden();
     }
     public function test_can_move()
     {
@@ -469,6 +488,52 @@ class CardControllerTest extends TestCase
             return $event->card->id == $card->id
                 && $event->after == null
                 && $event->column->id == $newColumn->id;
+        });
+    }
+    public function test_can_move_in_correct_column_with_kanban_module()
+    {
+        $team = Team::factory()->create();
+        $project = Project::factory()->team($team)->create();
+        $board = Board::factory()->project($project)->create();
+        $column = Column::factory(3)->board($board)->sequence(
+            ['column_type_id' => ColumnType::TODO],
+            ['column_type_id' => ColumnType::IN_PROGRESS],
+            ['column_type_id' => ColumnType::DONE],
+        )->create();
+        $card = Card::factory()->column($column[0])->create();
+        $user = User::factory()->hasAttached($team)->create();
+        Sanctum::actingAs($user);
+
+        Event::fake();
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $column[1]->id);
+
+        $card->refresh();
+
+        $response->assertNoContent();
+        $this->assertDatabaseMissing('cards', ['column_id' => $column[0]->id]);
+        $this->assertDatabaseHas('cards', ['column_id' => $column[1]->id]);
+        $this->assertEquals(1, $card->order);
+        Event::assertDispatched(CardMoved::class, function (CardMoved $event) use ($card, $column) {
+            return $event->card->id == $card->id
+                && $event->after == null
+                && $event->column->id == $column[1]->id;
+        });
+
+        Event::fake();
+
+        $response = $this->postJson('/api/v1/cards/' . $card->id . '/move/' . $column[2]->id);
+
+        $card->refresh();
+
+        $response->assertNoContent();
+        $this->assertDatabaseMissing('cards', ['column_id' => $column[1]->id]);
+        $this->assertDatabaseHas('cards', ['column_id' => $column[2]->id]);
+        $this->assertEquals(1, $card->order);
+        Event::assertDispatched(CardMoved::class, function (CardMoved $event) use ($card, $column) {
+            return $event->card->id == $card->id
+                && $event->after == null
+                && $event->column->id == $column[2]->id;
         });
     }
 

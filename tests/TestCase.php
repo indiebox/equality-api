@@ -39,6 +39,7 @@ abstract class TestCase extends BaseTestCase
     protected function setupDatabase($schema)
     {
         Artisan::call('migrate');
+        Artisan::call('db:seed --class=ColumnTypeSeeder');
     }
 
     /**

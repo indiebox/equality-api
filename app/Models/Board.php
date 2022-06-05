@@ -21,6 +21,8 @@ use Znck\Eloquent\Traits\BelongsToThrough;
  * @property-read \App\Models\Team $team
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Column[] $columns
  * @property-read int|null $columns_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Module[] $modules
+ * @property-read int|null $modules_count
  * @method static \Database\Factories\BoardFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|Board newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Board newQuery()
@@ -65,5 +67,10 @@ class Board extends Model
     {
         return $this->belongsToThrough(Team::class, Project::class)
             ->withTrashedParents();
+    }
+
+    public function modules()
+    {
+        return $this->belongsToMany(Module::class);
     }
 }

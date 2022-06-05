@@ -80,7 +80,7 @@ class CardControllerTest extends TestCase
         $project = Project::factory()->team($team)->create();
         $board = Board::factory()->project($project)->create();
         $column = Column::factory()->board($board)->create();
-        Card::factory(MaxCardsPerColumn::MAX_CARDS)->column($column)->create();
+        Card::factory(MaxCardsPerColumn::MAX_ITEMS)->column($column)->create();
         $user = User::factory()->hasAttached($team)->create();
         Sanctum::actingAs($user);
 
@@ -89,7 +89,7 @@ class CardControllerTest extends TestCase
         $response
             ->assertUnprocessable()
             ->assertJsonPath('errors.column', [
-                trans('validation.max_cards_per_column', ['max' => MaxCardsPerColumn::MAX_CARDS])
+                trans('validation.max_cards_per_column', ['max' => MaxCardsPerColumn::MAX_ITEMS])
             ]);
     }
     public function test_can_store()

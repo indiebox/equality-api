@@ -5,25 +5,38 @@ namespace App\Rules\Api;
 use App\Models\Board;
 use App\Models\Column;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidatorAwareRule;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Validator;
 
-class ColumnInSameBoard implements Rule
+class ColumnInSameBoard implements Rule, ValidatorAwareRule
 {
-    protected $request;
-
-    protected $board;
-
     protected $attribute;
+
+    protected $column;
 
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct(Request $request, Board $board)
+    public function __construct(
+        protected Request $request,
+        protected Board $board
+    ) {
+    }
+
+    public function setValidator($validator)
     {
-        $this->request = $request;
-        $this->board = $board;
+        $validator->after(function (Validator $validator) {
+            if ($this->column == null) {
+                return;
+            }
+
+            $data = [$this->attribute => $this->column];
+            $validator->setData(array_merge($validator->getData(), $data));
+            $this->request->merge($data);
+        });
     }
 
     /**
@@ -47,7 +60,7 @@ class ColumnInSameBoard implements Rule
             return false;
         }
 
-        $this->request->merge([$attribute => $column]);
+        $this->column = $column;
 
         return true;
     }
