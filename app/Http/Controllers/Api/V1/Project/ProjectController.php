@@ -12,6 +12,23 @@ use App\Services\QueryBuilder\QueryBuilder;
 
 class ProjectController extends Controller
 {
+    public function index()
+    {
+        $projects = QueryBuilder::for(Project::whereIn('team_id', auth()->user()->teams()->pluck('teams.id')))
+            ->allowedFields(
+                [ProjectResource::class, UserResource::class => 'leader', TeamResource::class => 'team'],
+                [ProjectResource::class, UserResource::class => 'leader', TeamResource::class => 'team']
+            )
+            ->allowedIncludes(['leader', 'team'])
+            ->allowedFilters('name')
+            ->allowedSorts(['created_at', 'updated_at'])
+            ->defaultSorts('-updated_at')
+            ->allowCursorPagination()
+            ->cursorPaginate();
+
+        return ProjectResource::collection($projects);
+    }
+
     /**
      * Display the specified resource.
      *
@@ -43,6 +60,15 @@ class ProjectController extends Controller
             ->get();
 
         return new UserResource($leader);
+    }
+
+    public function team(Project $project)
+    {
+        $team = QueryBuilder::for($project->team)
+            ->allowedFields([TeamResource::class => 'team'], [TeamResource::class => 'team'], 'team')
+            ->get();
+
+        return new TeamResource($team);
     }
 
     /**

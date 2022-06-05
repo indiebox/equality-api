@@ -144,21 +144,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', 'store')->can('create', [BoardModel::class, 'project']);
         });
 
-        // Update project settings.
+        // Project related actions.
         Route::group([
             'prefix' => '{project}',
-            'middleware' => 'can:update,project',
         ], function () {
-            Route::patch('/', [Project\ProjectController::class, 'update']);
+            // Update project settings.
+            Route::group([
+                'middleware' => 'can:update,project',
+            ], function () {
+                Route::patch('/', [Project\ProjectController::class, 'update']);
 
-            Route::post('/image', [Project\ImageController::class, 'store']);
-            Route::delete('/image', [Project\ImageController::class, 'destroy']);
+                Route::post('/image', [Project\ImageController::class, 'store']);
+                Route::delete('/image', [Project\ImageController::class, 'destroy']);
+            });
+
+            // View project resources.
+            Route::group([
+                'middleware' => 'can:view,project',
+            ], function () {
+                Route::get('/leader', 'leader');
+                Route::get('/team', 'team');
+                Route::get('/', 'show');
+            });
+
+            Route::delete('/', 'destroy')->can('delete', 'project');
         });
 
+        Route::get('/', 'index');
         Route::post('/{trashed:project}/restore', 'restore')->can('restore', 'trashed:project');
-        Route::get('/{project}/leader', 'leader')->can('view', 'project');
-        Route::get('/{project}', 'show')->can('view', 'project');
-        Route::delete('/{project}', 'destroy')->can('delete', 'project');
     });
 
     /*

@@ -25,6 +25,7 @@ class ProjectController extends Controller
                 [ProjectResource::class, UserResource::class => 'leader']
             )
             ->allowedIncludes('leader')
+            ->allowedFilters('name')
             ->allowedSorts(['created_at', 'updated_at'])
             ->defaultSorts('-updated_at')
             ->allowCursorPagination()
